@@ -17,7 +17,9 @@ void bootstrap() {
     return true;
   };
 
-  Bloc.observer = const AppBlocObserver();
+  if (kDebugMode) {
+    Bloc.observer = const AppBlocObserver();
+  }
 
   runApp(App());
 }
