@@ -1,11 +1,10 @@
 import 'dart:developer';
 
-import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
+import 'package:mindful_links/core/di/injection.dart';
 
 import 'app/app.dart';
-import 'app/app_bloc_observer.dart';
 
 void bootstrap() {
   FlutterError.onError = (details) {
@@ -17,9 +16,6 @@ void bootstrap() {
     return true;
   };
 
-  if (kDebugMode) {
-    Bloc.observer = const AppBlocObserver();
-  }
-
+  configureDependencies();
   runApp(App());
 }
