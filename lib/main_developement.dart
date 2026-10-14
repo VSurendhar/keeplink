@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
+import 'package:mindful_links/features/logger/logger.dart';
 
 import 'app/app_bloc_observer.dart';
 import 'bootstrap.dart';
@@ -15,10 +16,27 @@ Future<void> main() async {
 
   Bloc.observer = const AppBlocObserver();
 
-  await initialSetup();
+  await initialDatabaseSetup();
+  await initialLoggingSetup();
 }
 
-Future<void> initialSetup() async {
+Future<void> initialLoggingSetup() async {
+  await initLogger();
+  // loggingDemo();
+}
+
+void loggingDemo() {
+  logDebug("Logging for Debug");
+  logInfo("Logging for Info");
+  logInfo("Logging for Info", showToast: true);
+  try {
+    final value = int.parse("mindful_links_app");
+  } catch (e, st) {
+    logError('Unexpected error while parsing', e, stackTrace: st);
+  }
+}
+
+Future<void> initialDatabaseSetup() async {
   final urlStore = GetIt.instance.get<UrlStore>();
 
   bool isSuccess = await _clearDatabase(urlStore);
@@ -177,8 +195,9 @@ Future<void> _printDatabase(UrlStore urlStore) async {
 
   debugPrint('--- URLS (${urls.length}) ---');
   for (final u in urls) {
-    final folder =
-        u.id != null ? await urlStore.findFolderForUrlId(u.id!) : null;
+    final folder = u.id != null
+        ? await urlStore.findFolderForUrlId(u.id!)
+        : null;
     debugPrint(
       'id=${u.id}, title=${u.title}, url=${u.url}, '
       'folderId=${u.folderId} (${folder?.folderName}), '
