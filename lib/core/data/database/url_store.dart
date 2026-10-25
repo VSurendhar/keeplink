@@ -98,6 +98,11 @@ class UrlStore {
     required Url url,
     required Folder folder,
     List<Tag> tags = const [],
-  }) async =>
-      (await _dao).createUrl(url, folder, tags);
+  }) async => (await _dao).createUrl(url, folder, tags);
+
+  Future<List<int>> clearAllAndCreateUrlFromRecords(
+    List<UrlRecord> records,
+  ) async => (await _dao).clearAllAndCreateUrlFromRecords(records);
 }
+
+typedef UrlRecord = (Url url, Folder folder, List<Tag> tags);

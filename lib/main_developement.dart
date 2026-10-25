@@ -3,6 +3,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/logger/logger.dart';
+import 'package:mindful_links/utils/utils.dart';
 
 import 'app/app_bloc_observer.dart';
 import 'bootstrap.dart';
@@ -16,42 +17,30 @@ Future<void> main() async {
 
   Bloc.observer = const AppBlocObserver();
 
-  await initialDatabaseSetup();
   await initialLoggingSetup();
+  await initialDatabaseSetup();
 }
 
 Future<void> initialLoggingSetup() async {
   await initLogger();
-  // loggingDemo();
-}
-
-void loggingDemo() {
-  logDebug("Logging for Debug");
-  logInfo("Logging for Info");
-  logInfo("Logging for Info", showToast: true);
-  try {
-    final value = int.parse("mindful_links_app");
-  } catch (e, st) {
-    logError('Unexpected error while parsing', e, stackTrace: st);
-  }
 }
 
 Future<void> initialDatabaseSetup() async {
   final urlStore = GetIt.instance.get<UrlStore>();
 
-  bool isSuccess = await _clearDatabase(urlStore);
-  if (isSuccess) {
-    await _seedDatabase(urlStore);
-    await _printDatabase(urlStore);
-  }
-}
-
-Future<bool> _clearDatabase(UrlStore urlStore) async {
   try {
-    await urlStore.clearAll();
-    return true;
-  } catch (e) {
-    return false;
+    await _seedDatabase(urlStore);
+  } catch (e, st) {
+    logError(
+      'Something wrong happened while creating Seed database',
+      e,
+      stackTrace: st,
+    );
+    Utils.showToast(
+      'Something wrong happened while creating Seed database: $e',
+    );
+  } finally {
+    await _printDatabase(urlStore);
   }
 }
 
@@ -106,80 +95,79 @@ Future<void> _seedDatabase(UrlStore urlStore) async {
   final flutterFolder = Folder(folderName: 'Flutter Resources');
   final dbFolder = Folder(folderName: 'Database Resources');
 
-  await urlStore.createUrl(
-    url: Url(
-      url: 'https://flutter.dev',
-      title: 'Flutter',
-      metaImageUrl: 'https://flutter.dev/og.png',
-      metaDescription: 'Description of Flutter',
-      createdAt: now,
-      updatedAt: now,
-      isFavorite: false,
+  final records = <UrlRecord>[
+    (
+      Url(
+        url: 'https://flutter.dev',
+        title: 'Flutter',
+        metaImageUrl: 'https://flutter.dev/og.png',
+        metaDescription: 'Description of Flutter',
+        createdAt: now,
+        updatedAt: now,
+        isFavorite: false,
+      ),
+      flutterFolder,
+      [Tag(tagName: 'flutter'), Tag(tagName: 'dart'), Tag(tagName: 'mobile')],
     ),
-    folder: flutterFolder,
-    tags: [
-      Tag(tagName: 'flutter'),
-      Tag(tagName: 'dart'),
-      Tag(tagName: 'mobile'),
-    ],
-  );
+    (
+      Url(
+        url: 'https://dart.dev',
+        title: 'Dart',
+        metaImageUrl: 'https://dart.dev/og.png',
+        metaDescription: 'Description of Dart',
+        createdAt: now,
+        updatedAt: now,
+        isFavorite: false,
+      ),
+      flutterFolder,
+      [
+        Tag(tagName: 'mobile'),
+        Tag(tagName: 'database'),
+        Tag(tagName: 'tutorial'),
+      ],
+    ),
+    (
+      Url(
+        url: 'https://pub.dev',
+        title: 'pub.dev',
+        metaImageUrl: 'https://pub.dev/og.png',
+        metaDescription: 'Description of pub.dev',
+        createdAt: now,
+        updatedAt: now,
+        isFavorite: false,
+      ),
+      flutterFolder,
+      const <Tag>[],
+    ),
+    (
+      Url(
+        url: 'https://pub.dev/packages/floor',
+        title: 'Floor',
+        metaImageUrl: 'https://pub.dev/packages/floor/og.png',
+        metaDescription: 'Description of Floor',
+        createdAt: now,
+        updatedAt: now,
+        isFavorite: false,
+      ),
+      dbFolder,
+      const <Tag>[],
+    ),
+    (
+      Url(
+        url: 'https://sqlite.org',
+        title: 'SQLite',
+        metaImageUrl: 'https://sqlite.org/og.png',
+        metaDescription: 'Description of SQLite',
+        createdAt: now,
+        updatedAt: now,
+        isFavorite: false,
+      ),
+      dbFolder,
+      const <Tag>[],
+    ),
+  ];
 
-  await urlStore.createUrl(
-    url: Url(
-      url: 'https://dart.dev',
-      title: 'Dart',
-      metaImageUrl: 'https://dart.dev/og.png',
-      metaDescription: 'Description of Dart',
-      createdAt: now,
-      updatedAt: now,
-      isFavorite: false,
-    ),
-    folder: flutterFolder,
-    tags: [
-      Tag(tagName: 'mobile'),
-      Tag(tagName: 'database'),
-      Tag(tagName: 'tutorial'),
-    ],
-  );
-
-  await urlStore.createUrl(
-    url: Url(
-      url: 'https://pub.dev',
-      title: 'pub.dev',
-      metaImageUrl: 'https://pub.dev/og.png',
-      metaDescription: 'Description of pub.dev',
-      createdAt: now,
-      updatedAt: now,
-      isFavorite: false,
-    ),
-    folder: flutterFolder,
-  );
-
-  await urlStore.createUrl(
-    url: Url(
-      url: 'https://pub.dev/packages/floor',
-      title: 'Floor',
-      metaImageUrl: 'https://pub.dev/packages/floor/og.png',
-      metaDescription: 'Description of Floor',
-      createdAt: now,
-      updatedAt: now,
-      isFavorite: false,
-    ),
-    folder: dbFolder,
-  );
-
-  await urlStore.createUrl(
-    url: Url(
-      url: 'https://sqlite.org',
-      title: 'SQLite',
-      metaImageUrl: 'https://sqlite.org/og.png',
-      metaDescription: 'Description of SQLite',
-      createdAt: now,
-      updatedAt: now,
-      isFavorite: false,
-    ),
-    folder: dbFolder,
-  );
+  await urlStore.clearAllAndCreateUrlFromRecords(records);
 }
 
 Future<void> _printDatabase(UrlStore urlStore) async {

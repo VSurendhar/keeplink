@@ -4,6 +4,8 @@ import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/entity/url_tag.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
+import 'package:mindful_links/core/data/database/url_store.dart';
+
 
 @dao
 abstract class UrlDao {
@@ -80,6 +82,42 @@ abstract class UrlDao {
   @transaction
   Future<int> createUrl(Url url, Folder folder, List<Tag> tags) async {
     // 1. First step: Check if the URL already exists. If it does, abort immediately!
+    await checkIfUrlExists(url);
+
+    // 2. Resolve folder: if ID is already known, use it directly; otherwise find by name or insert
+    final folderId = await resolveFolder(folder);
+
+    // 3. Insert the new URL with the resolved folderId
+    final urlId = await insertUrl(url.copyWith(folderId: folderId));
+
+    // 4. Resolve tags and link them via UrlTag
+    await resolveTags(urlId, tags);
+
+    return urlId;
+  }
+
+  @transaction
+  Future<List<int>> clearAllAndCreateUrlFromRecords(
+    List<UrlRecord> records,
+  ) async {
+    await deleteAllUrlTags();
+    await deleteAllUrls();
+    await deleteAllTags();
+    await deleteAllFolders();
+
+    final insertedIds = <int>[];
+    for (final record in records) {
+      final (url, folder, tags) = record;
+      await checkIfUrlExists(url);
+      final folderId = await resolveFolder(folder);
+      final urlId = await insertUrl(url.copyWith(folderId: folderId));
+      await resolveTags(urlId, tags);
+      insertedIds.add(urlId);
+    }
+    return insertedIds;
+  }
+
+  Future<void> checkIfUrlExists(Url url) async {
     final existingUrl = url.id != null
         ? await findUrlById(url.id!)
         : await findUrlByUrlString(url.url);
@@ -87,32 +125,29 @@ abstract class UrlDao {
     if (existingUrl != null) {
       throw DuplicateUrlException(url.url);
     }
+  }
 
-    // 2. Resolve folder: if ID is already known, use it directly; otherwise find by name or insert
-    final int folderId;
-    if (folder.id != null) {
-      folderId = folder.id!;
-    } else {
-      final existingFolder = await findFolderByName(folder.folderName);
-      if (existingFolder?.id != null) {
-        folderId = existingFolder!.id!;
-      } else {
-        folderId = await insertFolder(folder);
-      }
+  Future<int> resolveFolder(Folder folder) async {
+    final folderId = folder.id;
+    if (folderId != null) {
+      return folderId;
     }
+    final existingFolder = await findFolderByName(folder.folderName);
+    if (existingFolder != null && existingFolder.id != null) {
+      return existingFolder.id!;
+    }
+    return insertFolder(folder);
+  }
 
-    // 3. Insert the new URL with the resolved folderId
-    final urlId = await insertUrl(url.copyWith(folderId: folderId));
-
-    // 4. Resolve tags and link them via UrlTag
+  Future<void> resolveTags(int urlId, List<Tag> tags) async {
     for (final tag in tags) {
       final int tagId;
       if (tag.id != null) {
         tagId = tag.id!;
       } else {
         final existingTag = await findTagByName(tag.tagName);
-        if (existingTag?.id != null) {
-          tagId = existingTag!.id!;
+        if (existingTag != null && existingTag.id != null) {
+          tagId = existingTag.id!;
         } else {
           tagId = await insertTag(tag);
         }
@@ -123,7 +158,5 @@ abstract class UrlDao {
         await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
       }
     }
-
-    return urlId;
   }
 }

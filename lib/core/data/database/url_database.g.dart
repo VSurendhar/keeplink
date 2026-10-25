@@ -373,4 +373,20 @@ class _$UrlDao extends UrlDao {
       });
     }
   }
+
+  @override
+  Future<List<int>> clearAllAndCreateUrlFromRecords(
+      List<(Url, Folder, List<Tag>)> records) async {
+    if (database is sqflite.Transaction) {
+      return super.clearAllAndCreateUrlFromRecords(records);
+    } else {
+      return (database as sqflite.Database)
+          .transaction<List<int>>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        return transactionDatabase.urlDao
+            .clearAllAndCreateUrlFromRecords(records);
+      });
+    }
+  }
 }
