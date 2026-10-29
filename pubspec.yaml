@@ -20,6 +20,8 @@ dependencies:
   logger: ^2.6.1
   fluttertoast: ^8.2.12
   material_symbols_icons: ^4.2960.0
+  hive_flutter: ^1.1.0
+  hive: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -29,6 +31,7 @@ dev_dependencies:
   floor_generator: ^1.4.2
   build_runner: ^2.1.2
   injectable_generator: ^2.6.2
+  hive_generator: ^2.0.1
 
 flutter:
   uses-material-design: true
