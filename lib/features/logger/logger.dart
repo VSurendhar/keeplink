@@ -25,7 +25,7 @@ extension LogLevelValue on LogLevel {
   }
 }
 
-Future<void> initLogger() async {
+void initLogger() {
   if (isLoggingInitiated) {
     return;
   }

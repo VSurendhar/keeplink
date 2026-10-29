@@ -26,7 +26,7 @@ class HomeView extends StatelessWidget {
         children: [
           IndexedStack(
             index: selectedTab.index,
-            children: const [DashboardPage(), FolderPage(), SettingsPage()],
+            children: const [DashboardPage(), FolderPage(), AppSettingsPage()],
           ),
           const Align(
             alignment: Alignment.bottomCenter,

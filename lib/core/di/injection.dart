@@ -1,5 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:mindful_links/core/data/hive/hive_service.dart';
+import 'package:mindful_links/features/logger/logger.dart';
 
 import 'injection.config.dart';
 
@@ -12,8 +14,10 @@ bool _isConfigured = false;
   preferRelativeImports: true,
   asExtension: true,
 )
-void configureDependencies() {
+Future<void> configureDependencies() async {
   if (_isConfigured) return;
-  _getIt.init();
   _isConfigured = true;
+  _getIt.init();
+  await HiveService.init();
+  initLogger();
 }

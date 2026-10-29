@@ -1,21 +1,16 @@
-import 'dart:developer';
-
 import 'package:flutter/foundation.dart';
-import 'package:flutter/widgets.dart';
 import 'package:mindful_links/core/di/injection.dart';
+import 'package:mindful_links/features/logger/logger.dart';
 
-import 'app/app.dart';
-
-void bootstrap() {
+Future<void> bootstrap() async {
   FlutterError.onError = (details) {
-    log(details.exceptionAsString(), stackTrace: details.stack);
+    logError(details.exceptionAsString(), details, stackTrace: details.stack);
   };
 
   PlatformDispatcher.instance.onError = (error, stack) {
-    log(error.toString(), stackTrace: stack);
+    logError(error.toString(), error, stackTrace: stack);
     return true;
   };
 
-  configureDependencies();
-  runApp(App());
+  await configureDependencies();
 }

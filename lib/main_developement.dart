@@ -2,27 +2,28 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
+import 'package:mindful_links/core/data/hive/models/app_settings.dart';
 import 'package:mindful_links/features/logger/logger.dart';
 import 'package:mindful_links/utils/utils.dart';
 
+import 'app/app.dart';
 import 'app/app_bloc_observer.dart';
 import 'bootstrap.dart';
 import 'core/data/database/entity/folder.dart';
 import 'core/data/database/entity/tag.dart';
 import 'core/data/database/entity/url.dart';
+import 'features/settings/service/settings_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  bootstrap();
 
   Bloc.observer = const AppBlocObserver();
 
-  await initialLoggingSetup();
+  await bootstrap();
   await initialDatabaseSetup();
-}
+  await initialAppSettings();
 
-Future<void> initialLoggingSetup() async {
-  await initLogger();
+  runApp(App());
 }
 
 Future<void> initialDatabaseSetup() async {
@@ -42,6 +43,13 @@ Future<void> initialDatabaseSetup() async {
   } finally {
     await _printDatabase(urlStore);
   }
+}
+
+Future<void> initialAppSettings() async {
+  SettingsService settingsService = GetIt.instance.get<SettingsService>();
+  settingsService.saveAppTheme(AppTheme.light);
+  settingsService.saveLanguage(AppLanguage.englishUs);
+  settingsService.saveTrashRetention(30);
 }
 
 /*
