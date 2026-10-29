@@ -21,7 +21,7 @@ Future<void> main() async {
 
   await bootstrap();
   await initialDatabaseSetup();
-  await initialAppSettings();
+  // await initialAppSettings();
 
   runApp(App());
 }
