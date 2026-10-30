@@ -2,11 +2,11 @@ import 'package:bloc/bloc.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_event.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_state.dart';
-import 'package:mindful_links/features/settings/service/settings_service.dart';
+import 'package:mindful_links/features/settings/service/app_settings_service.dart';
 
 class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   AppSettingsBloc({
-    required SettingsService appSettingsService,
+    required AppSettingsService appSettingsService,
     required UrlStore urlStore,
   }) : _urlStore = urlStore,
        _appSettingsService = appSettingsService,
@@ -28,7 +28,7 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     on<AppSettingsActionHandled>(_onActionHandled);
   }
 
-  final SettingsService _appSettingsService;
+  final AppSettingsService _appSettingsService;
   final UrlStore _urlStore;
 
   Future<void> _onThemeChanged(
