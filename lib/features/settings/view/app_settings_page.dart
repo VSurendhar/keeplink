@@ -8,7 +8,7 @@ import 'package:mindful_links/features/home/constants/constants.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_bloc.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_event.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_state.dart';
-import 'package:mindful_links/features/settings/service/settings_service.dart';
+import 'package:mindful_links/features/settings/service/app_settings_service.dart';
 import 'package:mindful_links/features/settings/view/widgets/erase_all_confirmation_widget.dart';
 import 'package:mindful_links/features/settings/view/widgets/export_bottom_sheet_widget.dart';
 import 'package:mindful_links/features/settings/view/widgets/import_bottom_sheet_widget.dart';
@@ -25,7 +25,7 @@ class AppSettingsPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (context) => AppSettingsBloc(
-        appSettingsService: GetIt.instance.get<SettingsService>(),
+        appSettingsService: GetIt.instance.get<AppSettingsService>(),
         urlStore: GetIt.instance.get<UrlStore>(),
       ),
       child: AppSettingsView(),
