@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:mindful_links/core/data/hive/models/app_settings.dart';
-import 'package:mindful_links/features/settings/bloc/settings_action.dart';
+import 'package:mindful_links/features/settings/bloc/app_settings_action.dart';
 
-export 'package:mindful_links/features/settings/bloc/settings_action.dart';
+export 'package:mindful_links/features/settings/bloc/app_settings_action.dart';
 
 final class AppSettingsState extends Equatable {
   const AppSettingsState({
@@ -34,4 +34,9 @@ final class AppSettingsState extends Equatable {
 
   @override
   List<Object?> get props => [appTheme, appLanguage, retentionPeriod, action];
+
+  @override
+  String toString() {
+    return 'AppSettingsState{appTheme: $appTheme, appLanguage: $appLanguage, retentionPeriod: $retentionPeriod, action: $action}';
+  }
 }
