@@ -4,7 +4,7 @@ import 'package:mindful_links/features/dashboard/view/dashboard_page.dart';
 import 'package:mindful_links/features/folder/view/folder_page.dart';
 import 'package:mindful_links/features/home/cubit/home_cubit.dart';
 import 'package:mindful_links/features/home/view/widgets/home_bottom_nav_bar.dart';
-import 'package:mindful_links/features/settings/view/settings_page.dart';
+import 'package:mindful_links/features/settings/view/app_settings_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

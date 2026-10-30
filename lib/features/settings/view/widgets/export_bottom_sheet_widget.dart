@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
 
 class ExportBottomSheetWidget extends StatelessWidget {
-  const ExportBottomSheetWidget({super.key, required this.count});
+  const ExportBottomSheetWidget({
+    super.key,
+    required this.count,
+    this.onExport,
+  });
 
   final int count;
+  final VoidCallback? onExport;
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +55,10 @@ class ExportBottomSheetWidget extends StatelessWidget {
                   ),
                   padding: const EdgeInsets.symmetric(vertical: 12),
                 ),
-                onPressed: () => Navigator.pop(context),
+                onPressed: () {
+                  Navigator.pop(context);
+                  onExport?.call();
+                },
                 child: const Text('Export'),
               ),
             ),

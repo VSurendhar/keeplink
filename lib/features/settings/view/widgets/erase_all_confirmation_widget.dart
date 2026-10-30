@@ -7,6 +7,8 @@ class EraseAllConfirmationWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const dangerActionColor = Color(0xFFC83838);
+
     return Dialog(
       backgroundColor: Colors.white,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -21,7 +23,7 @@ class EraseAllConfirmationWidget extends StatelessWidget {
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFC83838),
+                color: dangerActionColor,
               ),
             ),
             const SizedBox(height: 16),
@@ -43,7 +45,7 @@ class EraseAllConfirmationWidget extends StatelessWidget {
                 const SizedBox(width: 8),
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFC83838),
+                    backgroundColor: dangerActionColor,
                     foregroundColor: Colors.white,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),

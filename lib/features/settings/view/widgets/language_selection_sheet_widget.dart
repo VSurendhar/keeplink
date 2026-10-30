@@ -14,6 +14,8 @@ class LanguageSelectionSheetWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    const selectedOptionColor = Color(0xFF7A3E26);
+
     return SafeArea(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
@@ -57,14 +59,14 @@ class LanguageSelectionSheetWidget extends StatelessWidget {
                     fontWeight:
                         isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: isSelected
-                        ? const Color(0xFF7A3E26)
+                        ? selectedOptionColor
                         : MindfulLinksTheme.textPrimary,
                   ),
                 ),
                 trailing: isSelected
                     ? const Icon(
                         Icons.check_rounded,
-                        color: Color(0xFF7A3E26),
+                        color: selectedOptionColor,
                       )
                     : null,
                 onTap: () {
