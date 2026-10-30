@@ -11,7 +11,7 @@
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
-import '../../features/settings/service/settings_service.dart' as _i310;
+import '../../features/settings/service/app_settings_service.dart' as _i732;
 import '../data/database/url_store.dart' as _i994;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -26,7 +26,8 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     gh.singleton<_i994.UrlStore>(() => _i994.UrlStore());
-    gh.lazySingleton<_i310.SettingsService>(() => _i310.SettingsService());
+    gh.lazySingleton<_i732.AppSettingsService>(
+        () => _i732.AppSettingsService());
     return this;
   }
 }

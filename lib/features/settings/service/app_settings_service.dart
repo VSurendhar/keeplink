@@ -5,7 +5,7 @@ import 'package:mindful_links/core/data/hive/hive_service.dart';
 import 'package:mindful_links/core/data/hive/models/app_settings.dart';
 
 @lazySingleton
-class SettingsService {
+class AppSettingsService {
   Box get _box => Hive.box(HiveService.settingsBoxName);
 
   Future<void> saveAppTheme(AppTheme appTheme) async {
