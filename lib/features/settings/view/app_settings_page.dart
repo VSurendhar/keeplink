@@ -131,10 +131,7 @@ class AppSettingsView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _buildEraseDataCard(context),
-                  Container(
-                    decoration: const BoxDecoration(color: Colors.black),
-                    child: const SizedBox(height: paddingForBottomNavBar),
-                  ),
+                  const SizedBox(height: paddingForBottomNavBar),
                 ],
               ),
             ),
@@ -472,7 +469,10 @@ class AppSettingsView extends StatelessWidget {
           decoration: BoxDecoration(
             color: const Color(0xFFFFF5F3),
             borderRadius: BorderRadius.circular(24),
-            border: Border.all(color: dangerActionColor.withValues(alpha: 0.2), width: 1),
+            border: Border.all(
+              color: dangerActionColor.withValues(alpha: 0.2),
+              width: 1,
+            ),
           ),
           child: Row(
             children: [
