@@ -1,0 +1,574 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:mindful_links/core/data/database/url_store.dart';
+import 'package:mindful_links/core/data/hive/models/app_settings.dart';
+import 'package:mindful_links/features/home/constants/constants.dart';
+import 'package:mindful_links/features/settings/bloc/app_settings_bloc.dart';
+import 'package:mindful_links/features/settings/bloc/app_settings_event.dart';
+import 'package:mindful_links/features/settings/bloc/app_settings_state.dart';
+import 'package:mindful_links/features/settings/service/settings_service.dart';
+import 'package:mindful_links/features/settings/view/widgets/erase_all_confirmation_widget.dart';
+import 'package:mindful_links/features/settings/view/widgets/export_bottom_sheet_widget.dart';
+import 'package:mindful_links/features/settings/view/widgets/import_bottom_sheet_widget.dart';
+import 'package:mindful_links/features/settings/view/widgets/language_selection_sheet_widget.dart';
+import 'package:mindful_links/features/settings/view/widgets/trash_retention_card_widget.dart';
+import 'package:mindful_links/features/theme/colors.dart';
+import 'package:mindful_links/features/theme/theme.dart';
+import 'package:mindful_links/utils/utils.dart';
+
+class AppSettingsPage extends StatelessWidget {
+  const AppSettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => AppSettingsBloc(
+        appSettingsService: GetIt.instance.get<SettingsService>(),
+        urlStore: GetIt.instance.get<UrlStore>(),
+      ),
+      child: AppSettingsView(),
+    );
+  }
+}
+
+class AppSettingsView extends StatelessWidget {
+  const AppSettingsView({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocConsumer<AppSettingsBloc, AppSettingsState>(
+      listenWhen: (previous, current) =>
+          current.action != null && previous.action != current.action,
+      listener: (context, state) {
+        final action = state.action;
+        if (action == null) return;
+
+        if (action is AppSettingsShowLanguageSheetAction) {
+          _showLanguageSelectionSheet(
+            context,
+            selectedLanguage: state.appLanguage,
+          );
+        } else if (action is AppSettingsShowEraseDialogAction) {
+          _showEraseDataConfirmation(context);
+        } else if (action is AppSettingsShowExportSheetAction) {
+          _showExportBottomSheet(context, action.count);
+        } else if (action is AppSettingsShowImportSheetAction) {
+          _showImportBottomSheet(context);
+        }
+
+        // Clear the action immediately so the same action can be re-triggered.
+        context.read<AppSettingsBloc>().add(const AppSettingsActionHandled());
+      },
+      builder: (context, state) {
+        return Scaffold(
+          backgroundColor: MindfulLinksTheme.secondaryLight,
+          appBar: AppBar(
+            backgroundColor: MindfulLinksTheme.secondaryLight,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+            centerTitle: true,
+            title: Text(
+              'MindfulLinks',
+              style: TextStyle(
+                color: MindfulLinkColors.appBarTitleColor,
+                fontWeight: FontWeight.bold,
+                fontSize: 24,
+              ),
+            ),
+            actions: [
+              IconButton(
+                icon: Icon(
+                  Symbols.delete,
+                  color: MindfulLinkColors.appBarTitleColor,
+                  size: 24,
+                ),
+                onPressed: () {},
+              ),
+            ],
+          ),
+          body: SafeArea(
+            top: false,
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 8),
+                  Text(
+                    'Settings',
+                    style: TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w600,
+                      color: MindfulLinkColors.headerTitleColor,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Manage your digital library preferences.',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w400,
+                      color: MindfulLinkColors.headerSubTitleColor,
+                    ),
+                  ),
+                  const SizedBox(height: 32),
+                  _buildAppearanceCard(
+                    context,
+                    isDarkMode: state.appTheme == AppTheme.dark,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildLocalizationCard(
+                    context,
+                    languageValue: state.appLanguage.value,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildDataBackupCard(context),
+                  const SizedBox(height: 16),
+                  TrashRetentionCardWidget(
+                    savedRetentionPeriod: state.retentionPeriod,
+                  ),
+                  const SizedBox(height: 16),
+                  _buildEraseDataCard(context),
+                  Container(
+                    decoration: const BoxDecoration(color: Colors.black),
+                    child: const SizedBox(height: paddingForBottomNavBar),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildAppearanceCard(
+    BuildContext context, {
+    required bool isDarkMode,
+  }) {
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('Appearance'),
+          const SizedBox(height: 12),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              _buildIconBadge(
+                icon: Icons.palette_outlined,
+                iconColor: const Color(0xFF895032),
+                backgroundColor: const Color(0x33FFB38E),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Theme',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF1E1B18),
+                ),
+              ),
+              const Spacer(),
+              _buildThemeToggle(
+                isDarkMode: isDarkMode,
+                onAppThemeToggle: (appTheme) {
+                  context.read<AppSettingsBloc>().add(
+                    AppSettingsThemeChanged(appTheme),
+                  );
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocalizationCard(
+    BuildContext context, {
+    required String languageValue,
+  }) {
+    return _buildCard(
+      onTap: () {
+        context.read<AppSettingsBloc>().add(
+          const AppSettingsShowLanguageSheetRequested(),
+        );
+      },
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('Localization'),
+          const SizedBox(height: 12),
+          Row(
+            children: [
+              _buildIconBadge(
+                icon: Icons.language_rounded,
+                iconColor: const Color(0xFF895032),
+                backgroundColor: const Color(0x33FFB38E),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Language',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF1E1B18),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      languageValue,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w400,
+                        color: Color(0xFF857B74),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Icon(
+                Icons.chevron_right_rounded,
+                color: Color(0xFFD7C2B9),
+                size: 22,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDataBackupCard(BuildContext context) {
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('Data & Backup'),
+          const SizedBox(height: 12),
+          _buildActionButton(
+            icon: Icons.file_upload_outlined,
+            label: 'Export Bookmarks',
+            onTap: () {
+              context.read<AppSettingsBloc>().add(
+                const AppSettingsExportBookmarksRequested(),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _buildActionButton(
+            icon: Icons.file_download_outlined,
+            label: 'Import Bookmarks',
+            onTap: () {
+              context.read<AppSettingsBloc>().add(
+                const AppSettingsImportBookmarksRequested(),
+              );
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCard({required Widget child, VoidCallback? onTap}) {
+    final content = Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        boxShadow: [
+          BoxShadow(
+            color: const Color(0xFF2D2926).withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: child,
+    );
+
+    if (onTap != null) {
+      return Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(22),
+          child: content,
+        ),
+      );
+    }
+    return content;
+  }
+
+  Widget _buildSectionHeader(String title) {
+    return Text(
+      title,
+      style: const TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: Color(0xFF9E8E85),
+      ),
+    );
+  }
+
+  Widget _buildIconBadge({
+    required IconData icon,
+    required Color iconColor,
+    required Color backgroundColor,
+  }) {
+    return Container(
+      width: 40,
+      height: 40,
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      alignment: Alignment.center,
+      child: Icon(icon, color: iconColor, size: 16),
+    );
+  }
+
+  Widget _buildThemeToggle({
+    required bool isDarkMode,
+    required Function(AppTheme) onAppThemeToggle,
+  }) {
+    const activeTextColor = Color(0xFF1E1B18);
+    const inactiveTextColor = Color(0xFF52443D);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: const Color(0xFFFBF2ED),
+        borderRadius: BorderRadius.circular(16),
+      ),
+      padding: const EdgeInsets.all(4),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          GestureDetector(
+            onTap: () {
+              onAppThemeToggle(AppTheme.light);
+            },
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: !isDarkMode ? Colors.white : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: !isDarkMode
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Text(
+                'Light',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: !isDarkMode ? activeTextColor : inactiveTextColor,
+                ),
+              ),
+            ),
+          ),
+          GestureDetector(
+            onTap: () {
+              onAppThemeToggle(AppTheme.dark);
+            },
+            behavior: HitTestBehavior.opaque,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: isDarkMode ? Colors.white : Colors.transparent,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: isDarkMode
+                    ? [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.06),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ]
+                    : null,
+              ),
+              child: Text(
+                'Dark',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isDarkMode ? activeTextColor : inactiveTextColor,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    const buttonContentColor = Color(0xFF1E1B18);
+
+    return Material(
+      color: const Color(0xFFFAF0E8),
+      borderRadius: BorderRadius.circular(16),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(16),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(vertical: 16),
+          alignment: Alignment.center,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(icon, size: 20, color: buttonContentColor),
+              const SizedBox(width: 8),
+              Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w400,
+                  color: buttonContentColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEraseDataCard(BuildContext context) {
+    const dangerActionColor = Color(0xFFBA1A1A);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () {
+          context.read<AppSettingsBloc>().add(
+            const AppSettingsShowEraseDialogRequested(),
+          );
+        },
+        borderRadius: BorderRadius.circular(24),
+        child: Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: const Color(0xFFFFF5F3),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(color: dangerActionColor.withValues(alpha: 0.2), width: 1),
+          ),
+          child: Row(
+            children: [
+              Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: const Color(0xFFFDE4E1),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                alignment: Alignment.center,
+                child: const Icon(
+                  Symbols.delete_forever,
+                  color: dangerActionColor,
+                  size: 18,
+                ),
+              ),
+              const SizedBox(width: 12),
+              const Text(
+                'Erase All Data',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                  color: dangerActionColor,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showLanguageSelectionSheet(
+    BuildContext context, {
+    required AppLanguage selectedLanguage,
+  }) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => LanguageSelectionSheetWidget(
+        selectedLanguage: selectedLanguage,
+        onLanguageChanged: (appLanguage) {
+          context.read<AppSettingsBloc>().add(
+            AppSettingsLanguageChanged(appLanguage),
+          );
+        },
+      ),
+    );
+  }
+
+  void _showEraseDataConfirmation(BuildContext context) {
+    showDialog<void>(
+      context: context,
+      builder: (_) => EraseAllConfirmationWidget(
+        onErase: () {
+          context.read<AppSettingsBloc>().add(
+            const AppSettingsEraseAllRequested(),
+          );
+          Utils.showToast('Data Erased');
+        },
+      ),
+    );
+  }
+
+  void _showExportBottomSheet(BuildContext context, int count) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => ExportBottomSheetWidget(
+        count: count,
+        onExport: () {
+          Utils.showToast('Exported Links');
+        },
+      ),
+    );
+  }
+
+  void _showImportBottomSheet(BuildContext context) {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (_) => ImportBottomSheetWidget(
+        onImport: () {
+          Utils.showToast('Imported Link');
+        },
+      ),
+    );
+  }
+}
