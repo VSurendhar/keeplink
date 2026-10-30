@@ -12,7 +12,7 @@ import 'bootstrap.dart';
 import 'core/data/database/entity/folder.dart';
 import 'core/data/database/entity/tag.dart';
 import 'core/data/database/entity/url.dart';
-import 'features/settings/service/settings_service.dart';
+import 'features/settings/service/app_settings_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -46,7 +46,7 @@ Future<void> initialDatabaseSetup() async {
 }
 
 Future<void> initialAppSettings() async {
-  SettingsService settingsService = GetIt.instance.get<SettingsService>();
+  AppSettingsService settingsService = GetIt.instance.get<AppSettingsService>();
   settingsService.saveAppTheme(AppTheme.light);
   settingsService.saveLanguage(AppLanguage.englishUs);
   settingsService.saveTrashRetention(30);
