@@ -163,7 +163,6 @@ class _TrashRetentionCardWidgetState extends State<TrashRetentionCardWidget> {
                             backgroundColor: const Color(0xFFFFB38E),
                             foregroundColor: const Color(0xFF7A4326),
                             elevation: 0,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                             ),
