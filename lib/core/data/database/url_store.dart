@@ -105,13 +105,14 @@ class UrlStore {
     List<UrlRecord> records,
   ) async => (await _dao).clearAllAndCreateUrlFromRecords(records);
 
-  /// Inserts [AppDefaults.defaultFolder] if it does not already exist in the
+  /// Inserts [AppDefaults.defaultFolders] if it does not already exist in the
   /// database.
   Future<void> seedDefaultFolderIfNotExist() async {
-    final defaultFolder = AppDefaults.defaultFolder;
-    final existing = await findFolderByName(defaultFolder.folderName);
-    if (existing == null) {
-      await insertFolder(defaultFolder);
+    for (final folder in AppDefaults.defaultFolders) {
+      final existing = await findFolderByName(folder.folderName);
+      if (existing == null) {
+        await insertFolder(folder);
+      }
     }
   }
 
