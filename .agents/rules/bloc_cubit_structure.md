@@ -58,4 +58,6 @@ For a Payment feature:
 2. Follow the class-to-file naming convention.
 3. Do not mix unrelated feature Events, Actions, or States.
 4. Follow the existing project directory structure when creating new BLoC or Cubit files.
-5. Inspect existing implementations before introducing a new structure.
+5. Inspect existing implementations before introducing a new structure. 
+6. Prefix every State class, including child State classes, with the feature name. 
+7. Do not prefix individual child Event or Action class names with the feature name. Use the feature name only for their respective parent (base) classes, such as TagSelectionEvent and TagSelectionAction. Child classes should be named according to their intended purpose, such as TagSelected or ShowSuccessMessage.
