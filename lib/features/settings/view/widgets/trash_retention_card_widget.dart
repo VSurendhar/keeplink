@@ -158,8 +158,8 @@ class _TrashRetentionCardWidgetState extends State<TrashRetentionCardWidget> {
                           ),
                         ),
                         const SizedBox(width: 8),
-                        ElevatedButton(
-                          style: ElevatedButton.styleFrom(
+                        FilledButton(
+                          style: FilledButton.styleFrom(
                             backgroundColor: const Color(0xFFFFB38E),
                             foregroundColor: const Color(0xFF7A4326),
                             elevation: 0,
