@@ -20,7 +20,7 @@ Future<void> main() async {
   Bloc.observer = const AppBlocObserver();
 
   await bootstrap();
-  await initialDatabaseSetup();
+  // await initialDatabaseSetup();
   // await initialAppSettings();
 
   runApp(App());

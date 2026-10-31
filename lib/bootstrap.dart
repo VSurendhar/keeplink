@@ -1,4 +1,6 @@
 import 'package:flutter/foundation.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/core/di/injection.dart';
 import 'package:mindful_links/features/logger/logger.dart';
 
@@ -13,4 +15,10 @@ Future<void> bootstrap() async {
   };
 
   await configureDependencies();
+  seeDbWithDefaults();
+}
+
+void seeDbWithDefaults() async {
+  await GetIt.instance.get<UrlStore>().seedDefaultFolderIfNotExist();
+  await GetIt.instance.get<UrlStore>().seedDefaultTagsIfNotExist();
 }

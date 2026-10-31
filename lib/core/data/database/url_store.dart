@@ -1,4 +1,5 @@
 import 'package:injectable/injectable.dart';
+import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/core/data/database/dao/url_dao.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
@@ -103,6 +104,27 @@ class UrlStore {
   Future<List<int>> clearAllAndCreateUrlFromRecords(
     List<UrlRecord> records,
   ) async => (await _dao).clearAllAndCreateUrlFromRecords(records);
+
+  /// Inserts [AppDefaults.defaultFolder] if it does not already exist in the
+  /// database.
+  Future<void> seedDefaultFolderIfNotExist() async {
+    final defaultFolder = AppDefaults.defaultFolder;
+    final existing = await findFolderByName(defaultFolder.folderName);
+    if (existing == null) {
+      await insertFolder(defaultFolder);
+    }
+  }
+
+  /// Inserts each tag from [AppDefaults.defaultTags] that does not already
+  /// exist in the database.
+  Future<void> seedDefaultTagsIfNotExist() async {
+    for (final tag in AppDefaults.defaultTags) {
+      final existing = await findTagByName(tag.tagName);
+      if (existing == null) {
+        await insertTag(tag);
+      }
+    }
+  }
 }
 
 typedef UrlRecord = (Url url, Folder folder, List<Tag> tags);
