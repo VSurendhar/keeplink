@@ -9,6 +9,7 @@ import 'package:mindful_links/utils/utils.dart';
 import 'app/app.dart';
 import 'app/app_bloc_observer.dart';
 import 'bootstrap.dart';
+import 'core/build_config.dart';
 import 'core/data/database/entity/folder.dart';
 import 'core/data/database/entity/tag.dart';
 import 'core/data/database/entity/url.dart';
@@ -16,6 +17,7 @@ import 'features/settings/service/app_settings_service.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  BuildConfig.isDevelopmentBuild = true;
 
   Bloc.observer = const AppBlocObserver();
 

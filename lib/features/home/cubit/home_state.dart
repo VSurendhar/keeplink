@@ -4,7 +4,11 @@ import 'package:flutter/material.dart';
 enum HomeTab {
   home(filledIcon: Icons.home_filled, unfilledIcon: Icons.home_outlined),
   folder(filledIcon: Icons.folder, unfilledIcon: Icons.folder_outlined),
-  settings(filledIcon: Icons.settings, unfilledIcon: Icons.settings_outlined);
+  settings(filledIcon: Icons.settings, unfilledIcon: Icons.settings_outlined),
+  developerOption(
+    filledIcon: Icons.developer_mode,
+    unfilledIcon: Icons.developer_mode_outlined,
+  );
 
   const HomeTab({required this.filledIcon, required this.unfilledIcon});
 
