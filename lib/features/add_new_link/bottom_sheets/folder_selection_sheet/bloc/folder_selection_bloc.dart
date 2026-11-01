@@ -22,7 +22,6 @@ class FolderSelectionBloc
   FolderSelectionBloc({required this.urlStore, Folder? initialSelectedFolder})
     : super(FolderSelectionState.initial(initialSelectedFolder)) {
     on<OnInitEvent>(_onInit);
-    on<OnFolderSelected>(_onFolderSelected);
   }
 
   final UrlStore urlStore;
@@ -65,12 +64,5 @@ class FolderSelectionBloc
       },
       onError: (_, __) => state.copyWith(isLoading: false),
     );
-  }
-
-  void _onFolderSelected(
-    OnFolderSelected event,
-    Emitter<FolderSelectionState> emit,
-  ) {
-    emit(state.copyWith(selectedFolder: event.folder));
   }
 }
