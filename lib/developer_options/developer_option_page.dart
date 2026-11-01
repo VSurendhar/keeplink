@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mindful_links/features/home/constants/constants.dart';
+import 'package:mindful_links/features/settings/view/app_settings_page.dart';
 import 'package:mindful_links/features/theme/colors.dart';
 import 'package:mindful_links/features/theme/theme.dart';
 
@@ -48,6 +49,35 @@ class DeveloperOptionPage extends StatelessWidget {
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                     color: MindfulLinkColors.headerSubTitleColor,
+                  ),
+                ),
+                const SizedBox(height: 24),
+                FilledButton(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: MindfulLinksTheme.primary,
+                    foregroundColor: const Color(0xFF7A4326),
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 12,
+                    ),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                  ),
+                  onPressed: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) => const AppSettingsPage(),
+                      ),
+                    );
+                  },
+                  child: const Text(
+                    'Settings page',
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
