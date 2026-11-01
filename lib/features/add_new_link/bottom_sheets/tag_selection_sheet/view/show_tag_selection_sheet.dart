@@ -26,7 +26,10 @@ Future<List<Tag>?> showTagSelectionSheet(
             urlStore: GetIt.instance.get<UrlStore>(),
             initialSelectedTags: selectedTags,
           )..add(const OnTagInit()),
-          child: const TagSelectionSheetWidget(),
+          child: AnimatedSize(
+            duration: Duration(milliseconds: 250),
+            child: const TagSelectionSheetWidget(),
+          ),
         ),
       ),
     ),

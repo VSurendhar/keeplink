@@ -33,29 +33,28 @@ class TagSelectionSheetWidget extends StatelessWidget {
                 _buildCreateNewTagRow(),
                 const SizedBox(height: 12),
                 Flexible(
-                  child: AnimatedSize(
-                    duration: const Duration(milliseconds: 250),
-                    curve: Curves.easeInOut,
-                    child: state.isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 16,
-                            ),
-                            child: Center(child: CircularProgressIndicator()),
-                          )
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLibraryHeader(state.totalTagCount),
-                              const SizedBox(height: 8),
-                              _buildTagGrid(context, state),
-                              const SizedBox(height: 16),
-                              _buildApplyButton(context, selectedTags),
-                            ],
+                  child: state.isLoading
+                      ? const Padding(
+                          padding: EdgeInsets.symmetric(
+                            vertical: 16,
+                            horizontal: 16,
                           ),
-                  ),
+                          child: Center(
+                            heightFactor: 1.0,
+                            child: CircularProgressIndicator(),
+                          ),
+                        )
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            _buildLibraryHeader(state.totalTagCount),
+                            const SizedBox(height: 8),
+                            _buildTagGrid(context, state),
+                            const SizedBox(height: 16),
+                            _buildApplyButton(context, selectedTags),
+                          ],
+                        ),
                 ),
               ],
             ),

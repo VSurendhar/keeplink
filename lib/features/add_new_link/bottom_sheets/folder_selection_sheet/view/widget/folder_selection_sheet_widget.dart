@@ -35,7 +35,10 @@ class FolderSelectionSheetWidget extends StatelessWidget {
                             vertical: 16,
                             horizontal: 16,
                           ),
-                          child: Center(child: CircularProgressIndicator()),
+                          child: Center(
+                            heightFactor: 1.0,
+                            child: CircularProgressIndicator(),
+                          ),
                         )
                       : _buildFolderList(context, state),
                 ),
@@ -152,6 +155,7 @@ class FolderSelectionSheetWidget extends StatelessWidget {
       return const Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(
+          heightFactor: 1.0,
           child: Text(
             'No folders found',
             style: TextStyle(fontSize: 14, color: Color(0xFF9E8E85)),

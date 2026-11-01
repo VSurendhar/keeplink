@@ -26,7 +26,10 @@ Future<Folder?> showFolderSelectionSheet(
             urlStore: GetIt.instance.get<UrlStore>(),
             initialSelectedFolder: selectedFolder,
           )..add(const OnInitEvent()),
-          child: const FolderSelectionSheetWidget(),
+          child: AnimatedSize(
+            duration: Duration(milliseconds: 250),
+            child: const FolderSelectionSheetWidget(),
+          ),
         ),
       ),
     ),
