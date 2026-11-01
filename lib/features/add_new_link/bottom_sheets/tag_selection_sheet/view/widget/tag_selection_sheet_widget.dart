@@ -18,45 +18,49 @@ class TagSelectionSheetWidget extends StatelessWidget {
     return BlocBuilder<TagSelectionBloc, TagSelectionState>(
       builder: (context, state) {
         final selectedTags = state.selectedTags;
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDragHandle(),
-                const SizedBox(height: 16),
-                _buildHeader(context, selectedTags),
-                const SizedBox(height: 16),
-                _buildCreateNewTagRow(),
-                const SizedBox(height: 12),
-                Flexible(
-                  child: state.isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 16,
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.translucent,
+          child: SafeArea(
+            top: false,
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _buildDragHandle(),
+                  const SizedBox(height: 16),
+                  _buildHeader(context, selectedTags),
+                  const SizedBox(height: 16),
+                  _buildCreateNewTagRow(context, state),
+                  const SizedBox(height: 12),
+                  Flexible(
+                    child: state.isLoading
+                        ? const Padding(
+                            padding: EdgeInsets.symmetric(
+                              vertical: 16,
+                              horizontal: 16,
+                            ),
+                            child: Center(
+                              heightFactor: 1.0,
+                              child: CircularProgressIndicator(),
+                            ),
+                          )
+                        : Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildLibraryHeader(state.totalTagCount),
+                              const SizedBox(height: 8),
+                              _buildTagGrid(context, state),
+                              const SizedBox(height: 16),
+                              _buildApplyButton(context, selectedTags),
+                            ],
                           ),
-                          child: Center(
-                            heightFactor: 1.0,
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            _buildLibraryHeader(state.totalTagCount),
-                            const SizedBox(height: 8),
-                            _buildTagGrid(context, state),
-                            const SizedBox(height: 16),
-                            _buildApplyButton(context, selectedTags),
-                          ],
-                        ),
-                ),
-              ],
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -112,6 +116,7 @@ class TagSelectionSheetWidget extends StatelessWidget {
         if (selectedCount > 0)
           GestureDetector(
             onTap: () {
+              context.read<TagSelectionBloc>().createTagFocusNode.unfocus();
               context.read<TagSelectionBloc>().add(const OnClearAllRequested());
             },
             behavior: HitTestBehavior.opaque,
@@ -131,7 +136,9 @@ class TagSelectionSheetWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCreateNewTagRow() {
+  Widget _buildCreateNewTagRow(BuildContext context, TagSelectionState state) {
+    final bloc = context.read<TagSelectionBloc>();
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFE0D5CE), width: 1),
@@ -142,16 +149,17 @@ class TagSelectionSheetWidget extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            // TODO "Navigate to Create Tag UI"
+            bloc.add(const OnToggleCreateMode());
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   width: 36,
                   height: 36,
-                  decoration: const BoxDecoration(
+                  decoration: BoxDecoration(
                     color: MindfulLinksTheme.primary,
                     shape: BoxShape.circle,
                   ),
@@ -166,17 +174,17 @@ class TagSelectionSheetWidget extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
                         'Create New Tag',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1E1B18),
+                          color: const Color(0xFF1E1B18),
                         ),
                       ),
-                      SizedBox(height: 2),
-                      Text(
+                      const SizedBox(height: 2),
+                      const Text(
                         'Type name to create on the fly',
                         style: TextStyle(
                           fontSize: 14,
@@ -184,6 +192,80 @@ class TagSelectionSheetWidget extends StatelessWidget {
                           color: Color(0xFF857B74),
                         ),
                       ),
+                      if (state.isCreating) ...[
+                        const SizedBox(height: 10),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFE0D5CE),
+                                    width: 1,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                alignment: Alignment.centerLeft,
+                                child: TextField(
+                                  controller: bloc.createTagController,
+                                  focusNode: bloc.createTagFocusNode,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Color(0xFF1E1B18),
+                                  ),
+                                  textInputAction: TextInputAction.done,
+                                  onSubmitted: (_) {
+                                    bloc.createTagFocusNode.unfocus();
+                                    bloc.add(const OnSaveTagClicked());
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter tag name...',
+                                    hintStyle: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF9E8E85),
+                                    ),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Material(
+                              color: const Color(0xFF7A4326),
+                              borderRadius: BorderRadius.circular(12),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () {
+                                  bloc.createTagFocusNode.unfocus();
+                                  bloc.add(const OnSaveTagClicked());
+                                },
+                                child: Container(
+                                  height: 38,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -232,7 +314,7 @@ class TagSelectionSheetWidget extends StatelessWidget {
       );
     }
 
-    return Expanded(
+    return Flexible(
       child: GridView.builder(
         shrinkWrap: true,
         gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -267,6 +349,7 @@ class TagSelectionSheetWidget extends StatelessWidget {
       elevation: 0,
       child: InkWell(
         onTap: () {
+          context.read<TagSelectionBloc>().createTagFocusNode.unfocus();
           context.read<TagSelectionBloc>().add(OnTagToggled(tag));
         },
         borderRadius: BorderRadius.circular(16),
@@ -367,6 +450,7 @@ class TagSelectionSheetWidget extends StatelessWidget {
         ),
         onPressed: hasSelection
             ? () {
+                context.read<TagSelectionBloc>().createTagFocusNode.unfocus();
                 Navigator.pop(context, selectedTags);
               }
             : null,

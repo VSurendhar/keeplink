@@ -8,12 +8,14 @@ final class TagSelectionState extends Equatable {
     this.tags = const [],
     this.selectedTags = const [],
     this.totalTagCount = 0,
+    this.isCreating = false,
   });
 
   final bool isLoading;
   final List<TagItem> tags;
   final List<Tag> selectedTags;
   final int totalTagCount;
+  final bool isCreating;
 
   factory TagSelectionState.initial(List<Tag> initialSelectedTags) {
     return TagSelectionState(
@@ -21,6 +23,7 @@ final class TagSelectionState extends Equatable {
       tags: const [],
       selectedTags: List<Tag>.unmodifiable(initialSelectedTags),
       totalTagCount: 0,
+      isCreating: false,
     );
   }
 
@@ -29,6 +32,7 @@ final class TagSelectionState extends Equatable {
     List<TagItem>? tags,
     List<Tag>? selectedTags,
     int? totalTagCount,
+    bool? isCreating,
     bool clearAction = false,
   }) {
     return TagSelectionState(
@@ -36,14 +40,21 @@ final class TagSelectionState extends Equatable {
       tags: tags ?? this.tags,
       selectedTags: selectedTags ?? this.selectedTags,
       totalTagCount: totalTagCount ?? this.totalTagCount,
+      isCreating: isCreating ?? this.isCreating,
     );
   }
 
   @override
-  List<Object?> get props => [isLoading, tags, selectedTags, totalTagCount];
+  List<Object?> get props => [
+    isLoading,
+    tags,
+    selectedTags,
+    totalTagCount,
+    isCreating,
+  ];
 
   @override
   String toString() {
-    return 'TagSelectionState{isLoading: $isLoading, tags: $tags, selectedTags: $selectedTags, totalTagCount: $totalTagCount}';
+    return 'TagSelectionState{isLoading: $isLoading, tags: $tags, selectedTags: $selectedTags, totalTagCount: $totalTagCount, isCreating: $isCreating}';
   }
 }

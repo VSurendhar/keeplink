@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
@@ -12,13 +13,55 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
     required this.urlStore,
     List<Tag> initialSelectedTags = const [],
   }) : super(TagSelectionState.initial(initialSelectedTags)) {
+    createTagController = TextEditingController();
+    createTagFocusNode = FocusNode();
+
     on<OnTagInit>(_onInit);
     on<OnTagToggled>(_onTagToggled);
     on<OnTagRemove>(_onTagRemove);
     on<OnClearAllRequested>(_onClearAll);
+    on<OnToggleCreateMode>(_onToggleCreateMode);
+    on<OnSaveTagClicked>(_onSaveTagClicked);
   }
 
   final UrlStore urlStore;
+  late final TextEditingController createTagController;
+  late final FocusNode createTagFocusNode;
+
+  @override
+  Future<void> close() {
+    createTagController.dispose();
+    createTagFocusNode.dispose();
+    return super.close();
+  }
+
+  void _onToggleCreateMode(
+    OnToggleCreateMode event,
+    Emitter<TagSelectionState> emit,
+  ) {
+    final nextState = !state.isCreating;
+    if (nextState) {
+      createTagFocusNode.requestFocus();
+    } else {
+      createTagFocusNode.unfocus();
+    }
+    emit(state.copyWith(isCreating: nextState));
+  }
+
+  Future<void> _onSaveTagClicked(
+    OnSaveTagClicked event,
+    Emitter<TagSelectionState> emit,
+  ) async {
+    final name = createTagController.text.trim();
+    createTagFocusNode.unfocus();
+    if (name.isEmpty) return;
+
+    final newTag = Tag(tagName: name);
+    await urlStore.insertTag(newTag);
+    createTagController.clear();
+
+    emit(state.copyWith(isCreating: false));
+  }
 
   Future<void> _onInit(OnTagInit event, Emitter<TagSelectionState> emit) async {
     emit(state.copyWith(isLoading: true));
@@ -41,6 +84,7 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
   }
 
   void _onTagToggled(OnTagToggled event, Emitter<TagSelectionState> emit) {
+    createTagFocusNode.unfocus();
     final selectedTags = List<Tag>.from(state.selectedTags);
     final exists = selectedTags.any(
       (t) => t.tagName == event.tag.tagName && t.id == event.tag.id,
@@ -56,6 +100,7 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
   }
 
   void _onTagRemove(OnTagRemove event, Emitter<TagSelectionState> emit) {
+    createTagFocusNode.unfocus();
     final selectedTags = List<Tag>.from(state.selectedTags)
       ..removeWhere(
         (t) => t.tagName == event.tag.tagName && t.id == event.tag.id,
@@ -64,10 +109,10 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
   }
 
   void _onClearAll(OnClearAllRequested event, Emitter<TagSelectionState> emit) {
+    createTagFocusNode.unfocus();
     emit(state.copyWith(selectedTags: const []));
   }
 }
-
 
 class TagItem extends Equatable {
   const TagItem({required this.tag, required this.linkCount});

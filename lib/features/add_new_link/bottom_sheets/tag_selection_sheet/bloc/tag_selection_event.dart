@@ -38,3 +38,13 @@ final class OnClearAllRequested extends TagSelectionEvent {
   const OnClearAllRequested();
 }
 
+/// Triggered to toggle the create tag input view.
+final class OnToggleCreateMode extends TagSelectionEvent {
+  const OnToggleCreateMode();
+}
+
+/// Triggered when the user taps the save button to create a new tag.
+final class OnSaveTagClicked extends TagSelectionEvent {
+  const OnSaveTagClicked();
+}
+
