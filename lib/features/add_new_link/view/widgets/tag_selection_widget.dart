@@ -38,8 +38,8 @@ class TagSelectionWidget extends StatelessWidget {
           Text(
             tag.tagName,
             style: const TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
               color: Color(0xFF1E1B18),
             ),
           ),
@@ -76,8 +76,8 @@ class TagSelectionWidget extends StatelessWidget {
               Text(
                 '+ Add Tag',
                 style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
                   color: Color(0xFF857B74),
                 ),
               ),
