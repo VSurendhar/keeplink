@@ -35,9 +35,4 @@ class AppSettingsService {
 
   AppTheme get appTheme =>
       _box.get(SettingsKeys.appTheme, defaultValue: AppTheme.light);
-
-  // Clear settings if needed
-  Future<void> clearAll() async {
-    await _box.clear();
-  }
 }
