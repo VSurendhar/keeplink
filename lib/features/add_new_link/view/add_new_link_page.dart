@@ -70,6 +70,15 @@ class AddNewLinkView extends StatelessWidget {
                 color: MindfulLinkColors.headerTitleColor,
               ),
             ),
+            actions: [
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: _buildTopSaveButton(
+                  context,
+                  isEnabled: state.isSaveEnabled,
+                ),
+              ),
+            ],
           ),
           body: SafeArea(
             child: SingleChildScrollView(
@@ -93,8 +102,6 @@ class AddNewLinkView extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   _buildTagSection(context, tags: state.tags),
-                  const SizedBox(height: 24),
-                  _buildSaveButton(context),
                   const SizedBox(height: paddingForBottomNavBar),
                 ],
               ),
@@ -335,36 +342,35 @@ class AddNewLinkView extends StatelessWidget {
     );
   }
 
-  Widget _buildSaveButton(BuildContext context) {
+  Widget _buildTopSaveButton(BuildContext context, {required bool isEnabled}) {
+    const buttonTextColor = Color(0xFF7A4326);
+    const disabledTextColor = Color(0xFF9E8E85);
+
     return SizedBox(
-      width: double.infinity,
-      height: 48,
       child: FilledButton(
         style: FilledButton.styleFrom(
-          backgroundColor: MindfulLinksTheme.primary,
-          foregroundColor: const Color(0xFF7A4326),
+          backgroundColor: isEnabled
+              ? MindfulLinksTheme.primary
+              : const Color(0xFFE0D5CE),
+          foregroundColor: isEnabled ? buttonTextColor : disabledTextColor,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(20),
           ),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         ),
-        onPressed: () {
-          context.read<AddNewLinkBloc>().add(const OnSaveClicked());
-        },
-        child: const Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(Icons.bookmark, size: 18, color: Color(0xFF7A4326)),
-            SizedBox(width: 8),
-            Text(
-              'Save Link',
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: Color(0xFF7A4326),
-              ),
-            ),
-          ],
+        onPressed: isEnabled
+            ? () {
+                context.read<AddNewLinkBloc>().add(const OnSaveClicked());
+              }
+            : null,
+        child: Text(
+          'Save',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: isEnabled ? buttonTextColor : disabledTextColor,
+          ),
         ),
       ),
     );

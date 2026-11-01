@@ -51,6 +51,12 @@ final class AddNewLinkState extends Equatable {
     );
   }
 
+  bool get isSaveEnabled =>
+      urlName.trim().isNotEmpty &&
+      url.trim().isNotEmpty &&
+      folder.folderName.trim().isNotEmpty &&
+      tags.isNotEmpty;
+
   @override
   List<Object?> get props => [urlName, url, imageUrl, folder, tags, action];
 
