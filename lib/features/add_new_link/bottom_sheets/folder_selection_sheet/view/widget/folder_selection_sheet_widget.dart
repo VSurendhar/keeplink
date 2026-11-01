@@ -160,19 +160,17 @@ class FolderSelectionSheetWidget extends StatelessWidget {
       );
     }
 
-    return Expanded(
-      child: ListView.separated(
-        shrinkWrap: true,
-        itemCount: state.folders.length,
-        separatorBuilder: (_, __) => const SizedBox(height: 4),
-        itemBuilder: (context, index) {
-          return _buildFolderItem(
-            context: context,
-            item: state.folders[index],
-            selectedFolder: state.selectedFolder,
-          );
-        },
-      ),
+    return ListView.separated(
+      shrinkWrap: true,
+      itemCount: state.folders.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 4),
+      itemBuilder: (context, index) {
+        return _buildFolderItem(
+          context: context,
+          item: state.folders[index],
+          selectedFolder: state.selectedFolder,
+        );
+      },
     );
   }
 
