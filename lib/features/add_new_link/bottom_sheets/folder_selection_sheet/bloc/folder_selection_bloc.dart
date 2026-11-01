@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:flutter/material.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
@@ -21,10 +22,51 @@ class FolderSelectionBloc
     extends Bloc<FolderSelectionEvent, FolderSelectionState> {
   FolderSelectionBloc({required this.urlStore, Folder? initialSelectedFolder})
     : super(FolderSelectionState.initial(initialSelectedFolder)) {
+    createFolderController = TextEditingController();
+    createFolderFocusNode = FocusNode();
+
     on<OnInitEvent>(_onInit);
+    on<OnToggleCreateMode>(_onToggleCreateMode);
+    on<OnSaveFolderClicked>(_onSaveFolderClicked);
   }
 
   final UrlStore urlStore;
+  late final TextEditingController createFolderController;
+  late final FocusNode createFolderFocusNode;
+
+  @override
+  Future<void> close() {
+    createFolderController.dispose();
+    createFolderFocusNode.dispose();
+    return super.close();
+  }
+
+  void _onToggleCreateMode(
+    OnToggleCreateMode event,
+    Emitter<FolderSelectionState> emit,
+  ) {
+    final isCreating = !state.isCreating;
+    if (isCreating) {
+      createFolderFocusNode.requestFocus();
+    } else {
+      createFolderFocusNode.unfocus();
+    }
+    emit(state.copyWith(isCreating: isCreating));
+  }
+
+  Future<void> _onSaveFolderClicked(
+    OnSaveFolderClicked event,
+    Emitter<FolderSelectionState> emit,
+  ) async {
+    final name = createFolderController.text.trim();
+    createFolderFocusNode.unfocus();
+    if (name.isEmpty) return;
+
+    final newFolder = Folder(folderName: name);
+    await urlStore.insertFolder(newFolder);
+    createFolderController.clear();
+    emit(state.copyWith(isCreating: false));
+  }
 
   Future<void> _onInit(
     OnInitEvent event,

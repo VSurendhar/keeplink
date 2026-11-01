@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
+import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_state.dart';
 import 'package:mindful_links/features/theme/theme.dart';
 
@@ -12,37 +13,49 @@ class FolderSelectionSheetWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<FolderSelectionBloc, FolderSelectionState>(
       builder: (context, state) {
-        return SafeArea(
-          top: false,
+        return GestureDetector(
+          onTap: () => FocusScope.of(context).unfocus(),
+          behavior: HitTestBehavior.translucent,
           child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _buildDragHandle(),
-                const SizedBox(height: 16),
-                _buildHeader(),
-                const SizedBox(height: 4),
-                _buildSubtitle(),
-                const SizedBox(height: 16),
-                _buildCreateNewFolderRow(),
-                const SizedBox(height: 12),
-                Flexible(
-                  child: state.isLoading
-                      ? const Padding(
-                          padding: EdgeInsets.symmetric(
-                            vertical: 16,
-                            horizontal: 16,
-                          ),
-                          child: Center(
-                            heightFactor: 1.0,
-                            child: CircularProgressIndicator(),
-                          ),
-                        )
-                      : _buildFolderList(context, state),
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 16,
                 ),
-              ],
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDragHandle(),
+                    const SizedBox(height: 16),
+                    _buildHeader(),
+                    const SizedBox(height: 4),
+                    _buildSubtitle(),
+                    const SizedBox(height: 16),
+                    _buildCreateNewFolderRow(context, state),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: state.isLoading
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 16,
+                                horizontal: 16,
+                              ),
+                              child: Center(
+                                heightFactor: 1.0,
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          : _buildFolderList(context, state),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         );
@@ -85,7 +98,12 @@ class FolderSelectionSheetWidget extends StatelessWidget {
     );
   }
 
-  Widget _buildCreateNewFolderRow() {
+  Widget _buildCreateNewFolderRow(
+    BuildContext context,
+    FolderSelectionState state,
+  ) {
+    final bloc = context.read<FolderSelectionBloc>();
+
     return Container(
       decoration: BoxDecoration(
         border: Border.all(color: const Color(0xFFE0D5CE), width: 1),
@@ -96,11 +114,12 @@ class FolderSelectionSheetWidget extends StatelessWidget {
         child: InkWell(
           borderRadius: BorderRadius.circular(16),
           onTap: () {
-            // TODO "Navigate to Create Folder UI"
+            bloc.add(const OnToggleCreateMode());
           },
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 Container(
                   width: 36,
@@ -110,9 +129,9 @@ class FolderSelectionSheetWidget extends StatelessWidget {
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,
-                  child: const Icon(
+                  child: Icon(
                     Icons.create_new_folder_outlined,
-                    color: Color(0xFF7A4326),
+                    color: const Color(0xFF7A4326),
                     size: 20,
                   ),
                 ),
@@ -120,17 +139,17 @@ class FolderSelectionSheetWidget extends StatelessWidget {
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
-                    children: const [
+                    children: [
                       Text(
-                        '+ Create New Folder',
+                        'Create New Folder',
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1E1B18),
+                          color: const Color(0xFF1E1B18),
                         ),
                       ),
-                      SizedBox(height: 2),
-                      Text(
+                      const SizedBox(height: 2),
+                      const Text(
                         'Organize links into a bespoke space',
                         style: TextStyle(
                           fontSize: 14,
@@ -138,10 +157,83 @@ class FolderSelectionSheetWidget extends StatelessWidget {
                           color: Color(0xFF857B74),
                         ),
                       ),
+                      if (state.isCreating) ...[
+                        const SizedBox(height: 12),
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Container(
+                                height: 38,
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color: const Color(0xFFE0D5CE),
+                                    width: 1,
+                                  ),
+                                ),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                ),
+                                alignment: Alignment.centerLeft,
+                                child: TextField(
+                                  controller: bloc.createFolderController,
+                                  focusNode: bloc.createFolderFocusNode,
+                                  style: const TextStyle(
+                                    fontSize: 14,
+                                    color: Colors.black,
+                                  ),
+                                  textInputAction: TextInputAction.done,
+                                  onSubmitted: (_) {
+                                    bloc.createFolderFocusNode.unfocus();
+                                    bloc.add(const OnSaveFolderClicked());
+                                  },
+                                  decoration: const InputDecoration(
+                                    hintText: 'Enter folder name...',
+                                    hintStyle: TextStyle(
+                                      fontSize: 14,
+                                      color: Color(0xFF9E8E85),
+                                    ),
+                                    border: InputBorder.none,
+                                    isDense: true,
+                                    contentPadding: EdgeInsets.zero,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Material(
+                              color: const Color(0xFF7A4326),
+                              borderRadius: BorderRadius.circular(12),
+                              child: InkWell(
+                                borderRadius: BorderRadius.circular(12),
+                                onTap: () {
+                                  bloc.createFolderFocusNode.unfocus();
+                                  bloc.add(const OnSaveFolderClicked());
+                                },
+                                child: Container(
+                                  height: 38,
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 14,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    'Save',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
                     ],
                   ),
                 ),
-                const Icon(Icons.add, color: Color(0xFF9E8E85), size: 20),
               ],
             ),
           ),
@@ -194,6 +286,7 @@ class FolderSelectionSheetWidget extends StatelessWidget {
       borderRadius: BorderRadius.circular(16),
       child: InkWell(
         onTap: () {
+          context.read<FolderSelectionBloc>().createFolderFocusNode.unfocus();
           Navigator.pop(context, folder);
         },
         borderRadius: BorderRadius.circular(16),
