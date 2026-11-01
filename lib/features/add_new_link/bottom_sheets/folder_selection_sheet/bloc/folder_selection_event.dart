@@ -21,3 +21,8 @@ final class OnToggleCreateMode extends FolderSelectionEvent {
 final class OnSaveFolderClicked extends FolderSelectionEvent {
   const OnSaveFolderClicked();
 }
+
+/// Triggered when a one-shot UI action has been consumed by the view.
+final class OnActionHandled extends FolderSelectionEvent {
+  const OnActionHandled();
+}

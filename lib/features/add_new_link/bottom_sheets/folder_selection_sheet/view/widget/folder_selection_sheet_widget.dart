@@ -5,13 +5,26 @@ import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selecti
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_state.dart';
 import 'package:mindful_links/features/theme/theme.dart';
+import 'package:mindful_links/utils/utils.dart';
 
 class FolderSelectionSheetWidget extends StatelessWidget {
   const FolderSelectionSheetWidget({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<FolderSelectionBloc, FolderSelectionState>(
+    return BlocConsumer<FolderSelectionBloc, FolderSelectionState>(
+      listenWhen: (previous, current) =>
+          current.action != null && previous.action != current.action,
+      listener: (context, state) {
+        final action = state.action;
+        if (action == null) return;
+
+        if (action is ShowToast) {
+          Utils.showToast(action.message);
+        }
+
+        context.read<FolderSelectionBloc>().add(const OnActionHandled());
+      },
       builder: (context, state) {
         return GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),

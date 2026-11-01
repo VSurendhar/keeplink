@@ -22,6 +22,7 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
     on<OnClearAllRequested>(_onClearAll);
     on<OnToggleCreateMode>(_onToggleCreateMode);
     on<OnSaveTagClicked>(_onSaveTagClicked);
+    on<OnActionHandled>(_onActionHandled);
   }
 
   final UrlStore urlStore;
@@ -52,15 +53,31 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
     OnSaveTagClicked event,
     Emitter<TagSelectionState> emit,
   ) async {
-    final name = createTagController.text.trim();
     createTagFocusNode.unfocus();
-    if (name.isEmpty) return;
+    final name = createTagController.text.trim();
+    if (name.isEmpty || name.length > 24) {
+      emit(
+        state.copyWith(
+          action: const ShowToast(
+            'Tag name must be between 1 and 24 characters',
+          ),
+        ),
+      );
+      return;
+    }
 
     final newTag = Tag(tagName: name);
     await urlStore.insertTag(newTag);
     createTagController.clear();
 
     emit(state.copyWith(isCreating: false));
+  }
+
+  void _onActionHandled(
+    OnActionHandled event,
+    Emitter<TagSelectionState> emit,
+  ) {
+    emit(state.copyWith(clearAction: true));
   }
 
   Future<void> _onInit(OnTagInit event, Emitter<TagSelectionState> emit) async {

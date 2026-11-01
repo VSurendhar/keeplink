@@ -48,3 +48,9 @@ final class OnSaveTagClicked extends TagSelectionEvent {
   const OnSaveTagClicked();
 }
 
+/// Triggered when a one-shot UI action has been consumed by the view.
+final class OnActionHandled extends TagSelectionEvent {
+  const OnActionHandled();
+}
+
+

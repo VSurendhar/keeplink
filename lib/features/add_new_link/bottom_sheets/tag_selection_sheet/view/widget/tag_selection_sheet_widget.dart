@@ -5,6 +5,7 @@ import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_state.dart';
 import 'package:mindful_links/features/theme/theme.dart';
+import 'package:mindful_links/utils/utils.dart';
 
 class TagSelectionSheetWidget extends StatelessWidget {
   const TagSelectionSheetWidget({super.key});
@@ -15,7 +16,19 @@ class TagSelectionSheetWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<TagSelectionBloc, TagSelectionState>(
+    return BlocConsumer<TagSelectionBloc, TagSelectionState>(
+      listenWhen: (previous, current) =>
+          current.action != null && previous.action != current.action,
+      listener: (context, state) {
+        final action = state.action;
+        if (action == null) return;
+
+        if (action is ShowToast) {
+          Utils.showToast(action.message);
+        }
+
+        context.read<TagSelectionBloc>().add(const OnActionHandled());
+      },
       builder: (context, state) {
         final selectedTags = state.selectedTags;
         return GestureDetector(

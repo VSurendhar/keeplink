@@ -28,6 +28,7 @@ class FolderSelectionBloc
     on<OnInitEvent>(_onInit);
     on<OnToggleCreateMode>(_onToggleCreateMode);
     on<OnSaveFolderClicked>(_onSaveFolderClicked);
+    on<OnActionHandled>(_onActionHandled);
   }
 
   final UrlStore urlStore;
@@ -58,14 +59,30 @@ class FolderSelectionBloc
     OnSaveFolderClicked event,
     Emitter<FolderSelectionState> emit,
   ) async {
-    final name = createFolderController.text.trim();
     createFolderFocusNode.unfocus();
-    if (name.isEmpty) return;
+    final name = createFolderController.text.trim();
+    if (name.isEmpty || name.length > 40) {
+      emit(
+        state.copyWith(
+          action: const ShowToast(
+            'Folder name must be between 1 and 40 characters',
+          ),
+        ),
+      );
+      return;
+    }
 
     final newFolder = Folder(folderName: name);
     await urlStore.insertFolder(newFolder);
     createFolderController.clear();
     emit(state.copyWith(isCreating: false));
+  }
+
+  void _onActionHandled(
+    OnActionHandled event,
+    Emitter<FolderSelectionState> emit,
+  ) {
+    emit(state.copyWith(clearAction: true));
   }
 
   Future<void> _onInit(
