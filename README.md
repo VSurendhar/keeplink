@@ -4,9 +4,9 @@ A mindful link management and bookmarking Flutter application.
 
 ## Development Commands
 
-### Run in Development Mode
+### Run the Application
 ```bash
-fvm flutter run lib/main_developement.dart
+fvm flutter run lib/main.dart
 ```
 
 ### Run Code Generation (`build_runner`)
