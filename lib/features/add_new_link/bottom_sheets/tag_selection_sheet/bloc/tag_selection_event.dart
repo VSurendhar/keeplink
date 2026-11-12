@@ -52,5 +52,3 @@ final class OnSaveTagClicked extends TagSelectionEvent {
 final class OnActionHandled extends TagSelectionEvent {
   const OnActionHandled();
 }
-
-

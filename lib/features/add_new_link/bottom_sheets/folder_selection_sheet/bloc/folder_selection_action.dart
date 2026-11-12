@@ -15,4 +15,3 @@ final class ShowToast extends FolderSelectionAction {
   @override
   List<Object?> get props => [message];
 }
-

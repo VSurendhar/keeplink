@@ -5,8 +5,8 @@ import 'home_state.dart';
 
 class HomeCubit extends Cubit<HomeState> {
   HomeCubit({bool? isDeveloperMode})
-      : isDeveloperMode = isDeveloperMode ?? BuildConfig.isDeveloperOrDebug,
-        super(const HomeState());
+    : isDeveloperMode = isDeveloperMode ?? BuildConfig.isDeveloperOrDebug,
+      super(const HomeState());
 
   final bool isDeveloperMode;
 
