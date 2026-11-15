@@ -73,7 +73,7 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
   }
 
   void _onTagRemoved(OnTagRemoved event, Emitter<AddNewLinkState> emit) {
-    final updatedTags = List<Tag>.from(state.tags)..remove(event.tag);
+    final updatedTags = List<Tag>.from(state.selectedTags)..remove(event.tag);
     emit(state.copyWith(tags: updatedTags));
   }
 

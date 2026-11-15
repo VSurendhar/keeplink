@@ -11,24 +11,24 @@ final class AddNewLinkState extends Equatable {
     required this.urlName,
     required this.url,
     this.imageUrl = '',
-    required this.folder,
-    required this.tags,
+    required this.selectedFolder,
+    required this.selectedTags,
     this.action,
   });
 
   final String urlName;
   final String url;
   final String imageUrl;
-  final Folder folder;
-  final List<Tag> tags;
+  final Folder selectedFolder;
+  final List<Tag> selectedTags;
   final AddNewLinkAction? action;
 
   factory AddNewLinkState.initial() {
     return AddNewLinkState(
       urlName: '',
       url: '',
-      folder: AppDefaults.defaultFolders.first,
-      tags: [],
+      selectedFolder: AppDefaults.defaultFolders.first,
+      selectedTags: [],
     );
   }
 
@@ -45,8 +45,8 @@ final class AddNewLinkState extends Equatable {
       urlName: urlName ?? this.urlName,
       url: url ?? this.url,
       imageUrl: imageUrl ?? this.imageUrl,
-      folder: folder ?? this.folder,
-      tags: tags ?? this.tags,
+      selectedFolder: folder ?? this.selectedFolder,
+      selectedTags: tags ?? this.selectedTags,
       action: clearAction ? null : (action ?? this.action),
     );
   }
@@ -54,13 +54,13 @@ final class AddNewLinkState extends Equatable {
   bool get isSaveEnabled =>
       urlName.trim().isNotEmpty &&
       url.trim().isNotEmpty &&
-      folder.folderName.trim().isNotEmpty;
+      selectedFolder.folderName.trim().isNotEmpty;
 
   @override
-  List<Object?> get props => [urlName, url, imageUrl, folder, tags, action];
+  List<Object?> get props => [urlName, url, imageUrl, selectedFolder, selectedTags, action];
 
   @override
   String toString() {
-    return 'AddNewLinkState{urlName: $urlName, url: $url, imageUrl: $imageUrl, folder: $folder, tags: $tags, action: $action}';
+    return 'AddNewLinkState{urlName: $urlName, url: $url, imageUrl: $imageUrl, selectedFolder: $selectedFolder, selectedTags: $selectedTags, action: $action}';
   }
 }

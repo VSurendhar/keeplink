@@ -40,9 +40,9 @@ class AddNewLinkView extends StatelessWidget {
         if (action == null) return;
 
         if (action is ShowFolderSelectionSheetAction) {
-          _showFolderSelectionSheet(context, selectedFolder: state.folder);
+          _showFolderSelectionSheet(context, selectedFolder: state.selectedFolder);
         } else if (action is ShowTagSelectionSheetAction) {
-          _showTagSelectionSheet(context, selectedTags: state.tags);
+          _showTagSelectionSheet(context, selectedTags: state.selectedTags);
         }
 
         context.read<AddNewLinkBloc>().add(const OnActionHandled());
@@ -105,10 +105,10 @@ class AddNewLinkView extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildSaveToFolderCard(
                     context,
-                    folderName: state.folder.folderName,
+                    folderName: state.selectedFolder.folderName,
                   ),
                   const SizedBox(height: 16),
-                  _buildTagSection(context, tags: state.tags),
+                  _buildTagSection(context, tags: state.selectedTags),
                   const SizedBox(height: paddingForBottomNavBar),
                 ],
               ),
