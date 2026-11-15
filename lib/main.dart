@@ -55,6 +55,11 @@ Future<void> seedDbWithDefaults() async {
     await urlStore.seedDefaultFolderIfNotExist();
     await urlStore.seedDefaultTagsIfNotExist();
   } catch (e, st) {
-    logError('Failed to seed default folders/tags', e, stackTrace: st);
+    logError(
+      'Failed to seed default folders/tags',
+      e,
+      stackTrace: st,
+      isShowToastInDebug: true,
+    );
   }
 }

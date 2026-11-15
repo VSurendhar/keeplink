@@ -39,12 +39,18 @@ void initLogger() {
   );
 }
 
-void logError(String message, Object? error, {StackTrace? stackTrace}) {
+void logError(
+  String message,
+  Object? error, {
+  StackTrace? stackTrace,
+  bool isShowToastInDebug = false,
+}) {
   printDebug(
     message,
     level: LogLevel.error,
     stackTrace: stackTrace,
     error: error,
+    showToast: isShowToastInDebug && kDebugMode,
   );
 }
 

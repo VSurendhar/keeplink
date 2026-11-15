@@ -76,12 +76,17 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
 
   void actionHandled() => emit(state.copyWith(clearAction: true));
 
-  /// Debug-console output only, so failures are logged without a toast.
+  /// Debug-console output only, so failures show a debug-only toast.
   Future<void> _printDatabase(UrlStore urlStore) async {
     try {
       await _developerOptionsService.printDatabase(urlStore);
     } catch (e, st) {
-      logError('Failed to print database', e, stackTrace: st);
+      logError(
+        'Failed to print database',
+        e,
+        stackTrace: st,
+        isShowToastInDebug: true,
+      );
     }
   }
 }
