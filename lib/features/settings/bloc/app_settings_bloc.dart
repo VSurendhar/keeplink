@@ -23,6 +23,8 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     on<EraseAllRequested>(_onEraseAllRequested);
     on<ExportBookmarksRequested>(_onExportBookmarksRequested);
     on<ImportBookmarksRequested>(_onImportBookmarksRequested);
+    on<ExportBookmarksConfirmed>(_onExportBookmarksConfirmed);
+    on<ImportBookmarksConfirmed>(_onImportBookmarksConfirmed);
     on<ActionHandled>(_onActionHandled);
   }
 
@@ -120,10 +122,16 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     EraseAllRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
-    final urlStore = _urlStoreProvider();
-    await urlStore.clearAll();
-    await urlStore.seedDefaultFolderIfNotExist();
-    await urlStore.seedDefaultTagsIfNotExist();
+    try {
+      final urlStore = _urlStoreProvider();
+      await urlStore.clearAll();
+      await urlStore.seedDefaultFolderIfNotExist();
+      await urlStore.seedDefaultTagsIfNotExist();
+      emit(state.copyWith(action: const ShowToast('Data Erased')));
+    } catch (e, st) {
+      logError('Failed to erase all data', e, stackTrace: st);
+      emit(state.copyWith(action: const ShowToast('Error While Erasing Data')));
+    }
   }
 
   Future<void> _onExportBookmarksRequested(
@@ -139,6 +147,20 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     Emitter<AppSettingsState> emit,
   ) async {
     emit(state.copyWith(action: const ShowImportSheet()));
+  }
+
+  void _onExportBookmarksConfirmed(
+    ExportBookmarksConfirmed event,
+    Emitter<AppSettingsState> emit,
+  ) {
+    emit(state.copyWith(action: const ShowToast('Exported Links')));
+  }
+
+  void _onImportBookmarksConfirmed(
+    ImportBookmarksConfirmed event,
+    Emitter<AppSettingsState> emit,
+  ) {
+    emit(state.copyWith(action: const ShowToast('Imported Link')));
   }
 
   void _onActionHandled(ActionHandled event, Emitter<AppSettingsState> emit) {

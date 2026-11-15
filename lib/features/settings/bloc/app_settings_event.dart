@@ -63,9 +63,19 @@ final class ExportBookmarksRequested extends AppSettingsEvent {
   const ExportBookmarksRequested();
 }
 
+/// Triggered when the user confirms the export in the export sheet.
+final class ExportBookmarksConfirmed extends AppSettingsEvent {
+  const ExportBookmarksConfirmed();
+}
+
 /// Triggered when the user requests to import bookmarks.
 final class ImportBookmarksRequested extends AppSettingsEvent {
   const ImportBookmarksRequested();
+}
+
+/// Triggered when the user confirms the import in the import sheet.
+final class ImportBookmarksConfirmed extends AppSettingsEvent {
+  const ImportBookmarksConfirmed();
 }
 
 /// Triggered when a one-shot UI action has been consumed/handled by the view.

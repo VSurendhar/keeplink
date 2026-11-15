@@ -619,7 +619,6 @@ class AppSettingsView extends StatelessWidget {
       builder: (_) => EraseAllConfirmationWidget(
         onErase: () {
           context.read<AppSettingsBloc>().add(const EraseAllRequested());
-          Utils.showToast('Data Erased');
         },
       ),
     );
@@ -635,7 +634,7 @@ class AppSettingsView extends StatelessWidget {
       builder: (_) => ExportBottomSheetWidget(
         count: count,
         onExport: () {
-          Utils.showToast('Exported Links');
+          context.read<AppSettingsBloc>().add(const ExportBookmarksConfirmed());
         },
       ),
     );
@@ -650,7 +649,7 @@ class AppSettingsView extends StatelessWidget {
       ),
       builder: (_) => ImportBottomSheetWidget(
         onImport: () {
-          Utils.showToast('Imported Link');
+          context.read<AppSettingsBloc>().add(const ImportBookmarksConfirmed());
         },
       ),
     );
