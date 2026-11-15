@@ -443,35 +443,32 @@ class TagSelectionSheetWidget extends StatelessWidget {
 
   Widget _buildApplyButton(BuildContext context, List<Tag> selectedTags) {
     final count = selectedTags.length;
-    final hasSelection = count > 0;
 
     return SizedBox(
       width: double.infinity,
       height: 48,
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
-          backgroundColor: hasSelection
-              ? const Color(0xFF7A4326)
-              : const Color(0xFFE0D5CE),
-          foregroundColor: hasSelection
-              ? Colors.white
-              : const Color(0xFF9E8E85),
+          backgroundColor: const Color(0xFF7A4326),
+          foregroundColor: Colors.white,
           elevation: 0,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(24),
           ),
         ),
-        onPressed: hasSelection
-            ? () {
-                context.read<TagSelectionBloc>().createTagFocusNode.unfocus();
-                Navigator.pop(context, selectedTags);
-              }
-            : null,
+        // Always enabled so an empty selection (e.g. after "Clear") can be
+        // applied to remove all tags from the link.
+        onPressed: () {
+          context.read<TagSelectionBloc>().createTagFocusNode.unfocus();
+          Navigator.pop(context, selectedTags);
+        },
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Text(
-              'Apply $count ${count == 1 ? 'Tag' : 'Tags'}',
+              count == 0
+                  ? 'Remove All Tags'
+                  : 'Apply $count ${count == 1 ? 'Tag' : 'Tags'}',
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(width: 6),
