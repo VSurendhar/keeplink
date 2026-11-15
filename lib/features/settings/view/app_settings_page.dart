@@ -26,7 +26,7 @@ class AppSettingsPage extends StatelessWidget {
     return BlocProvider(
       create: (context) => AppSettingsBloc(
         appSettingsService: GetIt.instance.get<AppSettingsService>(),
-        urlStore: GetIt.instance.get<UrlStore>(),
+        urlStoreProvider: GetIt.instance.get<UrlStore>,
       ),
       child: AppSettingsView(),
     );

@@ -16,4 +16,3 @@ final class ShowFolderSelectionSheetAction extends AddNewLinkAction {
 final class ShowTagSelectionSheetAction extends AddNewLinkAction {
   const ShowTagSelectionSheetAction();
 }
-

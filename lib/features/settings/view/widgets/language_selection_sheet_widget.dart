@@ -56,8 +56,7 @@ class LanguageSelectionSheetWidget extends StatelessWidget {
                   lang.value,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight:
-                        isSelected ? FontWeight.w600 : FontWeight.w400,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: isSelected
                         ? selectedOptionColor
                         : MindfulLinksTheme.textPrimary,
@@ -81,4 +80,3 @@ class LanguageSelectionSheetWidget extends StatelessWidget {
     );
   }
 }
-

@@ -143,4 +143,3 @@ class DatabaseUrlStore implements UrlStore {
     }
   }
 }
-

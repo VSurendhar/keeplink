@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:mindful_links/features/home/view/home_page.dart';
 import 'package:mindful_links/features/theme/theme.dart';
 
-
 class App extends StatelessWidget {
   const App({super.key});
 

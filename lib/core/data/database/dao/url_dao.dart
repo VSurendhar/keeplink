@@ -6,7 +6,6 @@ import 'package:mindful_links/core/data/database/entity/url_tag.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 
-
 @dao
 abstract class UrlDao {
   @Query('SELECT * FROM url')

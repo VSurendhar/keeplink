@@ -15,4 +15,3 @@ final class ShowToast extends TagSelectionAction {
   @override
   List<Object?> get props => [message];
 }
-

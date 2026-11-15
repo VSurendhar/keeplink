@@ -7,8 +7,8 @@ import 'package:mindful_links/features/settings/service/app_settings_service.dar
 class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   AppSettingsBloc({
     required AppSettingsService appSettingsService,
-    required UrlStore urlStore,
-  }) : _urlStore = urlStore,
+    required UrlStore Function() urlStoreProvider,
+  }) : _urlStoreProvider = urlStoreProvider,
        _appSettingsService = appSettingsService,
        super(
          AppSettingsState(
@@ -29,7 +29,10 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   }
 
   final AppSettingsService _appSettingsService;
-  final UrlStore _urlStore;
+
+  /// On every use so a mock/real switch in Developer Options is
+  /// picked up even though this BLoC outlives the switch (IndexedStack).
+  final UrlStore Function() _urlStoreProvider;
 
   Future<void> _onThemeChanged(
     AppSettingsThemeChanged event,
@@ -73,16 +76,17 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     AppSettingsEraseAllRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
-    await _urlStore.clearAll();
-    await _urlStore.seedDefaultFolderIfNotExist();
-    await _urlStore.seedDefaultTagsIfNotExist();
+    final urlStore = _urlStoreProvider();
+    await urlStore.clearAll();
+    await urlStore.seedDefaultFolderIfNotExist();
+    await urlStore.seedDefaultTagsIfNotExist();
   }
 
   Future<void> _onExportBookmarksRequested(
     AppSettingsExportBookmarksRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
-    final urls = await _urlStore.findAllUrl().first;
+    final urls = await _urlStoreProvider().findAllUrl().first;
     emit(
       state.copyWith(
         action: AppSettingsShowExportSheetAction(count: urls.length),
