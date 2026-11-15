@@ -138,8 +138,15 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     ExportBookmarksRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
-    final urls = await _urlStoreProvider().findAllUrl().first;
-    emit(state.copyWith(action: ShowExportSheet(count: urls.length)));
+    try {
+      final urls = await _urlStoreProvider().findAllUrl().first;
+      emit(state.copyWith(action: ShowExportSheet(count: urls.length)));
+    } catch (e, st) {
+      logError('Failed to load bookmarks for export', e, stackTrace: st);
+      emit(
+        state.copyWith(action: const ShowToast('Error While Exporting BookMarks')),
+      );
+    }
   }
 
   Future<void> _onImportBookmarksRequested(
