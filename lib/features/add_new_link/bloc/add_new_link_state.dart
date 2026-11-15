@@ -57,7 +57,14 @@ final class AddNewLinkState extends Equatable {
       selectedFolder.folderName.trim().isNotEmpty;
 
   @override
-  List<Object?> get props => [urlName, url, imageUrl, selectedFolder, selectedTags, action];
+  List<Object?> get props => [
+    urlName,
+    url,
+    imageUrl,
+    selectedFolder,
+    selectedTags,
+    action,
+  ];
 
   @override
   String toString() {

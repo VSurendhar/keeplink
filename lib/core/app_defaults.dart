@@ -12,4 +12,5 @@ class AppDefaults {
   static const AppLanguage appLanguage = AppLanguage.englishUs;
   static const int trashRetention = 10;
   static const AppTheme appTheme = AppTheme.light;
+  static const int linkNameMaxLength = 40;
 }

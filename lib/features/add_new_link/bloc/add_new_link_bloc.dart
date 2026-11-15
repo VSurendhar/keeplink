@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_event.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart';
@@ -34,10 +35,17 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
   }
 
   void _onNameChanged(OnNameChanged event, Emitter<AddNewLinkState> emit) {
-    if (nameController.text != event.name) {
-      nameController.text = event.name;
+    final characters = event.name.characters;
+    final name = characters.length > AppDefaults.linkNameMaxLength
+        ? characters.take(AppDefaults.linkNameMaxLength).toString()
+        : event.name;
+    if (nameController.text != name) {
+      nameController.value = TextEditingValue(
+        text: name,
+        selection: TextSelection.collapsed(offset: name.length),
+      );
     }
-    emit(state.copyWith(urlName: event.name));
+    emit(state.copyWith(urlName: name));
   }
 
   void _onUrlChanged(OnUrlChanged event, Emitter<AddNewLinkState> emit) {

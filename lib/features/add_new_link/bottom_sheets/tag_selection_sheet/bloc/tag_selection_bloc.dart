@@ -73,7 +73,10 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
     emit(
       state.copyWith(
         isCreating: false,
-        selectedTags: [...state.selectedTags, Tag(id: id, tagName: name)],
+        selectedTags: [
+          ...state.selectedTags,
+          Tag(id: id, tagName: name),
+        ],
       ),
     );
   }

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/common/widgets/save_button.dart';
+import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_bloc.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_event.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart';
@@ -40,7 +42,10 @@ class AddNewLinkView extends StatelessWidget {
         if (action == null) return;
 
         if (action is ShowFolderSelectionSheetAction) {
-          _showFolderSelectionSheet(context, selectedFolder: state.selectedFolder);
+          _showFolderSelectionSheet(
+            context,
+            selectedFolder: state.selectedFolder,
+          );
         } else if (action is ShowTagSelectionSheetAction) {
           _showTagSelectionSheet(context, selectedTags: state.selectedTags);
         }
@@ -89,7 +94,20 @@ class AddNewLinkView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader('Name', isRequired: true),
+                  Row(
+                    children: [
+                      _buildSectionHeader('Name', isRequired: true),
+                      const Spacer(),
+                      Text(
+                        '${state.urlName.characters.length}/${AppDefaults.linkNameMaxLength}',
+                        style: const TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xFF857B74),
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(height: 12),
                   _buildNameInputCard(context),
                   const SizedBox(height: 16),
@@ -157,6 +175,9 @@ class AddNewLinkView extends StatelessWidget {
       ),
       child: TextField(
         controller: context.read<AddNewLinkBloc>().nameController,
+        inputFormatters: [
+          LengthLimitingTextInputFormatter(AppDefaults.linkNameMaxLength),
+        ],
         keyboardType: TextInputType.text,
         textInputAction: TextInputAction.next,
         onSubmitted: (_) {
