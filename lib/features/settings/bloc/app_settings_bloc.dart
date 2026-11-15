@@ -14,16 +14,16 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   }) : _urlStoreProvider = urlStoreProvider,
        _appSettingsService = appSettingsService,
        super(_initialState(appSettingsService)) {
-    on<AppSettingsThemeChanged>(_onThemeChanged);
-    on<AppSettingsLanguageChanged>(_onLocalizationChanged);
-    on<AppSettingsTrashRetentionChanged>(_onTrashRetentionChanged);
+    on<ThemeChanged>(_onThemeChanged);
+    on<LanguageChanged>(_onLocalizationChanged);
+    on<TrashRetentionChanged>(_onTrashRetentionChanged);
     on<SaveSettingsRequested>(_onSaveSettingsRequested);
-    on<AppSettingsShowLanguageSheetRequested>(_onShowLanguageSheetRequested);
-    on<AppSettingsShowEraseDialogRequested>(_onShowEraseDialogRequested);
-    on<AppSettingsEraseAllRequested>(_onEraseAllRequested);
-    on<AppSettingsExportBookmarksRequested>(_onExportBookmarksRequested);
-    on<AppSettingsImportBookmarksRequested>(_onImportBookmarksRequested);
-    on<AppSettingsActionHandled>(_onActionHandled);
+    on<ShowLanguageSheetRequested>(_onShowLanguageSheetRequested);
+    on<ShowEraseDialogRequested>(_onShowEraseDialogRequested);
+    on<EraseAllRequested>(_onEraseAllRequested);
+    on<ExportBookmarksRequested>(_onExportBookmarksRequested);
+    on<ImportBookmarksRequested>(_onImportBookmarksRequested);
+    on<ActionHandled>(_onActionHandled);
   }
 
   final AppSettingsService _appSettingsService;
@@ -44,15 +44,12 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     );
   }
 
-  void _onThemeChanged(
-    AppSettingsThemeChanged event,
-    Emitter<AppSettingsState> emit,
-  ) {
+  void _onThemeChanged(ThemeChanged event, Emitter<AppSettingsState> emit) {
     _updateDraft(emit, state.newAppSettings.copyWith(appTheme: event.theme));
   }
 
   void _onLocalizationChanged(
-    AppSettingsLanguageChanged event,
+    LanguageChanged event,
     Emitter<AppSettingsState> emit,
   ) {
     _updateDraft(
@@ -62,7 +59,7 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   }
 
   void _onTrashRetentionChanged(
-    AppSettingsTrashRetentionChanged event,
+    TrashRetentionChanged event,
     Emitter<AppSettingsState> emit,
   ) {
     _updateDraft(
@@ -106,21 +103,21 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   }
 
   void _onShowLanguageSheetRequested(
-    AppSettingsShowLanguageSheetRequested event,
+    ShowLanguageSheetRequested event,
     Emitter<AppSettingsState> emit,
   ) {
-    emit(state.copyWith(action: const AppSettingsShowLanguageSheetAction()));
+    emit(state.copyWith(action: const ShowLanguageSheet()));
   }
 
   void _onShowEraseDialogRequested(
-    AppSettingsShowEraseDialogRequested event,
+    ShowEraseDialogRequested event,
     Emitter<AppSettingsState> emit,
   ) {
-    emit(state.copyWith(action: const AppSettingsShowEraseDialogAction()));
+    emit(state.copyWith(action: const ShowEraseDialog()));
   }
 
   Future<void> _onEraseAllRequested(
-    AppSettingsEraseAllRequested event,
+    EraseAllRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
     final urlStore = _urlStoreProvider();
@@ -130,28 +127,21 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   }
 
   Future<void> _onExportBookmarksRequested(
-    AppSettingsExportBookmarksRequested event,
+    ExportBookmarksRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
     final urls = await _urlStoreProvider().findAllUrl().first;
-    emit(
-      state.copyWith(
-        action: AppSettingsShowExportSheetAction(count: urls.length),
-      ),
-    );
+    emit(state.copyWith(action: ShowExportSheet(count: urls.length)));
   }
 
   Future<void> _onImportBookmarksRequested(
-    AppSettingsImportBookmarksRequested event,
+    ImportBookmarksRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
-    emit(state.copyWith(action: const AppSettingsShowImportSheetAction()));
+    emit(state.copyWith(action: const ShowImportSheet()));
   }
 
-  void _onActionHandled(
-    AppSettingsActionHandled event,
-    Emitter<AppSettingsState> emit,
-  ) {
+  void _onActionHandled(ActionHandled event, Emitter<AppSettingsState> emit) {
     emit(state.copyWith(clearAction: true));
   }
 }

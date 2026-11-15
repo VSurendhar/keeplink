@@ -45,23 +45,23 @@ class AppSettingsView extends StatelessWidget {
         final action = state.action;
         if (action == null) return;
 
-        if (action is AppSettingsShowLanguageSheetAction) {
+        if (action is ShowLanguageSheet) {
           _showLanguageSelectionSheet(
             context,
             selectedLanguage: state.newAppSettings.appLanguage,
           );
         } else if (action is ShowToast) {
           Utils.showToast(action.message);
-        } else if (action is AppSettingsShowEraseDialogAction) {
+        } else if (action is ShowEraseDialog) {
           _showEraseDataConfirmation(context);
-        } else if (action is AppSettingsShowExportSheetAction) {
+        } else if (action is ShowExportSheet) {
           _showExportBottomSheet(context, action.count);
-        } else if (action is AppSettingsShowImportSheetAction) {
+        } else if (action is ShowImportSheet) {
           _showImportBottomSheet(context);
         }
 
         // Clear the action immediately so the same action can be re-triggered.
-        context.read<AppSettingsBloc>().add(const AppSettingsActionHandled());
+        context.read<AppSettingsBloc>().add(const ActionHandled());
       },
       builder: (context, state) {
         return Scaffold(
@@ -122,8 +122,7 @@ class AppSettingsView extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildAppearanceCard(
                     context,
-                    isDarkMode:
-                        state.newAppSettings.appTheme == AppTheme.dark,
+                    isDarkMode: state.newAppSettings.appTheme == AppTheme.dark,
                   ),
                   const SizedBox(height: 16),
                   _buildLocalizationCard(
@@ -180,9 +179,7 @@ class AppSettingsView extends StatelessWidget {
               _buildThemeToggle(
                 isDarkMode: isDarkMode,
                 onAppThemeToggle: (appTheme) {
-                  context.read<AppSettingsBloc>().add(
-                    AppSettingsThemeChanged(appTheme),
-                  );
+                  context.read<AppSettingsBloc>().add(ThemeChanged(appTheme));
                 },
               ),
             ],
@@ -198,9 +195,7 @@ class AppSettingsView extends StatelessWidget {
   }) {
     return _buildCard(
       onTap: () {
-        context.read<AppSettingsBloc>().add(
-          const AppSettingsShowLanguageSheetRequested(),
-        );
+        context.read<AppSettingsBloc>().add(const ShowLanguageSheetRequested());
       },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -263,7 +258,7 @@ class AppSettingsView extends StatelessWidget {
             label: 'Export Bookmarks',
             onTap: () {
               context.read<AppSettingsBloc>().add(
-                const AppSettingsExportBookmarksRequested(),
+                const ExportBookmarksRequested(),
               );
             },
           ),
@@ -273,7 +268,7 @@ class AppSettingsView extends StatelessWidget {
             label: 'Import Bookmarks',
             onTap: () {
               context.read<AppSettingsBloc>().add(
-                const AppSettingsImportBookmarksRequested(),
+                const ImportBookmarksRequested(),
               );
             },
           ),
@@ -337,7 +332,7 @@ class AppSettingsView extends StatelessWidget {
                 final days = value.toInt();
                 if (days == retentionPeriod) return;
                 context.read<AppSettingsBloc>().add(
-                  AppSettingsTrashRetentionChanged(days),
+                  TrashRetentionChanged(days),
                 );
               },
             ),
@@ -553,9 +548,7 @@ class AppSettingsView extends StatelessWidget {
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          context.read<AppSettingsBloc>().add(
-            const AppSettingsShowEraseDialogRequested(),
-          );
+          context.read<AppSettingsBloc>().add(const ShowEraseDialogRequested());
         },
         borderRadius: BorderRadius.circular(24),
         child: Container(
@@ -614,9 +607,7 @@ class AppSettingsView extends StatelessWidget {
       builder: (_) => LanguageSelectionSheetWidget(
         selectedLanguage: selectedLanguage,
         onLanguageChanged: (appLanguage) {
-          context.read<AppSettingsBloc>().add(
-            AppSettingsLanguageChanged(appLanguage),
-          );
+          context.read<AppSettingsBloc>().add(LanguageChanged(appLanguage));
         },
       ),
     );
@@ -627,9 +618,7 @@ class AppSettingsView extends StatelessWidget {
       context: context,
       builder: (_) => EraseAllConfirmationWidget(
         onErase: () {
-          context.read<AppSettingsBloc>().add(
-            const AppSettingsEraseAllRequested(),
-          );
+          context.read<AppSettingsBloc>().add(const EraseAllRequested());
           Utils.showToast('Data Erased');
         },
       ),

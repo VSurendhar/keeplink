@@ -9,8 +9,8 @@ sealed class AppSettingsEvent extends Equatable {
 }
 
 /// Triggered when the user changes the app theme (Light / Dark).
-final class AppSettingsThemeChanged extends AppSettingsEvent {
-  const AppSettingsThemeChanged(this.theme);
+final class ThemeChanged extends AppSettingsEvent {
+  const ThemeChanged(this.theme);
 
   final AppTheme theme;
 
@@ -19,8 +19,8 @@ final class AppSettingsThemeChanged extends AppSettingsEvent {
 }
 
 /// Triggered when the user changes the app localization / language.
-final class AppSettingsLanguageChanged extends AppSettingsEvent {
-  const AppSettingsLanguageChanged(this.language);
+final class LanguageChanged extends AppSettingsEvent {
+  const LanguageChanged(this.language);
 
   final AppLanguage language;
 
@@ -29,8 +29,8 @@ final class AppSettingsLanguageChanged extends AppSettingsEvent {
 }
 
 /// Triggered when the user changes the auto-delete trash retention period.
-final class AppSettingsTrashRetentionChanged extends AppSettingsEvent {
-  const AppSettingsTrashRetentionChanged(this.retentionPeriod);
+final class TrashRetentionChanged extends AppSettingsEvent {
+  const TrashRetentionChanged(this.retentionPeriod);
 
   final int retentionPeriod;
 
@@ -44,31 +44,31 @@ final class SaveSettingsRequested extends AppSettingsEvent {
 }
 
 /// Triggered when the user requests to open language selection sheet.
-final class AppSettingsShowLanguageSheetRequested extends AppSettingsEvent {
-  const AppSettingsShowLanguageSheetRequested();
+final class ShowLanguageSheetRequested extends AppSettingsEvent {
+  const ShowLanguageSheetRequested();
 }
 
 /// Triggered when the user requests to open erase confirmation dialog.
-final class AppSettingsShowEraseDialogRequested extends AppSettingsEvent {
-  const AppSettingsShowEraseDialogRequested();
+final class ShowEraseDialogRequested extends AppSettingsEvent {
+  const ShowEraseDialogRequested();
 }
 
 /// Triggered when the user requests to erase all data.
-final class AppSettingsEraseAllRequested extends AppSettingsEvent {
-  const AppSettingsEraseAllRequested();
+final class EraseAllRequested extends AppSettingsEvent {
+  const EraseAllRequested();
 }
 
 /// Triggered when the user requests to export bookmarks.
-final class AppSettingsExportBookmarksRequested extends AppSettingsEvent {
-  const AppSettingsExportBookmarksRequested();
+final class ExportBookmarksRequested extends AppSettingsEvent {
+  const ExportBookmarksRequested();
 }
 
 /// Triggered when the user requests to import bookmarks.
-final class AppSettingsImportBookmarksRequested extends AppSettingsEvent {
-  const AppSettingsImportBookmarksRequested();
+final class ImportBookmarksRequested extends AppSettingsEvent {
+  const ImportBookmarksRequested();
 }
 
 /// Triggered when a one-shot UI action has been consumed/handled by the view.
-final class AppSettingsActionHandled extends AppSettingsEvent {
-  const AppSettingsActionHandled();
+final class ActionHandled extends AppSettingsEvent {
+  const ActionHandled();
 }

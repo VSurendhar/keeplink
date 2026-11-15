@@ -7,16 +7,16 @@ sealed class AppSettingsAction extends Equatable {
   List<Object?> get props => [];
 }
 
-final class AppSettingsShowLanguageSheetAction extends AppSettingsAction {
-  const AppSettingsShowLanguageSheetAction();
+final class ShowLanguageSheet extends AppSettingsAction {
+  const ShowLanguageSheet();
 }
 
-final class AppSettingsShowEraseDialogAction extends AppSettingsAction {
-  const AppSettingsShowEraseDialogAction();
+final class ShowEraseDialog extends AppSettingsAction {
+  const ShowEraseDialog();
 }
 
-final class AppSettingsShowExportSheetAction extends AppSettingsAction {
-  const AppSettingsShowExportSheetAction({required this.count});
+final class ShowExportSheet extends AppSettingsAction {
+  const ShowExportSheet({required this.count});
 
   final int count;
 
@@ -24,8 +24,8 @@ final class AppSettingsShowExportSheetAction extends AppSettingsAction {
   List<Object?> get props => [count];
 }
 
-final class AppSettingsShowImportSheetAction extends AppSettingsAction {
-  const AppSettingsShowImportSheetAction();
+final class ShowImportSheet extends AppSettingsAction {
+  const ShowImportSheet();
 }
 
 final class ShowToast extends AppSettingsAction {
