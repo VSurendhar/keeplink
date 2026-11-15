@@ -7,6 +7,7 @@ import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_state.dart';
+import 'package:mindful_links/features/logger/logger.dart';
 
 class FolderItem extends Equatable {
   const FolderItem({required this.folder, required this.linkCount});
@@ -81,14 +82,21 @@ class FolderSelectionBloc
       return;
     }
 
-    final id = await urlStore.insertFolder(Folder(folderName: name));
-    createFolderController.clear();
-    emit(
-      state.copyWith(
-        isCreating: false,
-        action: CloseWithSelectedFolder(Folder(id: id, folderName: name)),
-      ),
-    );
+    try {
+      final id = await urlStore.insertFolder(Folder(folderName: name));
+      createFolderController.clear();
+      emit(
+        state.copyWith(
+          isCreating: false,
+          action: CloseWithSelectedFolder(Folder(id: id, folderName: name)),
+        ),
+      );
+    } catch (e, st) {
+      logError('Failed to create folder', e, stackTrace: st);
+      emit(
+        state.copyWith(action: const ShowToast('Error While Creating Folder')),
+      );
+    }
   }
 
   void _onActionHandled(
@@ -134,7 +142,15 @@ class FolderSelectionBloc
           selectedFolder: matchedSelection,
         );
       },
-      onError: (_, __) => state.copyWith(isLoading: false),
+      onError: (e, st) {
+        logError(
+          'Failed to load folders',
+          e,
+          stackTrace: st,
+          isShowToastInDebug: true,
+        );
+        return state.copyWith(isLoading: false);
+      },
     );
   }
 }
