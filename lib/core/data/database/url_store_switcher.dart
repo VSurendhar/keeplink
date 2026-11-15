@@ -11,14 +11,14 @@ class UrlStoreSwitcher {
     return GetIt.instance.get<UrlStore>() is MockUrlStore;
   }
 
-  static void useMock({MockUrlStore? mockStore}) {
+  static void useMock() {
     _isMock = true;
-    _replaceStore(() => mockStore ?? MockUrlStore());
+    _replaceStore(MockUrlStore.new);
   }
 
-  static void useReal({DatabaseUrlStore? databaseStore}) {
+  static void useReal() {
     _isMock = false;
-    _replaceStore(() => databaseStore ?? DatabaseUrlStore());
+    _replaceStore(DatabaseUrlStore.new);
   }
 
   static void toggle() {
