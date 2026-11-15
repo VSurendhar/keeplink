@@ -8,7 +8,7 @@ import 'package:mindful_links/core/build_config.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/core/di/injection.dart';
 import 'package:mindful_links/features/logger/logger.dart';
-import 'package:mindful_links/utils/Utils.dart';
+import 'package:mindful_links/utils/utils.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
