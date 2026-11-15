@@ -41,7 +41,13 @@ Future<void> bootstrap() async {
   await seedDbWithDefaults();
 }
 
+/// Seeding failures are logged, not rethrown, so `runApp` still runs.
 Future<void> seedDbWithDefaults() async {
-  await GetIt.instance.get<UrlStore>().seedDefaultFolderIfNotExist();
-  await GetIt.instance.get<UrlStore>().seedDefaultTagsIfNotExist();
+  try {
+    final urlStore = GetIt.instance.get<UrlStore>();
+    await urlStore.seedDefaultFolderIfNotExist();
+    await urlStore.seedDefaultTagsIfNotExist();
+  } catch (e, st) {
+    logError('Failed to seed default folders/tags', e, stackTrace: st);
+  }
 }
