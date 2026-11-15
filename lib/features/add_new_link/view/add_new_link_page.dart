@@ -61,7 +61,7 @@ class AddNewLinkView extends StatelessWidget {
                 color: MindfulLinkColors.headerTitleColor,
                 size: 24,
               ),
-              onPressed: () => Navigator.maybePop(context),
+              onPressed: () => Navigator.pop(context),
             ),
             title: Text(
               'Add Link',
