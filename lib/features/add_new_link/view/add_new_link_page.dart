@@ -143,6 +143,11 @@ class AddNewLinkView extends StatelessWidget {
       ),
       child: TextField(
         controller: context.read<AddNewLinkBloc>().nameController,
+        keyboardType: TextInputType.text,
+        textInputAction: TextInputAction.next,
+        onSubmitted: (_) {
+          context.read<AddNewLinkBloc>().urlFocusNode.requestFocus();
+        },
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
@@ -188,6 +193,13 @@ class AddNewLinkView extends StatelessWidget {
             child: TextField(
               controller: context.read<AddNewLinkBloc>().urlController,
               focusNode: context.read<AddNewLinkBloc>().urlFocusNode,
+              keyboardType: TextInputType.url,
+              textInputAction: TextInputAction.done,
+              autocorrect: false,
+              enableSuggestions: false,
+              onSubmitted: (_) {
+                context.read<AddNewLinkBloc>().urlFocusNode.unfocus();
+              },
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w400,
