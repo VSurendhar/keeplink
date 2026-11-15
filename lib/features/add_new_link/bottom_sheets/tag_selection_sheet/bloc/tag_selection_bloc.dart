@@ -7,6 +7,7 @@ import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_state.dart';
+import 'package:mindful_links/features/logger/logger.dart';
 
 class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
   TagSelectionBloc({
@@ -75,19 +76,24 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
       return;
     }
 
-    final id = await urlStore.insertTag(Tag(tagName: name));
-    createTagController.clear();
+    try {
+      final id = await urlStore.insertTag(Tag(tagName: name));
+      createTagController.clear();
 
-    // Tags are multi-select: add the new tag to the selection, keep the sheet open.
-    emit(
-      state.copyWith(
-        isCreating: false,
-        selectedTags: [
-          ...state.selectedTags,
-          Tag(id: id, tagName: name),
-        ],
-      ),
-    );
+      // Tags are multi-select: add the new tag to the selection, keep the sheet open.
+      emit(
+        state.copyWith(
+          isCreating: false,
+          selectedTags: [
+            ...state.selectedTags,
+            Tag(id: id, tagName: name),
+          ],
+        ),
+      );
+    } catch (e, st) {
+      logError('Failed to create tag', e, stackTrace: st);
+      emit(state.copyWith(action: const ShowToast('Error While Creating Tag')));
+    }
   }
 
   void _onActionHandled(
@@ -113,7 +119,10 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
           totalTagCount: items.length,
         );
       },
-      onError: (_, __) => state.copyWith(isLoading: false),
+      onError: (e, st) {
+        logError('Failed to load tags', e, stackTrace: st ,isShowToastInDebug: true);
+        return state.copyWith(isLoading: false);
+      },
     );
   }
 
