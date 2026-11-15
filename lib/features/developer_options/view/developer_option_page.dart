@@ -1,24 +1,57 @@
 import 'package:flutter/material.dart';
-import 'package:mindful_links/core/data/database/url_store_switcher.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
+import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/view/add_new_link_page.dart';
+import 'package:mindful_links/features/developer_options/cubit/developer_options_cubit.dart';
+import 'package:mindful_links/features/developer_options/cubit/developer_options_state.dart';
+import 'package:mindful_links/features/developer_options/service/developer_options_service.dart';
 import 'package:mindful_links/features/home/constants/constants.dart';
 import 'package:mindful_links/features/settings/view/app_settings_page.dart';
 import 'package:mindful_links/features/theme/colors.dart';
 import 'package:mindful_links/features/theme/theme.dart';
 import 'package:mindful_links/utils/utils.dart';
-import 'developer_options_service.dart';
 
-class DeveloperOptionPage extends StatefulWidget {
+class DeveloperOptionPage extends StatelessWidget {
   const DeveloperOptionPage({super.key});
 
   @override
-  State<DeveloperOptionPage> createState() => _DeveloperOptionPageState();
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (_) => DeveloperOptionsCubit(
+        developerOptionsService: GetIt.instance.get<DeveloperOptionsService>(),
+        urlStoreProvider: GetIt.instance.get<UrlStore>,
+      ),
+      child: const DeveloperOptionView(),
+    );
+  }
 }
 
-class _DeveloperOptionPageState extends State<DeveloperOptionPage> {
+class DeveloperOptionView extends StatelessWidget {
+  const DeveloperOptionView({super.key});
+
   @override
   Widget build(BuildContext context) {
-    final isMock = UrlStoreSwitcher.isMock;
+    return BlocListener<DeveloperOptionsCubit, DeveloperOptionsState>(
+      listenWhen: (previous, current) =>
+          current.action != null && previous.action != current.action,
+      listener: (context, state) {
+        final action = state.action;
+        if (action == null) return;
+
+        switch (action) {
+          case ShowToast():
+            Utils.showToast(action.message);
+        }
+
+        context.read<DeveloperOptionsCubit>().actionHandled();
+      },
+      child: _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
+    final cubit = context.read<DeveloperOptionsCubit>();
 
     return Scaffold(
       backgroundColor: MindfulLinksTheme.secondaryLight,
@@ -48,7 +81,13 @@ class _DeveloperOptionPageState extends State<DeveloperOptionPage> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               _buildSectionHeader('Data Store'),
-              _buildStoreToggleCard(isMock: isMock),
+              BlocSelector<DeveloperOptionsCubit, DeveloperOptionsState, bool>(
+                selector: (state) => state.isMockStore,
+                builder: (context, isMock) => _buildStoreToggleCard(
+                  isMock: isMock,
+                  onChanged: cubit.setMockStore,
+                ),
+              ),
               const SizedBox(height: 24),
               _buildSectionHeader('Pages'),
               _buildButton(
@@ -76,12 +115,12 @@ class _DeveloperOptionPageState extends State<DeveloperOptionPage> {
               _buildSectionHeader('Setup & Seeding'),
               _buildButton(
                 title: 'Initialize Database Setup',
-                onPressed: () => DeveloperOptionsService.initialDatabaseSetup(),
+                onPressed: cubit.initialDatabaseSetup,
               ),
               const SizedBox(height: 12),
               _buildButton(
                 title: 'Initialize App Settings',
-                onPressed: () => DeveloperOptionsService.initialAppSettings(),
+                onPressed: cubit.initialAppSettings,
               ),
               const SizedBox(height: 16),
             ],
@@ -108,7 +147,10 @@ class _DeveloperOptionPageState extends State<DeveloperOptionPage> {
     );
   }
 
-  Widget _buildStoreToggleCard({required bool isMock}) {
+  Widget _buildStoreToggleCard({
+    required bool isMock,
+    required ValueChanged<bool> onChanged,
+  }) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -155,20 +197,7 @@ class _DeveloperOptionPageState extends State<DeveloperOptionPage> {
           Switch(
             value: isMock,
             activeThumbColor: MindfulLinksTheme.primaryDark,
-            onChanged: (bool value) {
-              setState(() {
-                if (value) {
-                  UrlStoreSwitcher.useMock();
-                } else {
-                  UrlStoreSwitcher.useReal();
-                }
-              });
-              Utils.showToast(
-                value
-                    ? 'Switched to Mock URL Store'
-                    : 'Switched to Database URL Store',
-              );
-            },
+            onChanged: onChanged,
           ),
         ],
       ),

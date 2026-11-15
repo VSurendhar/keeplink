@@ -1,47 +1,28 @@
 import 'package:flutter/foundation.dart';
-import 'package:get_it/get_it.dart';
+import 'package:injectable/injectable.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/core/app_defaults.dart';
-import 'package:mindful_links/features/logger/logger.dart';
 import 'package:mindful_links/features/settings/service/app_settings_service.dart';
-import 'package:mindful_links/utils/utils.dart';
 
+/// Developer-only data operations.
+@lazySingleton
 class DeveloperOptionsService {
-  /// Seeds initial database records and prints database state.
-  static Future<void> initialDatabaseSetup({UrlStore? store}) async {
-    final urlStore = store ?? GetIt.instance.get<UrlStore>();
+  DeveloperOptionsService(this._appSettingsService);
 
-    try {
-      await seedDatabase(urlStore);
-      Utils.showToast('Database seeded successfully');
-    } catch (e, st) {
-      logError(
-        'Something wrong happened while creating Seed database',
-        e,
-        stackTrace: st,
-      );
-      Utils.showToast(
-        'Something wrong happened while creating Seed database: $e',
-      );
-    } finally {
-      await printDatabase(urlStore);
-    }
-  }
+  final AppSettingsService _appSettingsService;
 
   /// Sets default app theme, language, and retention period.
-  static Future<void> initialAppSettings({AppSettingsService? service}) async {
-    final settingsService = service ?? GetIt.instance.get<AppSettingsService>();
-    await settingsService.saveAppTheme(AppDefaults.appTheme);
-    await settingsService.saveLanguage(AppDefaults.appLanguage);
-    await settingsService.saveTrashRetention(AppDefaults.trashRetention);
-    Utils.showToast('App settings initialized');
+  Future<void> initialAppSettings() async {
+    await _appSettingsService.saveAppTheme(AppDefaults.appTheme);
+    await _appSettingsService.saveLanguage(AppDefaults.appLanguage);
+    await _appSettingsService.saveTrashRetention(AppDefaults.trashRetention);
   }
 
   /// Populates the URL store with initial development records.
-  static Future<void> seedDatabase(UrlStore urlStore) async {
+  Future<void> seedDatabase(UrlStore urlStore) async {
     final now = DateTime.now().millisecondsSinceEpoch;
 
     final flutterFolder = Folder(folderName: 'Flutter Resources');
@@ -123,7 +104,7 @@ class DeveloperOptionsService {
   }
 
   /// Prints current database contents to the debug console.
-  static Future<void> printDatabase(UrlStore urlStore) async {
+  Future<void> printDatabase(UrlStore urlStore) async {
     final folders = await urlStore.findAllFolders().first;
     final urls = await urlStore.findAllUrl().first;
     final tags = await urlStore.findAllTags().first;
