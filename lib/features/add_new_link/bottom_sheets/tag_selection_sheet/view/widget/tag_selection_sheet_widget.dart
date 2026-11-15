@@ -34,45 +34,55 @@ class TagSelectionSheetWidget extends StatelessWidget {
         return GestureDetector(
           onTap: () => FocusScope.of(context).unfocus(),
           behavior: HitTestBehavior.translucent,
-          child: SafeArea(
-            top: false,
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildDragHandle(),
-                  const SizedBox(height: 16),
-                  _buildHeader(context, selectedTags),
-                  const SizedBox(height: 16),
-                  _buildCreateNewTagRow(context, state),
-                  const SizedBox(height: 12),
-                  Flexible(
-                    child: state.isLoading
-                        ? const Padding(
-                            padding: EdgeInsets.symmetric(
-                              vertical: 16,
-                              horizontal: 16,
+          // Lift the content above the keyboard; isScrollControlled sheets
+          // don't do this on their own.
+          child: Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: SafeArea(
+              top: false,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  vertical: 20,
+                  horizontal: 16,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildDragHandle(),
+                    const SizedBox(height: 16),
+                    _buildHeader(context, selectedTags),
+                    const SizedBox(height: 16),
+                    _buildCreateNewTagRow(context, state),
+                    const SizedBox(height: 12),
+                    Flexible(
+                      child: state.isLoading
+                          ? const Padding(
+                              padding: EdgeInsets.symmetric(
+                                vertical: 16,
+                                horizontal: 16,
+                              ),
+                              child: Center(
+                                heightFactor: 1.0,
+                                child: CircularProgressIndicator(),
+                              ),
+                            )
+                          : Column(
+                              mainAxisSize: MainAxisSize.min,
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                _buildLibraryHeader(state.totalTagCount),
+                                const SizedBox(height: 8),
+                                _buildTagGrid(context, state),
+                                const SizedBox(height: 16),
+                                _buildApplyButton(context, selectedTags),
+                              ],
                             ),
-                            child: Center(
-                              heightFactor: 1.0,
-                              child: CircularProgressIndicator(),
-                            ),
-                          )
-                        : Column(
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildLibraryHeader(state.totalTagCount),
-                              const SizedBox(height: 8),
-                              _buildTagGrid(context, state),
-                              const SizedBox(height: 16),
-                              _buildApplyButton(context, selectedTags),
-                            ],
-                          ),
-                  ),
-                ],
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
