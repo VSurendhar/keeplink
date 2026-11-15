@@ -21,6 +21,8 @@ class FolderSelectionSheetWidget extends StatelessWidget {
 
         if (action is ShowToast) {
           Utils.showToast(action.message);
+        } else if (action is CloseWithSelectedFolder) {
+          Navigator.pop(context, action.folder);
         }
 
         context.read<FolderSelectionBloc>().add(const OnActionHandled());

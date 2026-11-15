@@ -66,11 +66,16 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
       return;
     }
 
-    final newTag = Tag(tagName: name);
-    await urlStore.insertTag(newTag);
+    final id = await urlStore.insertTag(Tag(tagName: name));
     createTagController.clear();
 
-    emit(state.copyWith(isCreating: false));
+    // Tags are multi-select: add the new tag to the selection, keep the sheet open.
+    emit(
+      state.copyWith(
+        isCreating: false,
+        selectedTags: [...state.selectedTags, Tag(id: id, tagName: name)],
+      ),
+    );
   }
 
   void _onActionHandled(

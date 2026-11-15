@@ -72,10 +72,14 @@ class FolderSelectionBloc
       return;
     }
 
-    final newFolder = Folder(folderName: name);
-    await urlStore.insertFolder(newFolder);
+    final id = await urlStore.insertFolder(Folder(folderName: name));
     createFolderController.clear();
-    emit(state.copyWith(isCreating: false));
+    emit(
+      state.copyWith(
+        isCreating: false,
+        action: CloseWithSelectedFolder(Folder(id: id, folderName: name)),
+      ),
+    );
   }
 
   void _onActionHandled(
