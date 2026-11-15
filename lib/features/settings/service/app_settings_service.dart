@@ -21,15 +21,6 @@ class AppSettingsService {
     await _box.put(SettingsKeys.trashRetention, period);
   }
 
-  Future<void> saveOnboardingCompleted(bool value) async {
-    await _box.put(SettingsKeys.onboardingCompleted, value);
-  }
-
-  bool get onboardingCompleted => _box.get(
-    SettingsKeys.onboardingCompleted,
-    defaultValue: AppDefaults.onboardingCompleted,
-  );
-
   AppLanguage get appLanguage =>
       _box.get(SettingsKeys.appLanguage, defaultValue: AppDefaults.appLanguage);
 

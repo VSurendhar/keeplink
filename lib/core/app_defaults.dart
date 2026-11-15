@@ -9,7 +9,6 @@ class AppDefaults {
   static final List<Tag> defaultTags = List.unmodifiable([
     Tag(tagName: 'Tag1'),
   ]);
-  static const bool onboardingCompleted = false;
   static const AppLanguage appLanguage = AppLanguage.englishUs;
   static const int trashRetention = 10;
   static const AppTheme appTheme = AppTheme.light;
