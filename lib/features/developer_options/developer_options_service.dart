@@ -4,7 +4,7 @@ import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
+import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/features/logger/logger.dart';
 import 'package:mindful_links/features/settings/service/app_settings_service.dart';
 import 'package:mindful_links/utils/utils.dart';
@@ -34,9 +34,9 @@ class DeveloperOptionsService {
   /// Sets default app theme, language, and retention period.
   static Future<void> initialAppSettings({AppSettingsService? service}) async {
     final settingsService = service ?? GetIt.instance.get<AppSettingsService>();
-    await settingsService.saveAppTheme(AppTheme.light);
-    await settingsService.saveLanguage(AppLanguage.englishUs);
-    await settingsService.saveTrashRetention(30);
+    await settingsService.saveAppTheme(AppDefaults.appTheme);
+    await settingsService.saveLanguage(AppDefaults.appLanguage);
+    await settingsService.saveTrashRetention(AppDefaults.trashRetention);
     Utils.showToast('App settings initialized');
   }
 

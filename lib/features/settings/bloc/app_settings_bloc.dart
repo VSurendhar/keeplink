@@ -75,6 +75,7 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   ) async {
     await _urlStore.clearAll();
     await _urlStore.seedDefaultFolderIfNotExist();
+    await _urlStore.seedDefaultTagsIfNotExist();
   }
 
   Future<void> _onExportBookmarksRequested(
