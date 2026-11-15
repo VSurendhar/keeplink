@@ -18,6 +18,15 @@ Future<void> configureDependencies() async {
   if (_isConfigured) return;
   _isConfigured = true;
   _getIt.init();
-  await HiveService.init();
   initLogger();
+  try {
+    await HiveService.init();
+  } catch (e, st) {
+    logError(
+      'Failed to initialize Hive',
+      e,
+      stackTrace: st,
+      isShowToastInDebug: true,
+    );
+  }
 }
