@@ -66,6 +66,15 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
       return;
     }
 
+    final lowerName = name.toLowerCase();
+    final alreadyExists = state.tags.any(
+      (item) => item.tag.tagName.trim().toLowerCase() == lowerName,
+    );
+    if (alreadyExists) {
+      emit(state.copyWith(action: ShowToast('Tag already exists')));
+      return;
+    }
+
     final id = await urlStore.insertTag(Tag(tagName: name));
     createTagController.clear();
 
