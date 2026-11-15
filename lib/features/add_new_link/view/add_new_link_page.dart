@@ -89,8 +89,12 @@ class AddNewLinkView extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  _buildSectionHeader('Name', isRequired: true),
+                  const SizedBox(height: 12),
                   _buildNameInputCard(context),
                   const SizedBox(height: 16),
+                  _buildSectionHeader('URL', isRequired: true),
+                  const SizedBox(height: 12),
                   _buildUrlInputCard(context),
                   const SizedBox(height: 16),
                   LinkPreviewCardWidget(
@@ -115,9 +119,19 @@ class AddNewLinkView extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(String title) {
-    return Text(
-      title,
+  /// Set [isRequired] to append a red asterisk marking a mandatory field.
+  Widget _buildSectionHeader(String title, {bool isRequired = false}) {
+    return Text.rich(
+      TextSpan(
+        text: title,
+        children: [
+          if (isRequired)
+            TextSpan(
+              text: ' *',
+              style: TextStyle(color: MindfulLinkColors.requiredMarkColor),
+            ),
+        ],
+      ),
       style: const TextStyle(
         fontSize: 14,
         fontWeight: FontWeight.w600,
@@ -270,7 +284,7 @@ class AddNewLinkView extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildSectionHeader('Save To'),
+        _buildSectionHeader('Save To', isRequired: true),
         const SizedBox(height: 12),
         Material(
           color: Colors.white,
