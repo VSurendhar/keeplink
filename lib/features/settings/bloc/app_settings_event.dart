@@ -38,6 +38,11 @@ final class AppSettingsTrashRetentionChanged extends AppSettingsEvent {
   List<Object?> get props => [retentionPeriod];
 }
 
+/// Triggered when the user taps Save to persist the draft settings.
+final class SaveSettingsRequested extends AppSettingsEvent {
+  const SaveSettingsRequested();
+}
+
 /// Triggered when the user requests to open language selection sheet.
 final class AppSettingsShowLanguageSheetRequested extends AppSettingsEvent {
   const AppSettingsShowLanguageSheetRequested();

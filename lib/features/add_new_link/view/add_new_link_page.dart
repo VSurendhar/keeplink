@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
+import 'package:mindful_links/common/widgets/save_button.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_bloc.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_event.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart';
@@ -73,9 +74,11 @@ class AddNewLinkView extends StatelessWidget {
             actions: [
               Padding(
                 padding: const EdgeInsets.only(right: 16),
-                child: _buildTopSaveButton(
-                  context,
+                child: SaveButton(
                   isEnabled: state.isSaveEnabled,
+                  onPressed: () {
+                    context.read<AddNewLinkBloc>().add(const OnSaveClicked());
+                  },
                 ),
               ),
             ],
@@ -339,40 +342,6 @@ class AddNewLinkView extends StatelessWidget {
           },
         ),
       ],
-    );
-  }
-
-  Widget _buildTopSaveButton(BuildContext context, {required bool isEnabled}) {
-    const buttonTextColor = Color(0xFF7A4326);
-    const disabledTextColor = Color(0xFF9E8E85);
-
-    return SizedBox(
-      child: FilledButton(
-        style: FilledButton.styleFrom(
-          backgroundColor: isEnabled
-              ? MindfulLinksTheme.primary
-              : const Color(0xFFE0D5CE),
-          foregroundColor: isEnabled ? buttonTextColor : disabledTextColor,
-          elevation: 0,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        ),
-        onPressed: isEnabled
-            ? () {
-                context.read<AddNewLinkBloc>().add(const OnSaveClicked());
-              }
-            : null,
-        child: Text(
-          'Save',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: isEnabled ? buttonTextColor : disabledTextColor,
-          ),
-        ),
-      ),
     );
   }
 

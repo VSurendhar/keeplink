@@ -4,6 +4,7 @@ import 'package:get_it/get_it.dart';
 import 'package:material_symbols_icons/symbols.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/core/data/hive/models/app_settings.dart';
+import 'package:mindful_links/common/widgets/save_button.dart';
 import 'package:mindful_links/features/home/constants/constants.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_bloc.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_event.dart';
@@ -13,7 +14,6 @@ import 'package:mindful_links/features/settings/view/widgets/erase_all_confirmat
 import 'package:mindful_links/features/settings/view/widgets/export_bottom_sheet_widget.dart';
 import 'package:mindful_links/features/settings/view/widgets/import_bottom_sheet_widget.dart';
 import 'package:mindful_links/features/settings/view/widgets/language_selection_sheet_widget.dart';
-import 'package:mindful_links/features/settings/view/widgets/trash_retention_card_widget.dart';
 import 'package:mindful_links/features/theme/colors.dart';
 import 'package:mindful_links/features/theme/theme.dart';
 import 'package:mindful_links/utils/utils.dart';
@@ -48,8 +48,10 @@ class AppSettingsView extends StatelessWidget {
         if (action is AppSettingsShowLanguageSheetAction) {
           _showLanguageSelectionSheet(
             context,
-            selectedLanguage: state.appLanguage,
+            selectedLanguage: state.newAppSettings.appLanguage,
           );
+        } else if (action is ShowToast) {
+          Utils.showToast(action.message);
         } else if (action is AppSettingsShowEraseDialogAction) {
           _showEraseDataConfirmation(context);
         } else if (action is AppSettingsShowExportSheetAction) {
@@ -78,13 +80,17 @@ class AppSettingsView extends StatelessWidget {
               ),
             ),
             actions: [
-              IconButton(
-                icon: Icon(
-                  Symbols.delete,
-                  color: MindfulLinkColors.appBarTitleColor,
-                  size: 24,
+              Padding(
+                padding: const EdgeInsets.only(right: 16),
+                child: SaveButton(
+                  isEnabled: state.hasUnsavedChanges,
+                  isLoading: state.isSaving,
+                  onPressed: () {
+                    context.read<AppSettingsBloc>().add(
+                      const SaveSettingsRequested(),
+                    );
+                  },
                 ),
-                onPressed: () {},
               ),
             ],
           ),
@@ -116,18 +122,20 @@ class AppSettingsView extends StatelessWidget {
                   const SizedBox(height: 32),
                   _buildAppearanceCard(
                     context,
-                    isDarkMode: state.appTheme == AppTheme.dark,
+                    isDarkMode:
+                        state.newAppSettings.appTheme == AppTheme.dark,
                   ),
                   const SizedBox(height: 16),
                   _buildLocalizationCard(
                     context,
-                    languageValue: state.appLanguage.value,
+                    languageValue: state.newAppSettings.appLanguage.value,
                   ),
                   const SizedBox(height: 16),
                   _buildDataBackupCard(context),
                   const SizedBox(height: 16),
-                  TrashRetentionCardWidget(
-                    savedRetentionPeriod: state.retentionPeriod,
+                  _buildTrashRetentionCard(
+                    context,
+                    retentionPeriod: state.newAppSettings.retentionPeriod,
                   ),
                   const SizedBox(height: 16),
                   _buildEraseDataCard(context),
@@ -268,6 +276,93 @@ class AppSettingsView extends StatelessWidget {
                 const AppSettingsImportBookmarksRequested(),
               );
             },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTrashRetentionCard(
+    BuildContext context, {
+    required int retentionPeriod,
+  }) {
+    const sliderThumbColor = Color(0xFF7A3E26);
+    const rangeLabelTextColor = Color(0xFF85736C);
+
+    return _buildCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _buildSectionHeader('Trash Retention'),
+          const SizedBox(height: 12),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'Auto-delete after',
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w400,
+                  color: Color(0xFF52443D),
+                ),
+              ),
+              Text(
+                '$retentionPeriod Days',
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                  color: Color(0xFF895032),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          SliderTheme(
+            data: SliderTheme.of(context).copyWith(
+              trackHeight: 4,
+              activeTrackColor: const Color(0xFFC7B8AD),
+              inactiveTrackColor: const Color(0xFFEFE6DF),
+              thumbColor: sliderThumbColor,
+              overlayColor: sliderThumbColor.withValues(alpha: 0.1),
+              thumbShape: const RoundSliderThumbShape(enabledThumbRadius: 6),
+              overlayShape: const RoundSliderOverlayShape(overlayRadius: 12),
+              trackShape: const RoundedRectSliderTrackShape(),
+              padding: EdgeInsets.zero,
+            ),
+            child: Slider(
+              value: retentionPeriod.toDouble(),
+              min: 1,
+              max: 90,
+              onChanged: (value) {
+                final days = value.toInt();
+                if (days == retentionPeriod) return;
+                context.read<AppSettingsBloc>().add(
+                  AppSettingsTrashRetentionChanged(days),
+                );
+              },
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '1 day',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: rangeLabelTextColor,
+                ),
+              ),
+              Text(
+                '90 days',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w400,
+                  color: rangeLabelTextColor,
+                ),
+              ),
+            ],
           ),
         ],
       ),

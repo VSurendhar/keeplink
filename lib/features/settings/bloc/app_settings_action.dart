@@ -27,3 +27,12 @@ final class AppSettingsShowExportSheetAction extends AppSettingsAction {
 final class AppSettingsShowImportSheetAction extends AppSettingsAction {
   const AppSettingsShowImportSheetAction();
 }
+
+final class ShowToast extends AppSettingsAction {
+  const ShowToast(this.message);
+
+  final String message;
+
+  @override
+  List<Object?> get props => [message];
+}

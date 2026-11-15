@@ -1,42 +1,53 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
 import 'package:mindful_links/features/settings/bloc/app_settings_action.dart';
+import 'package:mindful_links/features/settings/bloc/app_settings_bloc.dart';
 
 export 'package:mindful_links/features/settings/bloc/app_settings_action.dart';
 
 final class AppSettingsState extends Equatable {
   const AppSettingsState({
-    required this.appTheme,
-    required this.appLanguage,
-    required this.retentionPeriod,
+    required this.currentAppSettings,
+    required this.newAppSettings,
+    this.isSaving = false,
     this.action,
   });
 
-  final AppTheme appTheme;
-  final AppLanguage appLanguage;
-  final int retentionPeriod;
+  /// Settings as currently persisted in Hive.
+  final AppSettings currentAppSettings;
+
+  /// Draft settings edited by the user and not yet saved.
+  final AppSettings newAppSettings;
+
+  final bool isSaving;
   final AppSettingsAction? action;
 
+  bool get hasUnsavedChanges => newAppSettings != currentAppSettings;
+
   AppSettingsState copyWith({
-    AppTheme? appTheme,
-    AppLanguage? appLanguage,
-    int? retentionPeriod,
+    AppSettings? currentAppSettings,
+    AppSettings? newAppSettings,
+    bool? isSaving,
     AppSettingsAction? action,
     bool clearAction = false,
   }) {
     return AppSettingsState(
-      appTheme: appTheme ?? this.appTheme,
-      appLanguage: appLanguage ?? this.appLanguage,
-      retentionPeriod: retentionPeriod ?? this.retentionPeriod,
+      currentAppSettings: currentAppSettings ?? this.currentAppSettings,
+      newAppSettings: newAppSettings ?? this.newAppSettings,
+      isSaving: isSaving ?? this.isSaving,
       action: clearAction ? null : (action ?? this.action),
     );
   }
 
   @override
-  List<Object?> get props => [appTheme, appLanguage, retentionPeriod, action];
+  List<Object?> get props => [
+    currentAppSettings,
+    newAppSettings,
+    isSaving,
+    action,
+  ];
 
   @override
   String toString() {
-    return 'AppSettingsState{appTheme: $appTheme, appLanguage: $appLanguage, retentionPeriod: $retentionPeriod, action: $action}';
+    return 'AppSettingsState{currentAppSettings: $currentAppSettings, newAppSettings: $newAppSettings, isSaving: $isSaving, action: $action}';
   }
 }
