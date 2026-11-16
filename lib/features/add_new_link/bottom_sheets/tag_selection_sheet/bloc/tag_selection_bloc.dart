@@ -120,7 +120,12 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
         );
       },
       onError: (e, st) {
-        logError('Failed to load tags', e, stackTrace: st ,isShowToastInDebug: true);
+        logError(
+          'Failed to load tags',
+          e,
+          stackTrace: st,
+          isShowToastInDebug: true,
+        );
         return state.copyWith(isLoading: false);
       },
     );

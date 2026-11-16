@@ -257,9 +257,7 @@ class AppSettingsView extends StatelessWidget {
             icon: Icons.file_upload_outlined,
             label: 'Export URLs',
             onTap: () {
-              context.read<AppSettingsBloc>().add(
-                const ExportUrlsRequested(),
-              );
+              context.read<AppSettingsBloc>().add(const ExportUrlsRequested());
             },
           ),
           const SizedBox(height: 12),
@@ -267,9 +265,7 @@ class AppSettingsView extends StatelessWidget {
             icon: Icons.file_download_outlined,
             label: 'Import URLs',
             onTap: () {
-              context.read<AppSettingsBloc>().add(
-                const ImportUrlsRequested(),
-              );
+              context.read<AppSettingsBloc>().add(const ImportUrlsRequested());
             },
           ),
         ],

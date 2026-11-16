@@ -19,8 +19,10 @@ class FolderItem extends Equatable {
 
 class FolderSelectionBloc
     extends Bloc<FolderSelectionEvent, FolderSelectionState> {
-  FolderSelectionBloc({required this.urlStore, required Folder initialSelectedFolder})
-    : super(FolderSelectionState.initial(initialSelectedFolder)) {
+  FolderSelectionBloc({
+    required this.urlStore,
+    required Folder initialSelectedFolder,
+  }) : super(FolderSelectionState.initial(initialSelectedFolder)) {
     createFolderController = TextEditingController();
     createFolderFocusNode = FocusNode();
 
