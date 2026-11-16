@@ -135,6 +135,10 @@ class MockUrlStore implements UrlStore {
   }
 
   @override
+  Future<Map<int, int>> findUrlCountPerFolder() async =>
+      UrlStore.countUrlsPerFolder(_urls.map((url) => url.folderId).nonNulls);
+
+  @override
   Future<Folder?> findFolderById(int id) async {
     for (final folder in _folders) {
       if (folder.id == id) return folder;

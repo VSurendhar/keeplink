@@ -288,11 +288,10 @@ class FolderSelectionSheetWidget extends StatelessWidget {
   Widget _buildFolderItem({
     required BuildContext context,
     required FolderItem item,
-    required Folder? selectedFolder,
+    required Folder selectedFolder,
   }) {
     final folder = item.folder;
     final isSelected =
-        selectedFolder != null &&
         selectedFolder.folderName == folder.folderName &&
         selectedFolder.id == folder.id;
 

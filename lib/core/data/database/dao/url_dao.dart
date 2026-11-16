@@ -25,6 +25,10 @@ abstract class UrlDao {
   @Query('SELECT * FROM folder')
   Stream<List<Folder>> findAllFolders();
 
+  /// One `folder_id` per URL that has a folder, for counting URLs per folder.
+  @Query('SELECT folder_id FROM url WHERE folder_id IS NOT NULL')
+  Future<List<int>> findAllUrlFolderIds();
+
   @insert
   Future<int> insertUrl(Url url);
 

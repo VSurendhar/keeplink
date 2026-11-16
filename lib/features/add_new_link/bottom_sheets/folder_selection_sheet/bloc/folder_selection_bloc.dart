@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -21,7 +19,7 @@ class FolderItem extends Equatable {
 
 class FolderSelectionBloc
     extends Bloc<FolderSelectionEvent, FolderSelectionState> {
-  FolderSelectionBloc({required this.urlStore, Folder? initialSelectedFolder})
+  FolderSelectionBloc({required this.urlStore, required Folder initialSelectedFolder})
     : super(FolderSelectionState.initial(initialSelectedFolder)) {
     createFolderController = TextEditingController();
     createFolderFocusNode = FocusNode();
@@ -106,40 +104,54 @@ class FolderSelectionBloc
     emit(state.copyWith(clearAction: true));
   }
 
+  /// Returns the loaded folder that matches the current selection.
+  ///
+  /// The selection passed in can be a folder without an `id`, such as the
+  /// default `Folder(folderName: 'Defaults')` from `AppDefaults`. The sheet
+  /// highlights a folder only when both `id` and name match, so the selection
+  /// is swapped for the loaded database copy (matched by `id` or name). That
+  /// way it is highlighted, and the folder returned to the Add Link page has
+  /// its `id`. If no loaded folder matches, the selection is kept as it is.
+  Folder _matchSelectedFolder(List<FolderItem> items) {
+    final currentSelection = state.selectedFolder;
+    final match = items.where(
+      (item) =>
+          item.folder.id == currentSelection.id ||
+          item.folder.folderName == currentSelection.folderName,
+    );
+    return match.firstOrNull?.folder ?? currentSelection;
+  }
+
   Future<void> _onInit(
     OnInitEvent event,
     Emitter<FolderSelectionState> emit,
   ) async {
     emit(state.copyWith(isLoading: true));
+
+    var urlCountByFolderId = const <int, int>{};
+    try {
+      urlCountByFolderId = await urlStore.findUrlCountPerFolder();
+    } catch (e, st) {
+      logError(
+        'Failed to load folder link counts',
+        e,
+        stackTrace: st,
+        isShowToastInDebug: true,
+      );
+    }
+
     await emit.forEach<List<Folder>>(
       urlStore.findAllFolders(),
       onData: (folders) {
-        final random = Random();
-        final items = folders
-            .map(
-              (f) => FolderItem(folder: f, linkCount: 1 + random.nextInt(10)),
-            )
-            .toList();
-
-        final currentSelection = state.selectedFolder;
-        Folder? matchedSelection = currentSelection;
-        if (currentSelection != null) {
-          final found = items.where(
-            (i) =>
-                i.folder.id == currentSelection.id ||
-                i.folder.folderName == currentSelection.folderName,
-          );
-          if (found.isNotEmpty) {
-            matchedSelection = found.first.folder;
-          }
-        } else if (items.isNotEmpty) {
-          matchedSelection = items.first.folder;
-        }
-
+        final items = folders.map((folder) {
+          final id = folder.id;
+          final linkCount = id == null ? 0 : (urlCountByFolderId[id] ?? 0);
+          return FolderItem(folder: folder, linkCount: linkCount);
+        }).toList();
         return state.copyWith(
           isLoading: false,
           folders: items,
-          selectedFolder: matchedSelection,
+          selectedFolder: _matchSelectedFolder(items),
         );
       },
       onError: (e, st) {

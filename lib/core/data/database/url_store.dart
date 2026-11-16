@@ -35,6 +35,11 @@ abstract class UrlStore {
   Future<Tag?> findTagByName(String tagName);
   Future<UrlTag?> findUrlTag(int urlId, int tagId);
 
+  /// Number of URLs in each folder, keyed by folder id.
+  ///
+  /// Folders with no URLs are not in the map; read them as `counts[id] ?? 0`.
+  Future<Map<int, int>> findUrlCountPerFolder();
+
   Future<void> clearAll();
   Future<int> createUrl({
     required Url url,
@@ -45,6 +50,15 @@ abstract class UrlStore {
 
   Future<void> seedDefaultFolderIfNotExist();
   Future<void> seedDefaultTagsIfNotExist();
+
+  /// Counts how many times each folder id appears in [folderIds].
+  static Map<int, int> countUrlsPerFolder(Iterable<int> folderIds) {
+    final counts = <int, int>{};
+    for (final folderId in folderIds) {
+      counts[folderId] = (counts[folderId] ?? 0) + 1;
+    }
+    return counts;
+  }
 }
 
 typedef UrlRecord = (Url url, Folder folder, List<Tag> tags);

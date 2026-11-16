@@ -9,18 +9,18 @@ final class FolderSelectionState extends Equatable {
   const FolderSelectionState({
     this.isLoading = true,
     this.folders = const [],
-    this.selectedFolder,
+    required this.selectedFolder,
     this.isCreating = false,
     this.action,
   });
 
   final bool isLoading;
   final List<FolderItem> folders;
-  final Folder? selectedFolder;
+  final Folder selectedFolder;
   final bool isCreating;
   final FolderSelectionAction? action;
 
-  factory FolderSelectionState.initial(Folder? initialSelectedFolder) {
+  factory FolderSelectionState.initial(Folder initialSelectedFolder) {
     return FolderSelectionState(
       isLoading: true,
       folders: const [],
