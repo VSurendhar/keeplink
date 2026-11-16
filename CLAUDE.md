@@ -2,7 +2,7 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-Mindful Links is a Flutter link-management / bookmarking app (Android + iOS). Project coding rules live in `.claude/rules/` and are loaded automatically — follow them (BLoC file layout, no `!`, `toString()` on models, dimension values, `@lazySingleton`, never edit generated files, run `dart analyze` after changes).
+Mindful Links is a Flutter link-management app for saving, reading, updating and deleting URLs (Android + iOS). Project coding rules live in `.claude/rules/` and are loaded automatically — follow them (BLoC file layout, no `!`, `toString()` on models, dimension values, `@lazySingleton`, never edit generated files, run `dart analyze` after changes).
 
 ## Commands
 

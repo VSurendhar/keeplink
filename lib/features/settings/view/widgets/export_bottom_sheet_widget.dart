@@ -31,7 +31,7 @@ class ExportBottomSheetWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Export Bookmarks',
+              'Export URLs',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -40,7 +40,7 @@ class ExportBottomSheetWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             Text(
-              'You currently have $count bookmark(s) ready to export.',
+              'You currently have $count URL(s) ready to export.',
               style: const TextStyle(fontSize: 14, color: Color(0xFF52443D)),
             ),
             const SizedBox(height: 16),

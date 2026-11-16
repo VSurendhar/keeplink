@@ -26,7 +26,7 @@ class ImportBottomSheetWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Import Bookmarks',
+              'Import URLs',
               style: TextStyle(
                 fontSize: 16,
                 fontWeight: FontWeight.w500,
@@ -35,7 +35,7 @@ class ImportBottomSheetWidget extends StatelessWidget {
             ),
             const SizedBox(height: 12),
             const Text(
-              'Are you sure you want to import bookmarks?',
+              'Are you sure you want to import URLs?',
               style: TextStyle(fontSize: 14, color: Color(0xFF52443D)),
             ),
             const SizedBox(height: 16),

@@ -21,10 +21,10 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     on<ShowLanguageSheetRequested>(_onShowLanguageSheetRequested);
     on<ShowEraseDialogRequested>(_onShowEraseDialogRequested);
     on<EraseAllRequested>(_onEraseAllRequested);
-    on<ExportBookmarksRequested>(_onExportBookmarksRequested);
-    on<ImportBookmarksRequested>(_onImportBookmarksRequested);
-    on<ExportBookmarksConfirmed>(_onExportBookmarksConfirmed);
-    on<ImportBookmarksConfirmed>(_onImportBookmarksConfirmed);
+    on<ExportUrlsRequested>(_onExportUrlsRequested);
+    on<ImportUrlsRequested>(_onImportUrlsRequested);
+    on<ExportUrlsConfirmed>(_onExportUrlsConfirmed);
+    on<ImportUrlsConfirmed>(_onImportUrlsConfirmed);
     on<ActionHandled>(_onActionHandled);
   }
 
@@ -134,37 +134,37 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     }
   }
 
-  Future<void> _onExportBookmarksRequested(
-    ExportBookmarksRequested event,
+  Future<void> _onExportUrlsRequested(
+    ExportUrlsRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
     try {
       final urls = await _urlStoreProvider().findAllUrl().first;
       emit(state.copyWith(action: ShowExportSheet(count: urls.length)));
     } catch (e, st) {
-      logError('Failed to load bookmarks for export', e, stackTrace: st);
+      logError('Failed to load URLs for export', e, stackTrace: st);
       emit(
-        state.copyWith(action: const ShowToast('Error While Exporting BookMarks')),
+        state.copyWith(action: const ShowToast('Error While Exporting URLs')),
       );
     }
   }
 
-  Future<void> _onImportBookmarksRequested(
-    ImportBookmarksRequested event,
+  Future<void> _onImportUrlsRequested(
+    ImportUrlsRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
     emit(state.copyWith(action: const ShowImportSheet()));
   }
 
-  void _onExportBookmarksConfirmed(
-    ExportBookmarksConfirmed event,
+  void _onExportUrlsConfirmed(
+    ExportUrlsConfirmed event,
     Emitter<AppSettingsState> emit,
   ) {
     emit(state.copyWith(action: const ShowToast('Exported Links')));
   }
 
-  void _onImportBookmarksConfirmed(
-    ImportBookmarksConfirmed event,
+  void _onImportUrlsConfirmed(
+    ImportUrlsConfirmed event,
     Emitter<AppSettingsState> emit,
   ) {
     emit(state.copyWith(action: const ShowToast('Imported Link')));

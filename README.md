@@ -1,6 +1,6 @@
 # Mindful Links
 
-A mindful link management and bookmarking Flutter application.
+A mindful link management Flutter application for saving, reading, updating and deleting URLs.
 
 ## Development Commands
 

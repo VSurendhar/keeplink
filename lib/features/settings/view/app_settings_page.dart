@@ -255,20 +255,20 @@ class AppSettingsView extends StatelessWidget {
           const SizedBox(height: 12),
           _buildActionButton(
             icon: Icons.file_upload_outlined,
-            label: 'Export Bookmarks',
+            label: 'Export URLs',
             onTap: () {
               context.read<AppSettingsBloc>().add(
-                const ExportBookmarksRequested(),
+                const ExportUrlsRequested(),
               );
             },
           ),
           const SizedBox(height: 12),
           _buildActionButton(
             icon: Icons.file_download_outlined,
-            label: 'Import Bookmarks',
+            label: 'Import URLs',
             onTap: () {
               context.read<AppSettingsBloc>().add(
-                const ImportBookmarksRequested(),
+                const ImportUrlsRequested(),
               );
             },
           ),
@@ -634,7 +634,7 @@ class AppSettingsView extends StatelessWidget {
       builder: (_) => ExportBottomSheetWidget(
         count: count,
         onExport: () {
-          context.read<AppSettingsBloc>().add(const ExportBookmarksConfirmed());
+          context.read<AppSettingsBloc>().add(const ExportUrlsConfirmed());
         },
       ),
     );
@@ -649,7 +649,7 @@ class AppSettingsView extends StatelessWidget {
       ),
       builder: (_) => ImportBottomSheetWidget(
         onImport: () {
-          context.read<AppSettingsBloc>().add(const ImportBookmarksConfirmed());
+          context.read<AppSettingsBloc>().add(const ImportUrlsConfirmed());
         },
       ),
     );

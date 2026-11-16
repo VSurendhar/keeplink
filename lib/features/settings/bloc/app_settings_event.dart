@@ -58,24 +58,24 @@ final class EraseAllRequested extends AppSettingsEvent {
   const EraseAllRequested();
 }
 
-/// Triggered when the user requests to export bookmarks.
-final class ExportBookmarksRequested extends AppSettingsEvent {
-  const ExportBookmarksRequested();
+/// Triggered when the user requests to export URLs.
+final class ExportUrlsRequested extends AppSettingsEvent {
+  const ExportUrlsRequested();
 }
 
 /// Triggered when the user confirms the export in the export sheet.
-final class ExportBookmarksConfirmed extends AppSettingsEvent {
-  const ExportBookmarksConfirmed();
+final class ExportUrlsConfirmed extends AppSettingsEvent {
+  const ExportUrlsConfirmed();
 }
 
-/// Triggered when the user requests to import bookmarks.
-final class ImportBookmarksRequested extends AppSettingsEvent {
-  const ImportBookmarksRequested();
+/// Triggered when the user requests to import URLs.
+final class ImportUrlsRequested extends AppSettingsEvent {
+  const ImportUrlsRequested();
 }
 
 /// Triggered when the user confirms the import in the import sheet.
-final class ImportBookmarksConfirmed extends AppSettingsEvent {
-  const ImportBookmarksConfirmed();
+final class ImportUrlsConfirmed extends AppSettingsEvent {
+  const ImportUrlsConfirmed();
 }
 
 /// Triggered when a one-shot UI action has been consumed/handled by the view.
