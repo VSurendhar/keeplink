@@ -21,14 +21,30 @@ class DeveloperOptionsService {
     await _appSettingsService.saveTrashRetention(AppDefaults.trashRetention);
   }
 
-  /// Populates the URL store with initial development records.
+  /// Clears the URL store and fills it with development records.
+  ///
+  /// `createUrl` only accepts existing folder and tag ids, so the folders and
+  /// tags are inserted first. The default folder and tags are restored at the
+  /// end, since clearing removes them.
   Future<void> seedDatabase(UrlStore urlStore) async {
     final now = DateTime.now().millisecondsSinceEpoch;
 
-    final flutterFolder = Folder(folderName: 'Flutter Resources');
-    final dbFolder = Folder(folderName: 'Database Resources');
+    await urlStore.clearAll();
 
-    final records = <UrlRecord>[
+    final flutterFolderId = await urlStore.insertFolder(
+      Folder(folderName: 'Flutter Resources'),
+    );
+    final dbFolderId = await urlStore.insertFolder(
+      Folder(folderName: 'Database Resources'),
+    );
+
+    final flutterTagId = await urlStore.insertTag(Tag(tagName: 'flutter'));
+    final dartTagId = await urlStore.insertTag(Tag(tagName: 'dart'));
+    final mobileTagId = await urlStore.insertTag(Tag(tagName: 'mobile'));
+    final databaseTagId = await urlStore.insertTag(Tag(tagName: 'database'));
+    final tutorialTagId = await urlStore.insertTag(Tag(tagName: 'tutorial'));
+
+    final records = <(Url url, int folderId, List<int> tagIds)>[
       (
         Url(
           url: 'https://flutter.dev',
@@ -39,8 +55,8 @@ class DeveloperOptionsService {
           updatedAt: now,
           isFavorite: false,
         ),
-        flutterFolder,
-        [Tag(tagName: 'flutter'), Tag(tagName: 'dart'), Tag(tagName: 'mobile')],
+        flutterFolderId,
+        [flutterTagId, dartTagId, mobileTagId],
       ),
       (
         Url(
@@ -52,12 +68,8 @@ class DeveloperOptionsService {
           updatedAt: now,
           isFavorite: false,
         ),
-        flutterFolder,
-        [
-          Tag(tagName: 'mobile'),
-          Tag(tagName: 'database'),
-          Tag(tagName: 'tutorial'),
-        ],
+        flutterFolderId,
+        [mobileTagId, databaseTagId, tutorialTagId],
       ),
       (
         Url(
@@ -69,8 +81,8 @@ class DeveloperOptionsService {
           updatedAt: now,
           isFavorite: false,
         ),
-        flutterFolder,
-        const <Tag>[],
+        flutterFolderId,
+        const <int>[],
       ),
       (
         Url(
@@ -82,8 +94,8 @@ class DeveloperOptionsService {
           updatedAt: now,
           isFavorite: false,
         ),
-        dbFolder,
-        const <Tag>[],
+        dbFolderId,
+        const <int>[],
       ),
       (
         Url(
@@ -95,12 +107,14 @@ class DeveloperOptionsService {
           updatedAt: now,
           isFavorite: false,
         ),
-        dbFolder,
-        const <Tag>[],
+        dbFolderId,
+        const <int>[],
       ),
     ];
 
-    await urlStore.clearAllAndCreateUrlFromRecords(records);
+    for (final (url, folderId, tagIds) in records) {
+      await urlStore.createUrl(url: url, folderId: folderId, tagIds: tagIds);
+    }
     await urlStore.seedDefaultFolderIfNotExist();
     await urlStore.seedDefaultTagsIfNotExist();
   }

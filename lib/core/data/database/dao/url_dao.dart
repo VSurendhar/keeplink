@@ -4,7 +4,8 @@ import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/entity/url_tag.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
+import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
+import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
 
 @dao
 abstract class UrlDao {
@@ -87,46 +88,24 @@ abstract class UrlDao {
   }
 
   @transaction
-  Future<int> createUrl(Url url, Folder folder, List<Tag> tags) async {
-    // 1. First step: Check if the URL already exists. If it does, abort immediately!
+  Future<int> createUrl(Url url, int folderId, List<int> tagIds) async {
+    // Validate everything before inserting, so nothing is saved on failure.
     await checkIfUrlExists(url);
+    await checkIfFolderExists(folderId);
+    final uniqueTagIds = tagIds.toSet();
+    await checkIfTagsExist(uniqueTagIds);
 
-    // 2. Resolve folder: if ID is already known, use it directly; otherwise find by name or insert
-    final folderId = await resolveFolder(folder);
-
-    // 3. Insert the new URL with the resolved folderId
     final urlId = await insertUrl(url.copyWith(folderId: folderId));
-
-    // 4. Resolve tags and link them via UrlTag
-    await resolveTags(urlId, tags);
-
+    for (final tagId in uniqueTagIds) {
+      await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
+    }
     return urlId;
   }
 
-  @transaction
-  Future<List<int>> clearAllAndCreateUrlFromRecords(
-    List<UrlRecord> records,
-  ) async {
-    await deleteAllUrlTags();
-    await deleteAllUrls();
-    await deleteAllTags();
-    await deleteAllFolders();
-
-    final insertedIds = <int>[];
-    for (final record in records) {
-      final (url, folder, tags) = record;
-      await checkIfUrlExists(url);
-      final folderId = await resolveFolder(folder);
-      final urlId = await insertUrl(url.copyWith(folderId: folderId));
-      await resolveTags(urlId, tags);
-      insertedIds.add(urlId);
-    }
-    return insertedIds;
-  }
-
   Future<void> checkIfUrlExists(Url url) async {
-    final existingUrl = url.id != null
-        ? await findUrlById(url.id!)
+    final id = url.id;
+    final existingUrl = id != null
+        ? await findUrlById(id)
         : await findUrlByUrlString(url.url);
 
     if (existingUrl != null) {
@@ -134,35 +113,18 @@ abstract class UrlDao {
     }
   }
 
-  Future<int> resolveFolder(Folder folder) async {
-    final folderId = folder.id;
-    if (folderId != null) {
-      return folderId;
+  /// Throws [FolderNotFoundException] if no folder has [folderId].
+  Future<void> checkIfFolderExists(int folderId) async {
+    if (await findFolderById(folderId) == null) {
+      throw FolderNotFoundException(folderId);
     }
-    final existingFolder = await findFolderByName(folder.folderName);
-    if (existingFolder != null && existingFolder.id != null) {
-      return existingFolder.id!;
-    }
-    return insertFolder(folder);
   }
 
-  Future<void> resolveTags(int urlId, List<Tag> tags) async {
-    for (final tag in tags) {
-      final int tagId;
-      if (tag.id != null) {
-        tagId = tag.id!;
-      } else {
-        final existingTag = await findTagByName(tag.tagName);
-        if (existingTag != null && existingTag.id != null) {
-          tagId = existingTag.id!;
-        } else {
-          tagId = await insertTag(tag);
-        }
-      }
-
-      final existingUrlTag = await findUrlTag(urlId, tagId);
-      if (existingUrlTag == null) {
-        await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
+  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag.
+  Future<void> checkIfTagsExist(Iterable<int> tagIds) async {
+    for (final tagId in tagIds) {
+      if (await findTagById(tagId) == null) {
+        throw TagNotFoundException(tagId);
       }
     }
   }

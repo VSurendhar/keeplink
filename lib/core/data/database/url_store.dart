@@ -108,34 +108,28 @@ abstract class UrlStore {
   /// to restore them.
   Future<void> clearAll();
 
-  /// Saves [url] in [folder] with [tags], in one transaction, and returns the
-  /// new URL's id.
+  /// Saves [url] in the folder [folderId] and links it to [tagIds]. Returns
+  /// the new URL's id.
+  ///
+  /// Never creates folders or tags: they must already exist (the selection
+  /// sheets create them). Everything is checked before anything is inserted,
+  /// so on any failure nothing is saved. The database store also runs it in
+  /// one transaction.
   ///
   /// Special cases:
-  /// - **Duplicate URL**: throws `DuplicateUrlException` and saves nothing if
-  ///   the URL already exists. The database store checks by `id` when [url]
-  ///   has one, otherwise by address; the mock store checks by address only.
-  /// - **Folder**: if [folder] has an `id`, it is used as it is. Otherwise the
-  ///   folder with the same name (case-sensitive) is used, or a new folder is
-  ///   created if none exists.
-  /// - **Tags**: each tag is resolved the same way as the folder (`id`, then
-  ///   exact name, then created). A tag already linked to the URL, e.g. listed
-  ///   twice in [tags], is linked only once.
+  /// - **Duplicate URL**: throws `DuplicateUrlException` if the URL already
+  ///   exists. The database store checks by `id` when [url] has one,
+  ///   otherwise by address; the mock store checks by address only.
+  /// - **Missing folder**: throws `FolderNotFoundException` if no folder has
+  ///   [folderId].
+  /// - **Missing tag**: throws `TagNotFoundException` for the first id in
+  ///   [tagIds] that has no tag.
+  /// - **Repeated tag id**: an id listed twice in [tagIds] is linked once.
   Future<int> createUrl({
     required Url url,
-    required Folder folder,
-    List<Tag> tags = const [],
+    required int folderId,
+    List<int> tagIds = const [],
   });
-
-  /// Deletes everything (like [clearAll]), then saves each record the same
-  /// way as [createUrl]. Returns the new URL ids in the same order as
-  /// [records].
-  ///
-  /// Used to seed the database from Developer Options. Throws
-  /// `DuplicateUrlException` if two records have the same URL; the database
-  /// store then rolls back the whole operation, including the delete.
-  /// The default folder and tags are not restored; seed them afterwards.
-  Future<List<int>> clearAllAndCreateUrlFromRecords(List<UrlRecord> records);
 
   /// Inserts each folder in `AppDefaults.defaultFolders` whose name
   /// (case-sensitive) doesn't exist yet. Returns nothing.
@@ -159,5 +153,3 @@ abstract class UrlStore {
     return counts;
   }
 }
-
-typedef UrlRecord = (Url url, Folder folder, List<Tag> tags);

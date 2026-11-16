@@ -5,6 +5,8 @@ import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/entity/url_tag.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
+import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
+import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 
 class MockUrlStore implements UrlStore {
@@ -213,66 +215,44 @@ class MockUrlStore implements UrlStore {
   @override
   Future<int> createUrl({
     required Url url,
-    required Folder folder,
-    List<Tag> tags = const [],
+    required int folderId,
+    List<int> tagIds = const [],
   }) async {
-    final existingUrl = await findUrlByUrlString(url.url);
-    if (existingUrl != null) {
-      throw DuplicateUrlException(url.url);
-    }
-
-    final int folderId;
-    final fId = folder.id;
-    if (fId != null) {
-      folderId = fId;
-    } else {
-      final existingFolder = await findFolderByName(folder.folderName);
-      final existingFolderId = existingFolder?.id;
-      if (existingFolderId != null) {
-        folderId = existingFolderId;
-      } else {
-        folderId = await insertFolder(folder);
-      }
-    }
+    // Validate everything before inserting, so nothing is saved on failure.
+    await _checkIfUrlExists(url);
+    await _checkIfFolderExists(folderId);
+    // A Set links a tag listed twice only once.
+    final uniqueTagIds = tagIds.toSet();
+    await _checkIfTagsExist(uniqueTagIds);
 
     final urlId = await insertUrl(url.copyWith(folderId: folderId));
-
-    for (final tag in tags) {
-      final int tagId;
-      final tId = tag.id;
-      if (tId != null) {
-        tagId = tId;
-      } else {
-        final existingTag = await findTagByName(tag.tagName);
-        final existingTagId = existingTag?.id;
-        if (existingTagId != null) {
-          tagId = existingTagId;
-        } else {
-          tagId = await insertTag(tag);
-        }
-      }
-
-      final existingUrlTag = await findUrlTag(urlId, tagId);
-      if (existingUrlTag == null) {
-        await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
-      }
+    for (final tagId in uniqueTagIds) {
+      await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
     }
-
     return urlId;
   }
 
-  @override
-  Future<List<int>> clearAllAndCreateUrlFromRecords(
-    List<UrlRecord> records,
-  ) async {
-    await clearAll();
-    final ids = <int>[];
-    for (final record in records) {
-      final (url, folder, tags) = record;
-      final id = await createUrl(url: url, folder: folder, tags: tags);
-      ids.add(id);
+  /// Throws [DuplicateUrlException] if a URL with the same address exists.
+  Future<void> _checkIfUrlExists(Url url) async {
+    if (await findUrlByUrlString(url.url) != null) {
+      throw DuplicateUrlException(url.url);
     }
-    return ids;
+  }
+
+  /// Throws [FolderNotFoundException] if no folder has [folderId].
+  Future<void> _checkIfFolderExists(int folderId) async {
+    if (await findFolderById(folderId) == null) {
+      throw FolderNotFoundException(folderId);
+    }
+  }
+
+  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag.
+  Future<void> _checkIfTagsExist(Iterable<int> tagIds) async {
+    for (final tagId in tagIds) {
+      if (await findTagById(tagId) == null) {
+        throw TagNotFoundException(tagId);
+      }
+    }
   }
 
   @override

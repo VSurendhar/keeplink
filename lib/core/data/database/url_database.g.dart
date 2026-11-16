@@ -372,33 +372,17 @@ class _$UrlDao extends UrlDao {
   @override
   Future<int> createUrl(
     Url url,
-    Folder folder,
-    List<Tag> tags,
+    int folderId,
+    List<int> tagIds,
   ) async {
     if (database is sqflite.Transaction) {
-      return super.createUrl(url, folder, tags);
+      return super.createUrl(url, folderId, tagIds);
     } else {
       return (database as sqflite.Database)
           .transaction<int>((transaction) async {
         final transactionDatabase = _$UrlDatabase(changeListener)
           ..database = transaction;
-        return transactionDatabase.urlDao.createUrl(url, folder, tags);
-      });
-    }
-  }
-
-  @override
-  Future<List<int>> clearAllAndCreateUrlFromRecords(
-      List<(Url, Folder, List<Tag>)> records) async {
-    if (database is sqflite.Transaction) {
-      return super.clearAllAndCreateUrlFromRecords(records);
-    } else {
-      return (database as sqflite.Database)
-          .transaction<List<int>>((transaction) async {
-        final transactionDatabase = _$UrlDatabase(changeListener)
-          ..database = transaction;
-        return transactionDatabase.urlDao
-            .clearAllAndCreateUrlFromRecords(records);
+        return transactionDatabase.urlDao.createUrl(url, folderId, tagIds);
       });
     }
   }
