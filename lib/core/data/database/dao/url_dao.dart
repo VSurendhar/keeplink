@@ -29,6 +29,10 @@ abstract class UrlDao {
   @Query('SELECT folder_id FROM url WHERE folder_id IS NOT NULL')
   Future<List<int>> findAllUrlFolderIds();
 
+  /// One `tag_id` per URL-tag link, for counting URLs per tag.
+  @Query('SELECT tag_id FROM url_tag')
+  Future<List<int>> findAllUrlTagIds();
+
   @insert
   Future<int> insertUrl(Url url);
 

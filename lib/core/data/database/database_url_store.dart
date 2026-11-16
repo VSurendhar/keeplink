@@ -84,7 +84,11 @@ class DatabaseUrlStore implements UrlStore {
 
   @override
   Future<Map<int, int>> findUrlCountPerFolder() async =>
-      UrlStore.countUrlsPerFolder(await (await _dao).findAllUrlFolderIds());
+      UrlStore.countById(await (await _dao).findAllUrlFolderIds());
+
+  @override
+  Future<Map<int, int>> findUrlCountPerTag() async =>
+      UrlStore.countById(await (await _dao).findAllUrlTagIds());
 
   @override
   Future<Folder?> findFolderById(int id) async =>

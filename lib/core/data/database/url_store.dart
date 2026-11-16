@@ -40,6 +40,11 @@ abstract class UrlStore {
   /// Folders with no URLs are not in the map; read them as `counts[id] ?? 0`.
   Future<Map<int, int>> findUrlCountPerFolder();
 
+  /// Number of URLs with each tag, keyed by tag id.
+  ///
+  /// Tags with no URLs are not in the map; read them as `counts[id] ?? 0`.
+  Future<Map<int, int>> findUrlCountPerTag();
+
   Future<void> clearAll();
   Future<int> createUrl({
     required Url url,
@@ -51,11 +56,12 @@ abstract class UrlStore {
   Future<void> seedDefaultFolderIfNotExist();
   Future<void> seedDefaultTagsIfNotExist();
 
-  /// Counts how many times each folder id appears in [folderIds].
-  static Map<int, int> countUrlsPerFolder(Iterable<int> folderIds) {
+  /// Counts how many times each id appears in [ids], e.g. `[1, 1, 4]` gives
+  /// `{1: 2, 4: 1}`. Used for URL counts per folder and per tag.
+  static Map<int, int> countById(Iterable<int> ids) {
     final counts = <int, int>{};
-    for (final folderId in folderIds) {
-      counts[folderId] = (counts[folderId] ?? 0) + 1;
+    for (final id in ids) {
+      counts[id] = (counts[id] ?? 0) + 1;
     }
     return counts;
   }

@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
@@ -105,13 +103,27 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
 
   Future<void> _onInit(OnTagInit event, Emitter<TagSelectionState> emit) async {
     emit(state.copyWith(isLoading: true));
+
+    var urlCountByTagId = const <int, int>{};
+    try {
+      urlCountByTagId = await urlStore.findUrlCountPerTag();
+    } catch (e, st) {
+      logError(
+        'Failed to load tag link counts',
+        e,
+        stackTrace: st,
+        isShowToastInDebug: true,
+      );
+    }
+
     await emit.forEach<List<Tag>>(
       urlStore.findAllTags(),
       onData: (tags) {
-        final random = Random();
-        final items = tags
-            .map((t) => TagItem(tag: t, linkCount: 1 + random.nextInt(10)))
-            .toList();
+        final items = tags.map((tag) {
+          final id = tag.id;
+          final linkCount = id == null ? 0 : (urlCountByTagId[id] ?? 0);
+          return TagItem(tag: tag, linkCount: linkCount);
+        }).toList();
 
         return state.copyWith(
           isLoading: false,
