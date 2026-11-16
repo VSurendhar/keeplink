@@ -7,16 +7,6 @@ import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selecti
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_state.dart';
 import 'package:mindful_links/features/logger/logger.dart';
 
-class FolderItem extends Equatable {
-  const FolderItem({required this.folder, required this.linkCount});
-
-  final Folder folder;
-  final int linkCount;
-
-  @override
-  List<Object?> get props => [folder.id, folder.folderName, linkCount];
-}
-
 class FolderSelectionBloc
     extends Bloc<FolderSelectionEvent, FolderSelectionState> {
   FolderSelectionBloc({
@@ -166,4 +156,14 @@ class FolderSelectionBloc
       },
     );
   }
+}
+
+class FolderItem extends Equatable {
+  const FolderItem({required this.folder, required this.linkCount});
+
+  final Folder folder;
+  final int linkCount;
+
+  @override
+  List<Object?> get props => [folder.id, folder.folderName, linkCount];
 }
