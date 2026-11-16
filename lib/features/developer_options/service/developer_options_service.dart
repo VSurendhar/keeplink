@@ -101,6 +101,8 @@ class DeveloperOptionsService {
     ];
 
     await urlStore.clearAllAndCreateUrlFromRecords(records);
+    await urlStore.seedDefaultFolderIfNotExist();
+    await urlStore.seedDefaultTagsIfNotExist();
   }
 
   /// Prints current database contents to the debug console.
