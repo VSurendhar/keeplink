@@ -13,6 +13,7 @@ final class AddNewLinkState extends Equatable {
     this.imageUrl = '',
     required this.selectedFolder,
     required this.selectedTags,
+    this.isSaving = false,
     this.action,
   });
 
@@ -21,6 +22,9 @@ final class AddNewLinkState extends Equatable {
   final String imageUrl;
   final Folder selectedFolder;
   final List<Tag> selectedTags;
+
+  /// Whether a save is in progress; drives the Save button's loading state.
+  final bool isSaving;
   final AddNewLinkAction? action;
 
   factory AddNewLinkState.initial() {
@@ -38,6 +42,7 @@ final class AddNewLinkState extends Equatable {
     String? imageUrl,
     Folder? selectedFolder,
     List<Tag>? selectedTags,
+    bool? isSaving,
     AddNewLinkAction? action,
     bool clearAction = false,
   }) {
@@ -47,6 +52,7 @@ final class AddNewLinkState extends Equatable {
       imageUrl: imageUrl ?? this.imageUrl,
       selectedFolder: selectedFolder ?? this.selectedFolder,
       selectedTags: selectedTags ?? this.selectedTags,
+      isSaving: isSaving ?? this.isSaving,
       action: clearAction ? null : (action ?? this.action),
     );
   }
@@ -63,11 +69,12 @@ final class AddNewLinkState extends Equatable {
     imageUrl,
     selectedFolder,
     selectedTags,
+    isSaving,
     action,
   ];
 
   @override
   String toString() {
-    return 'AddNewLinkState{urlName: $urlName, url: $url, imageUrl: $imageUrl, selectedFolder: $selectedFolder, selectedTags: $selectedTags, action: $action}';
+    return 'AddNewLinkState{urlName: $urlName, url: $url, imageUrl: $imageUrl, selectedFolder: $selectedFolder, selectedTags: $selectedTags, isSaving: $isSaving, action: $action}';
   }
 }

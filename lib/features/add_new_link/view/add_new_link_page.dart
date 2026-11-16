@@ -18,6 +18,7 @@ import 'package:mindful_links/features/add_new_link/view/widgets/tag_selection_w
 import 'package:mindful_links/features/home/constants/constants.dart';
 import 'package:mindful_links/features/theme/colors.dart';
 import 'package:mindful_links/features/theme/theme.dart';
+import 'package:mindful_links/utils/utils.dart';
 
 class AddNewLinkPage extends StatelessWidget {
   const AddNewLinkPage({super.key});
@@ -52,6 +53,12 @@ class AddNewLinkView extends StatelessWidget {
           );
         } else if (action is ShowTagSelectionSheetAction) {
           _showTagSelectionSheet(context, selectedTags: state.selectedTags);
+        } else if (action is ShowToast) {
+          Utils.showToast(action.message);
+        } else if (action is CloseWithMessage) {
+          Utils.showToast(action.message);
+          Navigator.pop(context);
+          return;
         }
 
         context.read<AddNewLinkBloc>().add(const OnActionHandled());
@@ -85,6 +92,7 @@ class AddNewLinkView extends StatelessWidget {
                 padding: const EdgeInsets.only(right: 16),
                 child: SaveButton(
                   isEnabled: state.isSaveEnabled,
+                  isLoading: state.isSaving,
                   onPressed: () {
                     context.read<AddNewLinkBloc>().add(const OnSaveClicked());
                   },

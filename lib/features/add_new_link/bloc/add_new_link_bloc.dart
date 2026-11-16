@@ -2,6 +2,10 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
+import 'package:mindful_links/core/data/database/entity/url.dart';
+import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
+import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
+import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_event.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart';
@@ -122,7 +126,66 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
     OnSaveClicked event,
     Emitter<AddNewLinkState> emit,
   ) async {
-    // Will be connected to urlStore persistence once bottom sheets and saving flow are aligned.
+    if (state.isSaving || !state.isSaveEnabled) return;
+
+    // Null only if the default folder lookup in _onInit failed.
+    final folderId = state.selectedFolder.id;
+    if (folderId == null) {
+      emit(
+        state.copyWith(
+          action: const ShowToast('Folder is not loaded yet, try again'),
+        ),
+      );
+      return;
+    }
+    // Selected tags always come from the database, so they all have an id.
+    final tagIds = state.selectedTags.map((tag) => tag.id).nonNulls.toList();
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    emit(state.copyWith(isSaving: true));
+    try {
+      await urlStore.createUrl(
+        url: Url(
+          url: state.url.trim(),
+          title: state.urlName.trim(),
+          metaImageUrl: state.imageUrl,
+          metaDescription: '',
+          createdAt: now,
+          updatedAt: now,
+          isFavorite: false,
+        ),
+        folderId: folderId,
+        tagIds: tagIds,
+      );
+      emit(
+        state.copyWith(
+          isSaving: false,
+          action: const CloseWithMessage('Link Saved'),
+        ),
+      );
+    } on DuplicateUrlException catch (e, st) {
+      _onSaveFailed(emit, 'Link already exists', e, st);
+    } on FolderNotFoundException catch (e, st) {
+      final folder = state.selectedFolder;
+      final name = folder.id == e.folderId ? folder.folderName : 'Selected';
+      _onSaveFailed(emit, '$name Folder does not exist', e, st);
+    } on TagNotFoundException catch (e, st) {
+      final tag = state.selectedTags.where((tag) => tag.id == e.tagId);
+      final name = tag.firstOrNull?.tagName ?? 'Selected';
+      _onSaveFailed(emit, '$name Tag does not exist', e, st);
+    } catch (e, st) {
+      _onSaveFailed(emit, 'Error While Saving Link', e, st);
+    }
+  }
+
+  void _onSaveFailed(
+    Emitter<AddNewLinkState> emit,
+    String message,
+    Object error,
+    StackTrace stackTrace,
+  ) {
+    logError('Failed to save link', error, stackTrace: stackTrace);
+    emit(state.copyWith(isSaving: false, action: ShowToast(message)));
   }
 
   void _onActionHandled(OnActionHandled event, Emitter<AddNewLinkState> emit) {
