@@ -116,10 +116,11 @@ class FolderSelectionBloc
   /// its `id`. If no loaded folder matches, the selection is kept as it is.
   Folder _matchSelectedFolder(List<FolderItem> items) {
     final currentSelection = state.selectedFolder;
+    final lowerName = currentSelection.folderName.toLowerCase();
     final match = items.where(
       (item) =>
           item.folder.id == currentSelection.id ||
-          item.folder.folderName == currentSelection.folderName,
+          item.folder.folderName.toLowerCase() == lowerName,
     );
     return match.firstOrNull?.folder ?? currentSelection;
   }

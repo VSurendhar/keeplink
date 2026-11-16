@@ -152,8 +152,9 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<Folder?> findFolderByName(String folderName) async {
+    final lowerName = folderName.toLowerCase();
     for (final folder in _folders) {
-      if (folder.folderName == folderName) return folder;
+      if (folder.folderName.toLowerCase() == lowerName) return folder;
     }
     return null;
   }
@@ -184,8 +185,9 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<Tag?> findTagByName(String tagName) async {
+    final lowerName = tagName.toLowerCase();
     for (final tag in _tags) {
-      if (tag.tagName == tagName) return tag;
+      if (tag.tagName.toLowerCase() == lowerName) return tag;
     }
     return null;
   }

@@ -60,7 +60,10 @@ abstract class UrlDao {
   @Query('SELECT * FROM folder WHERE id = :id')
   Future<Folder?> findFolderById(int id);
 
-  @Query('SELECT * FROM folder WHERE folder_name = :folderName')
+  /// Case-insensitive, matching the duplicate check in the folder sheet.
+  @Query(
+    'SELECT * FROM folder WHERE folder_name = :folderName COLLATE NOCASE',
+  )
   Future<Folder?> findFolderByName(String folderName);
 
   @Query('SELECT * FROM url WHERE id = :id')
@@ -72,7 +75,7 @@ abstract class UrlDao {
   @Query('SELECT * FROM tag WHERE id = :id')
   Future<Tag?> findTagById(int id);
 
-  @Query('SELECT * FROM tag WHERE tag_name = :tagName')
+  @Query('SELECT * FROM tag WHERE tag_name = :tagName COLLATE NOCASE')
   Future<Tag?> findTagByName(String tagName);
 
   @Query('SELECT * FROM url_tag WHERE url_id = :urlId AND tag_id = :tagId')
