@@ -184,9 +184,8 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<Tag?> findTagByName(String tagName) async {
-    final lowerName = tagName.toLowerCase();
     for (final tag in _tags) {
-      if (tag.tagName.toLowerCase() == lowerName) return tag;
+      if (tag.tagName == tagName) return tag;
     }
     return null;
   }

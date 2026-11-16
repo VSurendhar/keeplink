@@ -314,8 +314,7 @@ class _$UrlDao extends UrlDao {
 
   @override
   Future<Tag?> findTagByName(String tagName) async {
-    return _queryAdapter.query(
-        'SELECT * FROM tag WHERE tag_name = ?1 COLLATE NOCASE',
+    return _queryAdapter.query('SELECT * FROM tag WHERE tag_name = ?1',
         mapper: (Map<String, Object?> row) =>
             Tag(id: row['id'] as int?, tagName: row['tag_name'] as String),
         arguments: [tagName]);

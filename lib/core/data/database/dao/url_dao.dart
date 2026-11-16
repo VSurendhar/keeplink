@@ -72,7 +72,7 @@ abstract class UrlDao {
   @Query('SELECT * FROM tag WHERE id = :id')
   Future<Tag?> findTagById(int id);
 
-  @Query('SELECT * FROM tag WHERE tag_name = :tagName COLLATE NOCASE')
+  @Query('SELECT * FROM tag WHERE tag_name = :tagName')
   Future<Tag?> findTagByName(String tagName);
 
   @Query('SELECT * FROM url_tag WHERE url_id = :urlId AND tag_id = :tagId')

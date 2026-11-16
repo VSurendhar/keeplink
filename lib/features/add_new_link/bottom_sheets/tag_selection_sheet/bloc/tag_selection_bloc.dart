@@ -65,9 +65,8 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
       return;
     }
 
-    final lowerName = name.toLowerCase();
     final alreadyExists = state.tags.any(
-      (item) => item.tag.tagName.trim().toLowerCase() == lowerName,
+      (item) => item.tag.tagName.trim() == name,
     );
     if (alreadyExists) {
       emit(state.copyWith(action: ShowToast('Tag already exists')));
@@ -125,6 +124,7 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
           return TagItem(tag: tag, linkCount: linkCount);
         }).toList();
 
+        // No matching like _matchSelectedFolder: selected tags always come from the database, so they already have an id.
         return state.copyWith(
           isLoading: false,
           tags: items,
