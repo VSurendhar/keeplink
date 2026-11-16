@@ -73,9 +73,8 @@ class FolderSelectionBloc
       return;
     }
 
-    final lowerName = name.toLowerCase();
     final alreadyExists = state.folders.any(
-      (item) => item.folder.folderName.trim().toLowerCase() == lowerName,
+      (item) => item.folder.folderName.trim() == name,
     );
     if (alreadyExists) {
       emit(state.copyWith(action: ShowToast('Folder already exists')));
@@ -116,11 +115,10 @@ class FolderSelectionBloc
   /// its `id`. If no loaded folder matches, the selection is kept as it is.
   Folder _matchSelectedFolder(List<FolderItem> items) {
     final currentSelection = state.selectedFolder;
-    final lowerName = currentSelection.folderName.toLowerCase();
     final match = items.where(
       (item) =>
           item.folder.id == currentSelection.id ||
-          item.folder.folderName.toLowerCase() == lowerName,
+          item.folder.folderName == currentSelection.folderName,
     );
     return match.firstOrNull?.folder ?? currentSelection;
   }

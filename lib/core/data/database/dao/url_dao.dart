@@ -60,10 +60,7 @@ abstract class UrlDao {
   @Query('SELECT * FROM folder WHERE id = :id')
   Future<Folder?> findFolderById(int id);
 
-  /// Case-insensitive, matching the duplicate check in the folder sheet.
-  @Query(
-    'SELECT * FROM folder WHERE folder_name = :folderName COLLATE NOCASE',
-  )
+  @Query('SELECT * FROM folder WHERE folder_name = :folderName')
   Future<Folder?> findFolderByName(String folderName);
 
   @Query('SELECT * FROM url WHERE id = :id')
