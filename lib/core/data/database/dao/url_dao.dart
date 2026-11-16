@@ -46,6 +46,15 @@ abstract class UrlDao {
   @insert
   Future<void> insertUrlTag(UrlTag urlTag);
 
+  @Query('SELECT * FROM url WHERE folder_id = :folderId')
+  Future<List<Url>> findUrlsByFolderId(int folderId);
+
+  @update
+  Future<void> updateUrls(List<Url> urls);
+
+  @delete
+  Future<void> deleteFolder(Folder folder);
+
   @Query('DELETE FROM url_tag')
   Future<void> deleteAllUrlTags();
 
@@ -100,6 +109,27 @@ abstract class UrlDao {
       await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
     }
     return urlId;
+  }
+
+  @transaction
+  Future<void> deleteFolderAndMoveUrls(
+    int sourceFolderId,
+    int targetFolderId,
+  ) async {
+    if (sourceFolderId == targetFolderId) {
+      throw ArgumentError('Cannot move URLs into the folder being deleted');
+    }
+    await checkIfFolderExists(targetFolderId);
+    final folder = await findFolderById(sourceFolderId);
+    if (folder == null) {
+      throw FolderNotFoundException(sourceFolderId);
+    }
+
+    final urls = await findUrlsByFolderId(sourceFolderId);
+    await updateUrls(
+      urls.map((url) => url.copyWith(folderId: targetFolderId)).toList(),
+    );
+    await deleteFolder(folder);
   }
 
   Future<void> checkIfUrlExists(Url url) async {

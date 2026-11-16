@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:mindful_links/core/data/database/entity/folder.dart';
 
 sealed class FolderSelectionEvent extends Equatable {
   const FolderSelectionEvent();
@@ -20,6 +21,16 @@ final class OnToggleCreateMode extends FolderSelectionEvent {
 /// Triggered when the user taps the save button to create a new folder.
 final class OnSaveFolderClicked extends FolderSelectionEvent {
   const OnSaveFolderClicked();
+}
+
+/// Triggered when the user taps the delete icon on a folder.
+final class OnDeleteFolderClicked extends FolderSelectionEvent {
+  const OnDeleteFolderClicked(this.folder);
+
+  final Folder folder;
+
+  @override
+  List<Object?> get props => [folder.id, folder.folderName];
 }
 
 /// Triggered when a one-shot UI action has been consumed by the view.

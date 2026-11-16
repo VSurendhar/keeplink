@@ -131,6 +131,23 @@ abstract class UrlStore {
     List<int> tagIds = const [],
   });
 
+  /// Deletes the folder [sourceFolderId] and moves its URLs into the folder
+  /// [targetFolderId]. Returns nothing.
+  ///
+  /// Checks run before anything changes, and the database store runs it in
+  /// one transaction, so on failure nothing is moved or deleted. Folder and
+  /// URL streams are notified.
+  ///
+  /// Special cases:
+  /// - **Same folder**: throws `ArgumentError` if both ids are equal.
+  /// - **Missing folder**: throws `FolderNotFoundException` if either folder
+  ///   doesn't exist.
+  /// - **Empty folder**: no URLs to move; the folder is just deleted.
+  Future<void> deleteFolderAndMoveUrls({
+    required int sourceFolderId,
+    required int targetFolderId,
+  });
+
   /// Inserts each folder in `AppDefaults.defaultFolders` whose name
   /// (case-sensitive) doesn't exist yet. Returns nothing.
   ///

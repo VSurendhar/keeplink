@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
@@ -19,6 +20,7 @@ class FolderSelectionBloc
     on<OnInitEvent>(_onInit);
     on<OnToggleCreateMode>(_onToggleCreateMode);
     on<OnSaveFolderClicked>(_onSaveFolderClicked);
+    on<OnDeleteFolderClicked>(_onDeleteFolderClicked);
     on<OnActionHandled>(_onActionHandled);
   }
 
@@ -26,12 +28,20 @@ class FolderSelectionBloc
   late final TextEditingController createFolderController;
   late final FocusNode createFolderFocusNode;
 
+  /// Link count per folder id. Refreshed after a delete moves links, and
+  /// read whenever the folder stream emits.
+  Map<int, int> _urlCountByFolderId = const {};
+
   @override
   Future<void> close() {
     createFolderController.dispose();
     createFolderFocusNode.dispose();
     return super.close();
   }
+
+  /// Whether [folder] is the default folder, which can't be deleted.
+  bool isDefaultFolder(Folder folder) =>
+      folder.folderName == AppDefaults.defaultFolders.first.folderName;
 
   void _onToggleCreateMode(
     OnToggleCreateMode event,
@@ -88,6 +98,70 @@ class FolderSelectionBloc
     }
   }
 
+  /// Deletes the folder and moves its links into the default folder.
+  ///
+  /// If the deleted folder was the selected one, the sheet closes with the
+  /// default folder selected, so the Add Link page never keeps a deleted
+  /// folder.
+  Future<void> _onDeleteFolderClicked(
+    OnDeleteFolderClicked event,
+    Emitter<FolderSelectionState> emit,
+  ) async {
+    createFolderFocusNode.unfocus();
+    final folder = event.folder;
+    final folderId = folder.id;
+    if (folderId == null || isDefaultFolder(folder)) return;
+
+    final defaultFolder = state.folders
+        .map((item) => item.folder)
+        .where(isDefaultFolder)
+        .firstOrNull;
+    final defaultFolderId = defaultFolder?.id;
+    if (defaultFolder == null || defaultFolderId == null) {
+      logError(
+        'Failed to delete folder ${folder.folderName}: default folder not found',
+        null,
+      );
+      emit(state.copyWith(action: const ShowToast('Default Folder not found')));
+      return;
+    }
+
+    try {
+      await urlStore.deleteFolderAndMoveUrls(
+        sourceFolderId: folderId,
+        targetFolderId: defaultFolderId,
+      );
+    } catch (e, st) {
+      logError('Failed to delete folder', e, stackTrace: st);
+      emit(
+        state.copyWith(action: const ShowToast('Error While Deleting Folder')),
+      );
+      return;
+    }
+
+    final message = '${folder.folderName} deleted';
+    if (state.selectedFolder.id == folderId) {
+      emit(
+        state.copyWith(
+          action: CloseWithSelectedFolder(defaultFolder, message: message),
+        ),
+      );
+      return;
+    }
+
+    // Moved links change the default folder's count.
+    _urlCountByFolderId = await _loadUrlCounts();
+    final remainingFolders = state.folders
+        .map((item) => item.folder)
+        .where((item) => item.id != folderId);
+    emit(
+      state.copyWith(
+        folders: _buildFolderItems(remainingFolders),
+        action: ShowToast(message),
+      ),
+    );
+  }
+
   void _onActionHandled(
     OnActionHandled event,
     Emitter<FolderSelectionState> emit,
@@ -113,15 +187,10 @@ class FolderSelectionBloc
     return match.firstOrNull?.folder ?? currentSelection;
   }
 
-  Future<void> _onInit(
-    OnInitEvent event,
-    Emitter<FolderSelectionState> emit,
-  ) async {
-    emit(state.copyWith(isLoading: true));
-
-    var urlCountByFolderId = const <int, int>{};
+  /// Link counts per folder id, or an empty map (all counts 0) on failure.
+  Future<Map<int, int>> _loadUrlCounts() async {
     try {
-      urlCountByFolderId = await urlStore.findUrlCountPerFolder();
+      return await urlStore.findUrlCountPerFolder();
     } catch (e, st) {
       logError(
         'Failed to load folder link counts',
@@ -129,16 +198,30 @@ class FolderSelectionBloc
         stackTrace: st,
         isShowToastInDebug: true,
       );
+      return const {};
     }
+  }
+
+  List<FolderItem> _buildFolderItems(Iterable<Folder> folders) {
+    return folders.map((folder) {
+      final id = folder.id;
+      final linkCount = id == null ? 0 : (_urlCountByFolderId[id] ?? 0);
+      return FolderItem(folder: folder, linkCount: linkCount);
+    }).toList();
+  }
+
+  Future<void> _onInit(
+    OnInitEvent event,
+    Emitter<FolderSelectionState> emit,
+  ) async {
+    emit(state.copyWith(isLoading: true));
+
+    _urlCountByFolderId = await _loadUrlCounts();
 
     await emit.forEach<List<Folder>>(
       urlStore.findAllFolders(),
       onData: (folders) {
-        final items = folders.map((folder) {
-          final id = folder.id;
-          final linkCount = id == null ? 0 : (urlCountByFolderId[id] ?? 0);
-          return FolderItem(folder: folder, linkCount: linkCount);
-        }).toList();
+        final items = _buildFolderItems(folders);
         return state.copyWith(
           isLoading: false,
           folders: items,

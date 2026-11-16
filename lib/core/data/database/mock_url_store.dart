@@ -232,6 +232,28 @@ class MockUrlStore implements UrlStore {
     return urlId;
   }
 
+  @override
+  Future<void> deleteFolderAndMoveUrls({
+    required int sourceFolderId,
+    required int targetFolderId,
+  }) async {
+    if (sourceFolderId == targetFolderId) {
+      throw ArgumentError('Cannot move URLs into the folder being deleted');
+    }
+    await _checkIfFolderExists(targetFolderId);
+    await _checkIfFolderExists(sourceFolderId);
+
+    for (var i = 0; i < _urls.length; i++) {
+      final url = _urls[i];
+      if (url.folderId == sourceFolderId) {
+        _urls[i] = url.copyWith(folderId: targetFolderId);
+      }
+    }
+    _folders.removeWhere((folder) => folder.id == sourceFolderId);
+    _notifyUrls();
+    _notifyFolders();
+  }
+
   /// Throws [DuplicateUrlException] if a URL with the same address exists.
   Future<void> _checkIfUrlExists(Url url) async {
     if (await findUrlByUrlString(url.url) != null) {

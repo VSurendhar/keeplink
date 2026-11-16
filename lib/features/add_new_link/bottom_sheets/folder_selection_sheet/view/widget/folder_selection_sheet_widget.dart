@@ -22,6 +22,10 @@ class FolderSelectionSheetWidget extends StatelessWidget {
         if (action is ShowToast) {
           Utils.showToast(action.message);
         } else if (action is CloseWithSelectedFolder) {
+          final message = action.message;
+          if (message != null) {
+            Utils.showToast(message);
+          }
           Navigator.pop(context, action.folder);
         }
 
@@ -354,10 +358,30 @@ class FolderSelectionSheetWidget extends StatelessWidget {
                   ],
                 ),
               ),
+              if (!context.read<FolderSelectionBloc>().isDefaultFolder(folder))
+                _buildDeleteButton(context, folder),
               const SizedBox(width: 8),
               _buildSelectionIndicator(isSelected),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  /// Deletes [folder] on tap; its links move to the default folder.
+  Widget _buildDeleteButton(BuildContext context, Folder folder) {
+    return InkWell(
+      onTap: () {
+        context.read<FolderSelectionBloc>().add(OnDeleteFolderClicked(folder));
+      },
+      customBorder: const CircleBorder(),
+      child: const Padding(
+        padding: EdgeInsets.all(8),
+        child: Icon(
+          Icons.delete_outline_rounded,
+          size: 20,
+          color: Color(0xFF9E8E85),
         ),
       ),
     );
