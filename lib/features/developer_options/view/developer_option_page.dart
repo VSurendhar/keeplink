@@ -5,8 +5,8 @@ import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/view/add_new_link_page.dart';
 import 'package:mindful_links/features/developer_options/cubit/developer_options_cubit.dart';
 import 'package:mindful_links/features/developer_options/cubit/developer_options_state.dart';
-import 'package:mindful_links/features/developer_options/service/developer_options_service.dart';
 import 'package:mindful_links/features/home/constants/constants.dart';
+import 'package:mindful_links/features/settings/service/app_settings_service.dart';
 import 'package:mindful_links/features/settings/view/app_settings_page.dart';
 import 'package:mindful_links/features/theme/colors.dart';
 import 'package:mindful_links/features/theme/theme.dart';
@@ -19,7 +19,7 @@ class DeveloperOptionPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocProvider(
       create: (_) => DeveloperOptionsCubit(
-        developerOptionsService: GetIt.instance.get<DeveloperOptionsService>(),
+        appSettingsService: GetIt.instance.get<AppSettingsService>(),
         urlStoreProvider: GetIt.instance.get<UrlStore>,
       ),
       child: const DeveloperOptionView(),

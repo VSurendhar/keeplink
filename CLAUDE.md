@@ -38,7 +38,7 @@ See `lib/features/link_details/` as the reference implementation. States extend 
 
 **Home / navigation**: `HomeCubit` drives the bottom nav (`HomeTab`); the Developer Options tab is only shown when `BuildConfig.isDeveloperOrDebug`. Pages expose a static `route(...)` returning a `MaterialPageRoute`.
 
-**Developer options (`lib/developer_options/`)**: toggles mock vs. real `UrlStore` and runs `DeveloperOptionsService` actions (DB seeding, settings init).
+**Developer options (`lib/features/developer_options/`)**: toggles mock vs. real `UrlStore`; `DeveloperOptionsCubit` itself seeds and prints the database and initializes default settings via `AppSettingsService`.
 
 **Shared code**: theme/colors in `lib/features/theme/` (`MindfulLinksTheme`, `MindfulLinkColors`), logging via `lib/features/logger/logger.dart` (`logError` etc.), toasts via `Utils.showToast` (`lib/utils/utils.dart`), defaults in `lib/core/app_defaults.dart`.
 
