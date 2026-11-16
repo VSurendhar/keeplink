@@ -48,6 +48,16 @@ final class OnSaveTagClicked extends TagSelectionEvent {
   const OnSaveTagClicked();
 }
 
+/// Triggered when the user taps the delete icon on a tag.
+final class OnDeleteTagClicked extends TagSelectionEvent {
+  const OnDeleteTagClicked(this.tag);
+
+  final Tag tag;
+
+  @override
+  List<Object?> get props => [tag.id, tag.tagName];
+}
+
 /// Triggered when a one-shot UI action has been consumed by the view.
 final class OnActionHandled extends TagSelectionEvent {
   const OnActionHandled();

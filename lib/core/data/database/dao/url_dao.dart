@@ -55,6 +55,15 @@ abstract class UrlDao {
   @delete
   Future<void> deleteFolder(Folder folder);
 
+  @Query('SELECT * FROM url_tag WHERE tag_id = :tagId')
+  Future<List<UrlTag>> findUrlTagsByTagId(int tagId);
+
+  @delete
+  Future<void> deleteUrlTags(List<UrlTag> urlTags);
+
+  @delete
+  Future<void> deleteTag(Tag tag);
+
   @Query('DELETE FROM url_tag')
   Future<void> deleteAllUrlTags();
 
@@ -130,6 +139,17 @@ abstract class UrlDao {
       urls.map((url) => url.copyWith(folderId: targetFolderId)).toList(),
     );
     await deleteFolder(folder);
+  }
+
+  @transaction
+  Future<void> deleteTagAndUrlTags(int tagId) async {
+    final tag = await findTagById(tagId);
+    if (tag == null) {
+      throw TagNotFoundException(tagId);
+    }
+
+    await deleteUrlTags(await findUrlTagsByTagId(tagId));
+    await deleteTag(tag);
   }
 
   Future<void> checkIfUrlExists(Url url) async {

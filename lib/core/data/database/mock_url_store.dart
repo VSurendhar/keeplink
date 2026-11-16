@@ -254,6 +254,16 @@ class MockUrlStore implements UrlStore {
     _notifyFolders();
   }
 
+  @override
+  Future<void> deleteTagAndUrlTags(int tagId) async {
+    await _checkIfTagsExist([tagId]);
+
+    _urlTags.removeWhere((urlTag) => urlTag.tagId == tagId);
+    _tags.removeWhere((tag) => tag.id == tagId);
+    _notifyUrlTags();
+    _notifyTags();
+  }
+
   /// Throws [DuplicateUrlException] if a URL with the same address exists.
   Future<void> _checkIfUrlExists(Url url) async {
     if (await findUrlByUrlString(url.url) != null) {

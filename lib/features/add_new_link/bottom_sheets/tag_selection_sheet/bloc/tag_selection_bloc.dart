@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
+import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
@@ -21,6 +22,7 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
     on<OnClearAllRequested>(_onClearAll);
     on<OnToggleCreateMode>(_onToggleCreateMode);
     on<OnSaveTagClicked>(_onSaveTagClicked);
+    on<OnDeleteTagClicked>(_onDeleteTagClicked);
     on<OnActionHandled>(_onActionHandled);
   }
 
@@ -33,6 +35,45 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
     createTagController.dispose();
     createTagFocusNode.dispose();
     return super.close();
+  }
+
+  bool isDefaultTag(Tag tag) =>
+      tag.tagName == AppDefaults.defaultTags.first.tagName;
+
+  /// Deletes the tag and unlinks it from all its links.
+  ///
+  /// The tag is only removed: links keep their other tags (possibly none).
+  /// If the deleted tag was selected, only it leaves the selection; the other
+  /// selected tags stay, and no tag, including the default one, is selected
+  /// in its place. Deleting the only selected tag leaves the selection empty.
+  Future<void> _onDeleteTagClicked(
+    OnDeleteTagClicked event,
+    Emitter<TagSelectionState> emit,
+  ) async {
+    createTagFocusNode.unfocus();
+    final tag = event.tag;
+    final tagId = tag.id;
+    if (tagId == null || isDefaultTag(tag)) return;
+
+    try {
+      await urlStore.deleteTagAndUrlTags(tagId);
+    } catch (e, st) {
+      logError('Failed to delete tag', e, stackTrace: st);
+      emit(state.copyWith(action: const ShowToast('Error While Deleting Tag')));
+      return;
+    }
+
+    final remainingTags = state.tags
+        .where((item) => item.tag.id != tagId)
+        .toList();
+    emit(
+      state.copyWith(
+        tags: remainingTags,
+        totalTagCount: remainingTags.length,
+        selectedTags: state.selectedTags.where((t) => t.id != tagId).toList(),
+        action: ShowToast('${tag.tagName} deleted'),
+      ),
+    );
   }
 
   void _onToggleCreateMode(

@@ -180,6 +180,20 @@ class _$UrlDao extends UrlDao {
                   'id': item.id,
                   'folder_name': item.folderName
                 },
+            changeListener),
+        _urlTagDeletionAdapter = DeletionAdapter(
+            database,
+            'url_tag',
+            ['url_id', 'tag_id'],
+            (UrlTag item) =>
+                <String, Object?>{'url_id': item.urlId, 'tag_id': item.tagId},
+            changeListener),
+        _tagDeletionAdapter = DeletionAdapter(
+            database,
+            'tag',
+            ['id'],
+            (Tag item) =>
+                <String, Object?>{'id': item.id, 'tag_name': item.tagName},
             changeListener);
 
   final sqflite.DatabaseExecutor database;
@@ -199,6 +213,10 @@ class _$UrlDao extends UrlDao {
   final UpdateAdapter<Url> _urlUpdateAdapter;
 
   final DeletionAdapter<Folder> _folderDeletionAdapter;
+
+  final DeletionAdapter<UrlTag> _urlTagDeletionAdapter;
+
+  final DeletionAdapter<Tag> _tagDeletionAdapter;
 
   @override
   Stream<List<Url>> findAllUrl() {
@@ -279,6 +297,14 @@ class _$UrlDao extends UrlDao {
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0),
         arguments: [folderId]);
+  }
+
+  @override
+  Future<List<UrlTag>> findUrlTagsByTagId(int tagId) async {
+    return _queryAdapter.queryList('SELECT * FROM url_tag WHERE tag_id = ?1',
+        mapper: (Map<String, Object?> row) =>
+            UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int),
+        arguments: [tagId]);
   }
 
   @override
@@ -411,6 +437,16 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<void> deleteUrlTags(List<UrlTag> urlTags) async {
+    await _urlTagDeletionAdapter.deleteList(urlTags);
+  }
+
+  @override
+  Future<void> deleteTag(Tag tag) async {
+    await _tagDeletionAdapter.delete(tag);
+  }
+
+  @override
   Future<void> clearAll() async {
     if (database is sqflite.Transaction) {
       await super.clearAll();
@@ -456,6 +492,20 @@ class _$UrlDao extends UrlDao {
           ..database = transaction;
         await transactionDatabase.urlDao
             .deleteFolderAndMoveUrls(sourceFolderId, targetFolderId);
+      });
+    }
+  }
+
+  @override
+  Future<void> deleteTagAndUrlTags(int tagId) async {
+    if (database is sqflite.Transaction) {
+      await super.deleteTagAndUrlTags(tagId);
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.deleteTagAndUrlTags(tagId);
       });
     }
   }

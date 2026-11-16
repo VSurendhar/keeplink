@@ -15,6 +15,8 @@ Future<List<Tag>?> showTagSelectionSheet(
     context: context,
     backgroundColor: Colors.white,
     isScrollControlled: true,
+    isDismissible: false,
+    enableDrag: false,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
     ),
@@ -26,9 +28,12 @@ Future<List<Tag>?> showTagSelectionSheet(
             urlStore: GetIt.instance.get<UrlStore>(),
             initialSelectedTags: selectedTags,
           )..add(const OnTagInit()),
-          child: AnimatedSize(
-            duration: Duration(milliseconds: 250),
-            child: const TagSelectionSheetWidget(),
+          child: PopScope(
+            canPop: false,
+            child: AnimatedSize(
+              duration: Duration(milliseconds: 250),
+              child: const TagSelectionSheetWidget(),
+            ),
           ),
         ),
       ),

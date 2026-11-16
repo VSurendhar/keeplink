@@ -134,6 +134,10 @@ class DatabaseUrlStore implements UrlStore {
       (await _dao).deleteFolderAndMoveUrls(sourceFolderId, targetFolderId);
 
   @override
+  Future<void> deleteTagAndUrlTags(int tagId) async =>
+      (await _dao).deleteTagAndUrlTags(tagId);
+
+  @override
   Future<void> seedDefaultFolderIfNotExist() async {
     for (final folder in AppDefaults.defaultFolders) {
       final existing = await findFolderByName(folder.folderName);

@@ -148,6 +148,19 @@ abstract class UrlStore {
     required int targetFolderId,
   });
 
+  /// Deletes the tag [tagId] and all its URL-tag links. Returns nothing.
+  ///
+  /// URLs are never changed or deleted: each linked URL keeps its other
+  /// tags, and a URL whose only tag was [tagId] is left with no tags. No
+  /// other tag is linked in its place. The database store runs it in one
+  /// transaction, so on failure nothing is deleted. Tag and URL-tag streams
+  /// are notified.
+  ///
+  /// Special cases:
+  /// - **Missing tag**: throws `TagNotFoundException` if no tag has [tagId].
+  /// - **Unused tag**: no links to delete; the tag is just deleted.
+  Future<void> deleteTagAndUrlTags(int tagId);
+
   /// Inserts each folder in `AppDefaults.defaultFolders` whose name
   /// (case-sensitive) doesn't exist yet. Returns nothing.
   ///

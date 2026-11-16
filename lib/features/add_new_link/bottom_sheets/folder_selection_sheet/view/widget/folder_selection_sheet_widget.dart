@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mindful_links/common/widgets/delete_icon_button.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
@@ -371,19 +372,10 @@ class FolderSelectionSheetWidget extends StatelessWidget {
 
   /// Deletes [folder] on tap; its links move to the default folder.
   Widget _buildDeleteButton(BuildContext context, Folder folder) {
-    return InkWell(
+    return DeleteIconButton(
       onTap: () {
         context.read<FolderSelectionBloc>().add(OnDeleteFolderClicked(folder));
       },
-      customBorder: const CircleBorder(),
-      child: const Padding(
-        padding: EdgeInsets.all(8),
-        child: Icon(
-          Icons.delete_outline_rounded,
-          size: 20,
-          color: Color(0xFF9E8E85),
-        ),
-      ),
     );
   }
 

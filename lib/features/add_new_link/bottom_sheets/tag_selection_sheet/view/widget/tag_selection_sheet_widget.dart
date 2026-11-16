@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mindful_links/common/widgets/delete_icon_button.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_bloc.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
@@ -420,6 +421,16 @@ class TagSelectionSheetWidget extends StatelessWidget {
                   ],
                 ),
               ),
+              if (!context.read<TagSelectionBloc>().isDefaultTag(tag))
+                DeleteIconButton(
+                  padding: const EdgeInsets.all(4),
+                  onTap: () {
+                    context.read<TagSelectionBloc>().add(
+                      OnDeleteTagClicked(tag),
+                    );
+                  },
+                ),
+              const SizedBox(width: 4),
               _buildTagSelectionIndicator(isSelected),
             ],
           ),
