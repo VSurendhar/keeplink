@@ -2,15 +2,18 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
+import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_event.dart';
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart';
+import 'package:mindful_links/features/logger/logger.dart';
 
 class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
-  AddNewLinkBloc() : super(AddNewLinkState.initial()) {
+  AddNewLinkBloc({required this.urlStore}) : super(AddNewLinkState.initial()) {
     nameController = TextEditingController();
     urlController = TextEditingController(text: state.url);
     urlFocusNode = FocusNode();
 
+    on<OnInitEvent>(_onInit);
     on<OnNameChanged>(_onNameChanged);
     on<OnUrlChanged>(_onUrlChanged);
     on<OnShowFolderSheetRequested>(_onShowFolderSheetRequested);
@@ -22,6 +25,7 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
     on<OnActionHandled>(_onActionHandled);
   }
 
+  final UrlStore urlStore;
   late final TextEditingController nameController;
   late final TextEditingController urlController;
   late final FocusNode urlFocusNode;
@@ -32,6 +36,35 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
     urlController.dispose();
     urlFocusNode.dispose();
     return super.close();
+  }
+
+  /// Swaps the initial `AppDefaults` folder, which has no id, for its
+  /// database copy, so a link saved without opening the folder sheet still
+  /// has a folder id for `UrlStore.createUrl`.
+  Future<void> _onInit(OnInitEvent event, Emitter<AddNewLinkState> emit) async {
+    final defaultFolderName = state.selectedFolder.folderName;
+    try {
+      final defaultFolder = await urlStore.findFolderByName(defaultFolderName);
+      if (defaultFolder == null) {
+        logError(
+          'Default folder "$defaultFolderName" not found',
+          null,
+          isShowToastInDebug: true,
+        );
+        return;
+      }
+      // Keep a folder the user picked while the lookup was running.
+      if (state.selectedFolder.id == null) {
+        emit(state.copyWith(selectedFolder: defaultFolder));
+      }
+    } catch (e, st) {
+      logError(
+        'Failed to load default folder',
+        e,
+        stackTrace: st,
+        isShowToastInDebug: true,
+      );
+    }
   }
 
   void _onNameChanged(OnNameChanged event, Emitter<AddNewLinkState> emit) {
@@ -73,16 +106,16 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
     OnFolderSelected event,
     Emitter<AddNewLinkState> emit,
   ) {
-    emit(state.copyWith(folder: event.folder));
+    emit(state.copyWith(selectedFolder: event.folder));
   }
 
   void _onTagsSelected(OnTagsSelected event, Emitter<AddNewLinkState> emit) {
-    emit(state.copyWith(tags: event.tags));
+    emit(state.copyWith(selectedTags: event.tags));
   }
 
   void _onTagRemoved(OnTagRemoved event, Emitter<AddNewLinkState> emit) {
     final updatedTags = List<Tag>.from(state.selectedTags)..remove(event.tag);
-    emit(state.copyWith(tags: updatedTags));
+    emit(state.copyWith(selectedTags: updatedTags));
   }
 
   Future<void> _onSaveClicked(

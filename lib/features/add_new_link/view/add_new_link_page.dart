@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:get_it/get_it.dart';
 import 'package:material_symbols_icons/symbols.dart';
+import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/common/widgets/save_button.dart';
@@ -23,7 +25,9 @@ class AddNewLinkPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) => AddNewLinkBloc(),
+      create: (context) =>
+          AddNewLinkBloc(urlStore: GetIt.instance.get<UrlStore>())
+            ..add(const OnInitEvent()),
       child: const AddNewLinkView(),
     );
   }

@@ -9,6 +9,11 @@ sealed class AddNewLinkEvent extends Equatable {
   List<Object?> get props => [];
 }
 
+/// Triggered when the page opens, to load the default folder with its id.
+final class OnInitEvent extends AddNewLinkEvent {
+  const OnInitEvent();
+}
+
 /// Triggered when the link name input changes.
 final class OnNameChanged extends AddNewLinkEvent {
   const OnNameChanged(this.name);

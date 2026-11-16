@@ -36,8 +36,8 @@ final class AddNewLinkState extends Equatable {
     String? urlName,
     String? url,
     String? imageUrl,
-    Folder? folder,
-    List<Tag>? tags,
+    Folder? selectedFolder,
+    List<Tag>? selectedTags,
     AddNewLinkAction? action,
     bool clearAction = false,
   }) {
@@ -45,8 +45,8 @@ final class AddNewLinkState extends Equatable {
       urlName: urlName ?? this.urlName,
       url: url ?? this.url,
       imageUrl: imageUrl ?? this.imageUrl,
-      selectedFolder: folder ?? this.selectedFolder,
-      selectedTags: tags ?? this.selectedTags,
+      selectedFolder: selectedFolder ?? this.selectedFolder,
+      selectedTags: selectedTags ?? this.selectedTags,
       action: clearAction ? null : (action ?? this.action),
     );
   }
