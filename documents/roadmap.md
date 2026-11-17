@@ -11,6 +11,7 @@ Version 1 covers only the basic CRUD operations on links.
   - The link is saved into a folder.
   - The link can have tags, or no tags.
   - New folders and tags can be created while saving a link.
+- **Receive links shared from other apps**: a link shared to the app from another app opens the create-link flow.
 - **Read links**:
   - The home screen shows the saved links.
   - The folder screen shows all folders. Tapping a folder opens a screen with the links saved in it.

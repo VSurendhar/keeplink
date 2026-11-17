@@ -2,12 +2,15 @@
 
 A mindful link management Flutter application for saving, reading, updating and deleting URLs.
 
+The main goal of the application is to bring AI-based categorization and search to saved links.
+
 ## Requirements
 
 ### Functional Requirements
 
 - Save a link.
-- Retrieve the link's image metadata from the internet.
+- A simple web crawler that fetches the link's metadata: meta image, meta title and meta description.
+- Show a description for each link, taken from its meta description or allow user to insert his own.
 - Tag links and create folders.
 - Delete, modify, search and sort links and folders by keywords, selection and tags.
 - Change the theme and language, and save user preferences.
@@ -19,6 +22,7 @@ A mindful link management Flutter application for saving, reading, updating and 
 - Analytics with Google Analytics or Mixpanel.
 - Store logs in a local file.
 - Trash.
+- AI-based categorization and search.
 
 ### Non-Functional Requirements
 
@@ -28,12 +32,9 @@ A mindful link management Flutter application for saving, reading, updating and 
 ### Out of Scope
 
 - User authentication, accounts, or saving links on a remote server.
-- Handling link collisions between two concurrent live instances.
 - Saving links from other sources such as Telegram or Slack bots.
 - An eviction policy for cached image metadata.
 - TinyURL integration.
-- AI-based categorization and search.
-- Descriptions for links.
 
 ## Development Commands
 
