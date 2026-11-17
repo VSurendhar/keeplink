@@ -1,2 +1,0 @@
-- Need to show the delete Icon in the Folder Bottom Sheet
-- Need to show the delete Icon in the Tag Bottom Sheet
