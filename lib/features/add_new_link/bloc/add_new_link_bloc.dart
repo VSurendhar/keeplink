@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:mindful_links/core/app_defaults.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
+import 'package:mindful_links/core/data/database/exception/duplicate_title_exception.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
@@ -165,6 +166,8 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
       );
     } on DuplicateUrlException catch (e, st) {
       _onSaveFailed(emit, 'Link already exists', e, st);
+    } on DuplicateTitleException catch (e, st) {
+      _onSaveFailed(emit, 'A link with this name already exists', e, st);
     } on FolderNotFoundException catch (e, st) {
       final folder = state.selectedFolder;
       final name = folder.id == e.folderId ? folder.folderName : 'Selected';

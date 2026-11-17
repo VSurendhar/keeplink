@@ -3,6 +3,7 @@ import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/entity/url_tag.dart';
+import 'package:mindful_links/core/data/database/exception/duplicate_title_exception.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
@@ -34,6 +35,8 @@ abstract class UrlDao {
   @Query('SELECT tag_id FROM url_tag')
   Future<List<int>> findAllUrlTagIds();
 
+  /// Internal to [createUrl], which validates the URL first; call
+  /// [createUrl] instead of this.
   @insert
   Future<int> insertUrl(Url url);
 
@@ -87,6 +90,9 @@ abstract class UrlDao {
 
   @Query('SELECT * FROM url WHERE url = :url')
   Future<Url?> findUrlByUrlString(String url);
+
+  @Query('SELECT * FROM url WHERE title = :title')
+  Future<Url?> findUrlByTitle(String title);
 
   @Query('SELECT * FROM tag WHERE id = :id')
   Future<Tag?> findTagById(int id);
@@ -152,14 +158,16 @@ abstract class UrlDao {
     await deleteTag(tag);
   }
 
+  /// Throws [DuplicateUrlException] if a URL with the same id or address
+  /// exists, or [DuplicateTitleException] if one with the same title exists.
   Future<void> checkIfUrlExists(Url url) async {
     final id = url.id;
-    final existingUrl = id != null
-        ? await findUrlById(id)
-        : await findUrlByUrlString(url.url);
-
-    if (existingUrl != null) {
+    final idTaken = id != null && await findUrlById(id) != null;
+    if (idTaken || await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
+    }
+    if (await findUrlByTitle(url.title) != null) {
+      throw DuplicateTitleException(url.title);
     }
   }
 

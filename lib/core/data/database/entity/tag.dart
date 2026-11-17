@@ -1,6 +1,11 @@
 import 'package:floor/floor.dart';
 
-@Entity(tableName: "tag")
+@Entity(
+  tableName: 'tag',
+  indices: [
+    Index(value: ['tag_name'], unique: true),
+  ],
+)
 class Tag {
   Tag({this.id, required this.tagName});
 

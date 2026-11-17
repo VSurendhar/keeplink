@@ -103,6 +103,14 @@ class _$UrlDatabase extends UrlDatabase {
             'CREATE TABLE IF NOT EXISTS `folder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `folder_name` TEXT NOT NULL)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `tag` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `tag_name` TEXT NOT NULL)');
+        await database
+            .execute('CREATE UNIQUE INDEX `index_url_url` ON `url` (`url`)');
+        await database.execute(
+            'CREATE UNIQUE INDEX `index_url_title` ON `url` (`title`)');
+        await database.execute(
+            'CREATE UNIQUE INDEX `index_folder_folder_name` ON `folder` (`folder_name`)');
+        await database.execute(
+            'CREATE UNIQUE INDEX `index_tag_tag_name` ON `tag` (`tag_name`)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -373,6 +381,22 @@ class _$UrlDao extends UrlDao {
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0),
         arguments: [url]);
+  }
+
+  @override
+  Future<Url?> findUrlByTitle(String title) async {
+    return _queryAdapter.query('SELECT * FROM url WHERE title = ?1',
+        mapper: (Map<String, Object?> row) => Url(
+            id: row['id'] as int?,
+            url: row['url'] as String,
+            title: row['title'] as String,
+            metaImageUrl: row['meta_image_url'] as String,
+            metaDescription: row['meta_description'] as String,
+            folderId: row['folder_id'] as int?,
+            createdAt: row['created_at'] as int,
+            updatedAt: row['updated_at'] as int,
+            isFavorite: (row['is_favorite'] as int) != 0),
+        arguments: [title]);
   }
 
   @override

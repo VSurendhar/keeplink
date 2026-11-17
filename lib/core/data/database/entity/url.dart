@@ -1,6 +1,12 @@
 import 'package:floor/floor.dart';
 
-@Entity(tableName: "url")
+@Entity(
+  tableName: 'url',
+  indices: [
+    Index(value: ['url'], unique: true),
+    Index(value: ['title'], unique: true),
+  ],
+)
 class Url {
   Url({
     this.id,

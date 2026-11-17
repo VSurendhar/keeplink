@@ -44,9 +44,6 @@ class DatabaseUrlStore implements UrlStore {
       (await _dao).insertFolder(folder);
 
   @override
-  Future<int> insertUrl(Url url) async => (await _dao).insertUrl(url);
-
-  @override
   Future<int> insertTag(Tag tag) async => (await _dao).insertTag(tag);
 
   @override
@@ -104,6 +101,10 @@ class DatabaseUrlStore implements UrlStore {
   @override
   Future<Url?> findUrlByUrlString(String url) async =>
       (await _dao).findUrlByUrlString(url);
+
+  @override
+  Future<Url?> findUrlByTitle(String title) async =>
+      (await _dao).findUrlByTitle(title);
 
   @override
   Future<Tag?> findTagById(int id) async => (await _dao).findTagById(id);

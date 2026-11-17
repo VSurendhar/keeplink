@@ -18,22 +18,18 @@ abstract class UrlStore {
 
   /// Inserts [folder] as it is and returns its id.
   ///
-  /// Does not check for an existing folder with the same name, so callers
-  /// must check first (e.g. with [findFolderByName]) to avoid duplicates.
-  /// If [folder] has an `id` that is already taken, the database throws.
+  /// Folder names are unique: if the name or `id` is already taken, the
+  /// database store throws (unique constraint) and the mock store throws a
+  /// [StateError]. Callers should check first (e.g. with [findFolderByName])
+  /// to show a friendly message.
   Future<int> insertFolder(Folder folder);
-
-  /// Inserts [url] as it is and returns its id.
-  ///
-  /// Does not check for duplicates or link a folder/tags; use [createUrl]
-  /// for that.
-  Future<int> insertUrl(Url url);
 
   /// Inserts [tag] as it is and returns its id.
   ///
-  /// Does not check for an existing tag with the same name, so callers must
-  /// check first (e.g. with [findTagByName]) to avoid duplicates.
-  /// If [tag] has an `id` that is already taken, the database throws.
+  /// Tag names are unique: if the name or `id` is already taken, the
+  /// database store throws (unique constraint) and the mock store throws a
+  /// [StateError]. Callers should check first (e.g. with [findTagByName]) to
+  /// show a friendly message.
   Future<int> insertTag(Tag tag);
 
   /// Links a URL to a tag. Returns nothing.
@@ -78,6 +74,12 @@ abstract class UrlStore {
   /// is none. Used for the duplicate check.
   Future<Url?> findUrlByUrlString(String url);
 
+  /// Returns the saved URL whose title is exactly [title], or `null` if there
+  /// is none. Used for the duplicate check.
+  ///
+  /// Case-sensitive, for the same reason as [findFolderByName].
+  Future<Url?> findUrlByTitle(String title);
+
   /// Returns the tag with this [id], or `null` if there is none.
   Future<Tag?> findTagById(int id);
 
@@ -111,15 +113,17 @@ abstract class UrlStore {
   /// Saves [url] in the folder [folderId] and links it to [tagIds]. Returns
   /// the new URL's id.
   ///
-  /// Never creates folders or tags: they must already exist (the selection
-  /// sheets create them). Everything is checked before anything is inserted,
-  /// so on any failure nothing is saved. The database store also runs it in
-  /// one transaction.
+  /// The only way to save a URL. Never creates folders or tags: they must
+  /// already exist (the selection sheets create them). Everything is checked
+  /// before anything is inserted, so on any failure nothing is saved. The
+  /// database store also runs it in one transaction, and its unique
+  /// constraints on address and title reject duplicates as a last resort.
   ///
   /// Special cases:
-  /// - **Duplicate URL**: throws `DuplicateUrlException` if the URL already
-  ///   exists. The database store checks by `id` when [url] has one,
-  ///   otherwise by address; the mock store checks by address only.
+  /// - **Duplicate URL**: throws `DuplicateUrlException` if a URL with the
+  ///   same address (or the same `id`, when [url] has one) already exists.
+  /// - **Duplicate title**: throws `DuplicateTitleException` if a URL with
+  ///   the same title already exists.
   /// - **Missing folder**: throws `FolderNotFoundException` if no folder has
   ///   [folderId].
   /// - **Missing tag**: throws `TagNotFoundException` for the first id in

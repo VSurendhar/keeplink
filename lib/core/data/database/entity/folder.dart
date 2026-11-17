@@ -1,6 +1,11 @@
 import 'package:floor/floor.dart';
 
-@Entity(tableName: "folder")
+@Entity(
+  tableName: 'folder',
+  indices: [
+    Index(value: ['folder_name'], unique: true),
+  ],
+)
 class Folder {
   Folder({this.id, required this.folderName});
 

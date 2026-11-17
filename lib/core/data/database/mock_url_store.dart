@@ -4,6 +4,7 @@ import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/entity/url_tag.dart';
+import 'package:mindful_links/core/data/database/exception/duplicate_title_exception.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
@@ -62,6 +63,10 @@ class MockUrlStore implements UrlStore {
   // Insert Operations
   @override
   Future<int> insertFolder(Folder folder) async {
+    // Mirrors the database's unique constraint on `folder_name`.
+    if (await findFolderByName(folder.folderName) != null) {
+      throw StateError('Folder "${folder.folderName}" already exists');
+    }
     final existingId = folder.id;
     final int id = existingId ?? _folderIdSeq++;
     final newFolder = Folder(id: id, folderName: folder.folderName);
@@ -71,17 +76,11 @@ class MockUrlStore implements UrlStore {
   }
 
   @override
-  Future<int> insertUrl(Url url) async {
-    final existingId = url.id;
-    final int id = existingId ?? _urlIdSeq++;
-    final newUrl = url.copyWith(id: id);
-    _urls.add(newUrl);
-    _notifyUrls();
-    return id;
-  }
-
-  @override
   Future<int> insertTag(Tag tag) async {
+    // Mirrors the database's unique constraint on `tag_name`.
+    if (await findTagByName(tag.tagName) != null) {
+      throw StateError('Tag "${tag.tagName}" already exists');
+    }
     final existingId = tag.id;
     final int id = existingId ?? _tagIdSeq++;
     final newTag = Tag(id: id, tagName: tag.tagName);
@@ -177,6 +176,14 @@ class MockUrlStore implements UrlStore {
   }
 
   @override
+  Future<Url?> findUrlByTitle(String title) async {
+    for (final item in _urls) {
+      if (item.title == title) return item;
+    }
+    return null;
+  }
+
+  @override
   Future<Tag?> findTagById(int id) async {
     for (final tag in _tags) {
       if (tag.id == id) return tag;
@@ -225,7 +232,9 @@ class MockUrlStore implements UrlStore {
     final uniqueTagIds = tagIds.toSet();
     await _checkIfTagsExist(uniqueTagIds);
 
-    final urlId = await insertUrl(url.copyWith(folderId: folderId));
+    final urlId = url.id ?? _urlIdSeq++;
+    _urls.add(url.copyWith(id: urlId, folderId: folderId));
+    _notifyUrls();
     for (final tagId in uniqueTagIds) {
       await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
     }
@@ -264,10 +273,16 @@ class MockUrlStore implements UrlStore {
     _notifyTags();
   }
 
-  /// Throws [DuplicateUrlException] if a URL with the same address exists.
+  /// Throws [DuplicateUrlException] if a URL with the same id or address
+  /// exists, or [DuplicateTitleException] if one with the same title exists.
   Future<void> _checkIfUrlExists(Url url) async {
-    if (await findUrlByUrlString(url.url) != null) {
+    final id = url.id;
+    final idTaken = id != null && await findUrlById(id) != null;
+    if (idTaken || await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
+    }
+    if (await findUrlByTitle(url.title) != null) {
+      throw DuplicateTitleException(url.title);
     }
   }
 
