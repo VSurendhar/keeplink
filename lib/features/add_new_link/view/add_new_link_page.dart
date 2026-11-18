@@ -13,7 +13,9 @@ import 'package:mindful_links/features/add_new_link/bloc/add_new_link_event.dart
 import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/view/show_folder_selection_sheet.dart';
 import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/view/show_tag_selection_sheet.dart';
-import 'package:mindful_links/features/add_new_link/view/widgets/link_preview_card_widget.dart';
+import 'package:mindful_links/core/data/files/preview_image_storage.dart';
+import 'package:mindful_links/features/add_new_link/bottom_sheets/preview_image_source_sheet/view/show_preview_image_source_sheet.dart';
+import 'package:mindful_links/features/add_new_link/view/widgets/preview_image_box.dart';
 import 'package:mindful_links/features/add_new_link/view/widgets/tag_selection_widget.dart';
 import 'package:mindful_links/features/home/constants/constants.dart';
 import 'package:mindful_links/features/theme/colors.dart';
@@ -26,9 +28,10 @@ class AddNewLinkPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (context) =>
-          AddNewLinkBloc(urlStore: GetIt.instance.get<UrlStore>())
-            ..add(const OnInitEvent()),
+      create: (context) => AddNewLinkBloc(
+        urlStore: GetIt.instance.get<UrlStore>(),
+        previewImageStorage: GetIt.instance.get<PreviewImageStorage>(),
+      )..add(const OnInitEvent()),
       child: const AddNewLinkView(),
     );
   }
@@ -53,6 +56,8 @@ class AddNewLinkView extends StatelessWidget {
           );
         } else if (action is ShowTagSelectionSheetAction) {
           _showTagSelectionSheet(context, selectedTags: state.selectedTags);
+        } else if (action is ShowPreviewImageSourceSheetAction) {
+          _showPreviewImageSourceSheet(context);
         } else if (action is ShowToast) {
           Utils.showToast(action.message);
         } else if (action is CloseWithMessage) {
@@ -127,10 +132,10 @@ class AddNewLinkView extends StatelessWidget {
                   const SizedBox(height: 12),
                   _buildUrlInputCard(context),
                   const SizedBox(height: 16),
-                  LinkPreviewCardWidget(
-                    previewImageUrl: state.imageUrl.isNotEmpty
-                        ? state.imageUrl
-                        : null,
+                  _buildPreviewImageBox(
+                    context,
+                    previewImageName: state.previewImageName,
+                    isSaving: state.isSavingPreviewImage,
                   ),
                   const SizedBox(height: 16),
                   _buildSaveToFolderCard(
@@ -310,6 +315,23 @@ class AddNewLinkView extends StatelessWidget {
     );
   }
 
+  /// The full path is built here, at display time, from the stored file name.
+  Widget _buildPreviewImageBox(
+    BuildContext context, {
+    required String? previewImageName,
+    required bool isSaving,
+  }) {
+    final bloc = context.read<AddNewLinkBloc>();
+    final imagePath = previewImageName == null
+        ? null
+        : bloc.previewImageStorage.filePathFor(previewImageName);
+    return PreviewImageBox(
+      imagePath: imagePath,
+      isSaving: isSaving,
+      onTap: () => bloc.add(const OnShowPreviewImageSourceSheetRequested()),
+    );
+  }
+
   Widget _buildSaveToFolderCard(
     BuildContext context, {
     required String folderName,
@@ -427,6 +449,13 @@ class AddNewLinkView extends StatelessWidget {
     );
     if (tags != null && context.mounted) {
       context.read<AddNewLinkBloc>().add(OnTagsSelected(tags));
+    }
+  }
+
+  Future<void> _showPreviewImageSourceSheet(BuildContext context) async {
+    final source = await showPreviewImageSourceSheet(context);
+    if (source != null && context.mounted) {
+      context.read<AddNewLinkBloc>().add(OnPickPreviewImageRequested(source));
     }
   }
 }

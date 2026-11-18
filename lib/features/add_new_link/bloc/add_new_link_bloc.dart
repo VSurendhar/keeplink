@@ -1,6 +1,8 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
+import 'package:image_cropper/image_cropper.dart';
 import 'package:mindful_links/core/app_defaults.dart';
+import 'package:mindful_links/core/data/files/preview_image_storage.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/exception/duplicate_title_exception.dart';
@@ -13,7 +15,8 @@ import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart
 import 'package:mindful_links/features/logger/logger.dart';
 
 class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
-  AddNewLinkBloc({required this.urlStore}) : super(AddNewLinkState.initial()) {
+  AddNewLinkBloc({required this.urlStore, required this.previewImageStorage})
+    : super(AddNewLinkState.initial()) {
     nameController = TextEditingController();
     urlController = TextEditingController(text: state.url);
     urlFocusNode = FocusNode();
@@ -26,11 +29,16 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
     on<OnFolderSelected>(_onFolderSelected);
     on<OnTagsSelected>(_onTagsSelected);
     on<OnTagRemoved>(_onTagRemoved);
+    on<OnShowPreviewImageSourceSheetRequested>(
+      _onShowPreviewImageSourceSheetRequested,
+    );
+    on<OnPickPreviewImageRequested>(_onPickPreviewImageRequested);
     on<OnSaveClicked>(_onSaveClicked);
     on<OnActionHandled>(_onActionHandled);
   }
 
   final UrlStore urlStore;
+  final PreviewImageStorage previewImageStorage;
   late final TextEditingController nameController;
   late final TextEditingController urlController;
   late final FocusNode urlFocusNode;
@@ -123,6 +131,70 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
     emit(state.copyWith(selectedTags: updatedTags));
   }
 
+  void _onShowPreviewImageSourceSheetRequested(
+    OnShowPreviewImageSourceSheetRequested event,
+    Emitter<AddNewLinkState> emit,
+  ) {
+    if (state.isSavingPreviewImage) return;
+    emit(state.copyWith(action: const ShowPreviewImageSourceSheetAction()));
+  }
+
+  /// Pick → crop → store. Cancelling the picker or cropper changes nothing.
+  /// A replaced image picked earlier on this screen is deleted once the new
+  /// one is stored.
+  Future<void> _onPickPreviewImageRequested(
+    OnPickPreviewImageRequested event,
+    Emitter<AddNewLinkState> emit,
+  ) async {
+    if (state.isSavingPreviewImage) return;
+
+    final CroppedFile? croppedFile;
+    try {
+      croppedFile = await previewImageStorage.pickAndCrop(event.source);
+    } catch (e, st) {
+      // e.g. camera or photo access denied.
+      logError('Failed to pick or crop preview image', e, stackTrace: st);
+      emit(state.copyWith(action: const ShowToast('Could not open the image')));
+      return;
+    }
+    if (croppedFile == null) return;
+    emit(state.copyWith(isSavingPreviewImage: true));
+    final String fileName;
+    try {
+      fileName = await previewImageStorage.store(croppedFile);
+    } catch (e, st) {
+      logError('Failed to store preview image', e, stackTrace: st);
+      emit(
+        state.copyWith(
+          isSavingPreviewImage: false,
+          action: const ShowToast('Error While Saving Image'),
+        ),
+      );
+      return;
+    }
+
+    final previousFileName = state.previewImageName;
+    emit(
+      state.copyWith(
+        previewImageName: fileName,
+        isSavingPreviewImage: false,
+      ),
+    );
+    if (previousFileName != null) {
+      await _deletePreviewImage(previousFileName);
+    }
+  }
+
+  /// Deletes a replaced preview image. A failure only leaves an unused file
+  /// behind, so it is logged without telling the user.
+  Future<void> _deletePreviewImage(String fileName) async {
+    try {
+      await previewImageStorage.delete(fileName);
+    } catch (e, st) {
+      logError('Failed to delete preview image $fileName', e, stackTrace: st);
+    }
+  }
+
   Future<void> _onSaveClicked(
     OnSaveClicked event,
     Emitter<AddNewLinkState> emit,
@@ -154,6 +226,7 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
           createdAt: now,
           updatedAt: now,
           isFavorite: false,
+          previewImageName: state.previewImageName,
         ),
         folderId: folderId,
         tagIds: tagIds,
