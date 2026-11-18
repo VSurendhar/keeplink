@@ -9,6 +9,19 @@ The main goal of the application is to bring AI-based categorization and search 
 ### Functional Requirements
 
 - Save a link.
+- Save every link exactly as the user entered it (only surrounding spaces are trimmed). Validation never changes the saved link.
+- A link is a duplicate only when its text exactly matches a saved link. `example.com` and `https://example.com` are different links.
+- Accept only absolute URLs, e.g. `https://example.com/page`. Relative URLs such as `./page`, `../page`, `?q=1` or `#section` are rejected. Text starting with `/` is accepted as a Mac or Linux path (see below), so a website-relative link like `/blog/post` is saved too.
+- Accept bare domains without a scheme, e.g. `example.com` or `babies.com`. The domain must be valid: no spaces and no empty parts (`a..com`). Without a scheme the domain needs a dot, so a single word like `notes` is rejected; `localhost` is the exception.
+- Accept servers without a dot when the scheme is typed, e.g. `https://localhost/user/1234` or `http://intranet/wiki`.
+- Accept file paths, saved as a note of where something lives even if the app can't open them:
+  - Absolute Windows paths, e.g. `C:\Users\me` or `c:/Users/me`. Drive-relative paths such as `C:Users` are rejected.
+  - Windows network paths, e.g. `\\server\share\a.txt`.
+  - Mac and Linux paths from the root or the home folder, e.g. `/home/me/notes.md` or `~/Documents`.
+  - Any `file:` link with a path, e.g. `file:///C:/Users/me`, `file:///sdcard/a.txt` or `file://server/share/a.txt`.
+- Accept Android and iOS deep links, including reverse-DNS schemes such as `com.example.app:/callback`.
+- Reject Data URLs (`data:`), Blob URLs (`blob:`) and JavaScript URLs (`javascript:`).
+- Reject device-local links that stop working once saved: `content:`, `asset:`, `resource:` and `android.resource:`.
 - A simple web crawler that fetches the link's metadata: meta image, meta title and meta description.
 - Show a description for each link, taken from its meta description or allow user to insert his own.
 - Tag links and create folders.
@@ -28,6 +41,8 @@ The main goal of the application is to bring AI-based categorization and search 
 
 - Save any number of links while avoiding duplicates.
 - Run on both Android and iOS, built with Flutter.
+- Security: never open a saved URL in a WebView, and never render or execute the content a URL points to. The metadata crawler may fetch a page only to read its meta title, meta description and meta image. It must not run scripts, render the page, or download, decode or process any other resource.
+- Data URLs are not supported because they embed the resource content itself, which makes them large (Base64 encoding alone adds about 33% to the data's size). Storing such payloads in SQLite would increase database size, disk I/O and memory use, and passing them to future AI integrations as plain text would waste input tokens and raise processing costs. Mindful Links manages links, not embedded resources, so supporting them adds overhead with no functional benefit.
 
 ### Out of Scope
 
@@ -35,6 +50,10 @@ The main goal of the application is to bring AI-based categorization and search 
 - Saving links from other sources such as Telegram or Slack bots.
 - An eviction policy for cached image metadata.
 - TinyURL integration.
+
+## References
+
+- To learn about URLs and their types, see MDN's [What is a URL?](https://developer.mozilla.org/en-US/docs/Learn_web_development/Howto/Web_mechanics/What_is_a_URL).
 
 ## Development Commands
 
