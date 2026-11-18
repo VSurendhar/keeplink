@@ -96,7 +96,7 @@ class _$UrlDatabase extends UrlDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `preview_image_name` TEXT)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `url_tag` (`url_id` INTEGER NOT NULL, `tag_id` INTEGER NOT NULL, PRIMARY KEY (`url_id`, `tag_id`))');
         await database.execute(
@@ -141,7 +141,8 @@ class _$UrlDao extends UrlDao {
                   'folder_id': item.folderId,
                   'created_at': item.createdAt,
                   'updated_at': item.updatedAt,
-                  'is_favorite': item.isFavorite ? 1 : 0
+                  'is_favorite': item.isFavorite ? 1 : 0,
+                  'preview_image_name': item.previewImageName
                 },
             changeListener),
         _folderInsertionAdapter = InsertionAdapter(
@@ -177,7 +178,8 @@ class _$UrlDao extends UrlDao {
                   'folder_id': item.folderId,
                   'created_at': item.createdAt,
                   'updated_at': item.updatedAt,
-                  'is_favorite': item.isFavorite ? 1 : 0
+                  'is_favorite': item.isFavorite ? 1 : 0,
+                  'preview_image_name': item.previewImageName
                 },
             changeListener),
         _folderDeletionAdapter = DeletionAdapter(
@@ -238,7 +240,8 @@ class _$UrlDao extends UrlDao {
             folderId: row['folder_id'] as int?,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
-            isFavorite: (row['is_favorite'] as int) != 0),
+            isFavorite: (row['is_favorite'] as int) != 0,
+            previewImageName: row['preview_image_name'] as String?),
         queryableName: 'url',
         isView: false);
   }
@@ -303,7 +306,8 @@ class _$UrlDao extends UrlDao {
             folderId: row['folder_id'] as int?,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
-            isFavorite: (row['is_favorite'] as int) != 0),
+            isFavorite: (row['is_favorite'] as int) != 0,
+            previewImageName: row['preview_image_name'] as String?),
         arguments: [folderId]);
   }
 
@@ -363,7 +367,8 @@ class _$UrlDao extends UrlDao {
             folderId: row['folder_id'] as int?,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
-            isFavorite: (row['is_favorite'] as int) != 0),
+            isFavorite: (row['is_favorite'] as int) != 0,
+            previewImageName: row['preview_image_name'] as String?),
         arguments: [id]);
   }
 
@@ -379,7 +384,8 @@ class _$UrlDao extends UrlDao {
             folderId: row['folder_id'] as int?,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
-            isFavorite: (row['is_favorite'] as int) != 0),
+            isFavorite: (row['is_favorite'] as int) != 0,
+            previewImageName: row['preview_image_name'] as String?),
         arguments: [url]);
   }
 
@@ -395,7 +401,8 @@ class _$UrlDao extends UrlDao {
             folderId: row['folder_id'] as int?,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
-            isFavorite: (row['is_favorite'] as int) != 0),
+            isFavorite: (row['is_favorite'] as int) != 0,
+            previewImageName: row['preview_image_name'] as String?),
         arguments: [title]);
   }
 

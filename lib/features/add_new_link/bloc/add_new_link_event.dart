@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/tag.dart';
 
@@ -72,6 +73,23 @@ final class OnTagRemoved extends AddNewLinkEvent {
 
   @override
   List<Object?> get props => [tag];
+}
+
+/// Triggered when the preview image box is tapped, to open the image source
+/// bottom sheet.
+final class OnShowPreviewImageSourceSheetRequested extends AddNewLinkEvent {
+  const OnShowPreviewImageSourceSheetRequested();
+}
+
+/// Triggered when an image [source] (gallery or camera) is chosen for the
+/// preview image.
+final class OnPickPreviewImageRequested extends AddNewLinkEvent {
+  const OnPickPreviewImageRequested(this.source);
+
+  final ImageSource source;
+
+  @override
+  List<Object?> get props => [source];
 }
 
 /// Triggered when the "Save Link" button is clicked.

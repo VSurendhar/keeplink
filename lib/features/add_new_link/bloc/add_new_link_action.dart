@@ -17,6 +17,12 @@ final class ShowTagSelectionSheetAction extends AddNewLinkAction {
   const ShowTagSelectionSheetAction();
 }
 
+/// Triggered when the view should open the preview image source bottom sheet
+/// (gallery or camera).
+final class ShowPreviewImageSourceSheetAction extends AddNewLinkAction {
+  const ShowPreviewImageSourceSheetAction();
+}
+
 /// Triggered when the view should show a toast with [message].
 final class ShowToast extends AddNewLinkAction {
   const ShowToast(this.message);

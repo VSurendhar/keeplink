@@ -14,6 +14,8 @@ final class AddNewLinkState extends Equatable {
     required this.selectedFolder,
     required this.selectedTags,
     this.isSaving = false,
+    this.previewImageName,
+    this.isSavingPreviewImage = false,
     this.action,
   });
 
@@ -25,6 +27,13 @@ final class AddNewLinkState extends Equatable {
 
   /// Whether a save is in progress; drives the Save button's loading state.
   final bool isSaving;
+
+  /// File name of the stored preview image, or `null` if none was picked.
+  final String? previewImageName;
+
+  /// Whether a picked image is being copied into storage; drives the preview
+  /// box's spinner and keeps the Save button disabled.
+  final bool isSavingPreviewImage;
   final AddNewLinkAction? action;
 
   factory AddNewLinkState.initial() {
@@ -43,6 +52,8 @@ final class AddNewLinkState extends Equatable {
     Folder? selectedFolder,
     List<Tag>? selectedTags,
     bool? isSaving,
+    String? previewImageName,
+    bool? isSavingPreviewImage,
     AddNewLinkAction? action,
     bool clearAction = false,
   }) {
@@ -53,11 +64,14 @@ final class AddNewLinkState extends Equatable {
       selectedFolder: selectedFolder ?? this.selectedFolder,
       selectedTags: selectedTags ?? this.selectedTags,
       isSaving: isSaving ?? this.isSaving,
+      previewImageName: previewImageName ?? this.previewImageName,
+      isSavingPreviewImage: isSavingPreviewImage ?? this.isSavingPreviewImage,
       action: clearAction ? null : (action ?? this.action),
     );
   }
 
   bool get isSaveEnabled =>
+      !isSavingPreviewImage &&
       urlName.trim().isNotEmpty &&
       url.trim().isNotEmpty &&
       selectedFolder.folderName.trim().isNotEmpty;
@@ -70,11 +84,13 @@ final class AddNewLinkState extends Equatable {
     selectedFolder,
     selectedTags,
     isSaving,
+    previewImageName,
+    isSavingPreviewImage,
     action,
   ];
 
   @override
   String toString() {
-    return 'AddNewLinkState{urlName: $urlName, url: $url, imageUrl: $imageUrl, selectedFolder: $selectedFolder, selectedTags: $selectedTags, isSaving: $isSaving, action: $action}';
+    return 'AddNewLinkState{urlName: $urlName, url: $url, imageUrl: $imageUrl, selectedFolder: $selectedFolder, selectedTags: $selectedTags, isSaving: $isSaving, previewImageName: $previewImageName, isSavingPreviewImage: $isSavingPreviewImage, action: $action}';
   }
 }
