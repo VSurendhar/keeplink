@@ -13,6 +13,7 @@ import 'package:injectable/injectable.dart' as _i526;
 
 import '../../features/settings/service/app_settings_service.dart' as _i732;
 import '../data/database/url_store.dart' as _i994;
+import '../data/files/preview_image_storage.dart' as _i939;
 
 extension GetItInjectableX on _i174.GetIt {
 // initializes the registration of main-scope dependencies inside of GetIt
@@ -26,6 +27,8 @@ extension GetItInjectableX on _i174.GetIt {
       environmentFilter,
     );
     gh.lazySingleton<_i994.UrlStore>(() => _i994.UrlStore());
+    gh.lazySingleton<_i939.PreviewImageStorage>(
+        () => _i939.PreviewImageStorage());
     gh.lazySingleton<_i732.AppSettingsService>(
         () => _i732.AppSettingsService());
     return this;
