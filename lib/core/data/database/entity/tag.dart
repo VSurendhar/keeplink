@@ -14,4 +14,9 @@ class Tag {
 
   @ColumnInfo(name: "tag_name")
   final String tagName;
+
+  @override
+  String toString() {
+    return 'Tag{id: $id, tagName: $tagName}';
+  }
 }

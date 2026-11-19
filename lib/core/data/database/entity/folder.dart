@@ -14,4 +14,9 @@ class Folder {
 
   @ColumnInfo(name: 'folder_name')
   final String folderName;
+
+  @override
+  String toString() {
+    return 'Folder{id: $id, folderName: $folderName}';
+  }
 }
