@@ -40,6 +40,6 @@ See `lib/features/add_new_link/` as the reference implementation. States extend 
 
 **Developer options (`lib/features/developer_options/`)**: toggles mock vs. real `UrlStore`; `DeveloperOptionsCubit` itself seeds and prints the database and initializes default settings via `AppSettingsService`.
 
-**Shared code**: theme/colors in `lib/features/theme/` (`KeepLinksTheme`, `KeepLinksColors`), logging via `lib/features/logger/logger.dart` (`logError` etc.), toasts via `Utils.showToast` (`lib/utils/utils.dart`), defaults in `lib/core/app_defaults.dart`.
+**Shared code**: theme/colors in `lib/features/theme/` (`KeepLinksTheme`, `KeepLinksColors`), logging via `lib/features/logger/logger.dart` (`logError` etc.), toasts via `Utils.showToast` (`lib/utils/utils.dart`), defaults in `lib/core/utils/app_defaults.dart`.
 
 **Tests**: `test/` currently only holds an empty placeholder `widget_test.dart` and we don't use tests in this project.

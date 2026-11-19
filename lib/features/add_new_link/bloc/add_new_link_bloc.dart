@@ -1,7 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart';
 import 'package:image_cropper/image_cropper.dart';
-import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/utils/app_defaults.dart';
 import 'package:keep_links/core/data/files/preview_image_storage.dart';
 import 'package:keep_links/core/data/database/entity/tag.dart';
 import 'package:keep_links/core/data/database/entity/url.dart';

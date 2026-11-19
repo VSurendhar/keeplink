@@ -1,5 +1,5 @@
 import 'package:bloc/bloc.dart';
-import 'package:keep_links/core/build_config.dart';
+import 'package:keep_links/core/utils/build_config.dart';
 
 import 'home_state.dart';
 

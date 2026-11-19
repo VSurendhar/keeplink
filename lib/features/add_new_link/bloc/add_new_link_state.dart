@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/utils/app_defaults.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/entity/tag.dart';
 import 'package:keep_links/features/add_new_link/bloc/add_new_link_action.dart';

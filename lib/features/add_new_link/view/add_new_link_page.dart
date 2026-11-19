@@ -7,7 +7,7 @@ import 'package:keep_links/core/data/database/url_store.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/entity/tag.dart';
 import 'package:keep_links/common/widgets/save_button.dart';
-import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/utils/app_defaults.dart';
 import 'package:keep_links/features/add_new_link/bloc/add_new_link_bloc.dart';
 import 'package:keep_links/features/add_new_link/bloc/add_new_link_event.dart';
 import 'package:keep_links/features/add_new_link/bloc/add_new_link_state.dart';

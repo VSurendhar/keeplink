@@ -4,7 +4,7 @@ import 'package:flutter/widgets.dart';
 import 'package:get_it/get_it.dart';
 import 'package:keep_links/app/app.dart';
 import 'package:keep_links/app/app_bloc_observer.dart';
-import 'package:keep_links/core/build_config.dart';
+import 'package:keep_links/core/utils/build_config.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
 import 'package:keep_links/core/di/injection.dart';
 import 'package:keep_links/features/logger/logger.dart';

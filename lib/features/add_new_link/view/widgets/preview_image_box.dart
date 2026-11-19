@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:keep_links/common/widgets/dashed_border_painter.dart';
-import 'package:keep_links/core/constants.dart';
+import 'package:keep_links/core/utils/constants.dart';
 
 /// The link's preview image box, shaped to [kPreviewImageAspectRatio].
 ///

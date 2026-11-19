@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/utils/app_defaults.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/entity/tag.dart';
 import 'package:keep_links/core/data/database/entity/url.dart';
