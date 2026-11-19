@@ -1,4 +1,5 @@
 import 'package:bloc/bloc.dart';
+import 'package:mindful_links/core/data/database/entity/folder.dart';
 import 'package:mindful_links/core/data/database/entity/url.dart';
 import 'package:mindful_links/core/data/database/url_store.dart';
 import 'package:mindful_links/features/folder/bloc/folder_event.dart';
@@ -21,8 +22,15 @@ class FolderBloc extends Bloc<FolderEvent, FolderState> {
   Future<void> _onInit(OnInitEvent event, Emitter<FolderState> emit) async {
     emit(const FolderLoadingState());
     try {
-      final folderItems = await _loadFolderItems();
-      emit(FolderSuccessState(folderItemsList: folderItems));
+      final urlStore = _urlStoreProvider();
+      final folders = await urlStore.findAllFolders().first;
+      final urls = await urlStore.findAllUrl().first;
+      emit(
+        FolderSuccessState(
+          folderItemsList: _buildFolderItems(folders, urls),
+          totalAvailableUrl: urls.length,
+        ),
+      );
     } catch (e, st) {
       logError('Failed to load folders', e, stackTrace: st);
       emit(const FolderErrorState());
@@ -48,12 +56,9 @@ class FolderBloc extends Bloc<FolderEvent, FolderState> {
     }
   }
 
-  /// Builds one [FolderItem] per folder, with its URL count and first URL.
-  Future<List<FolderItem>> _loadFolderItems() async {
-    final urlStore = _urlStoreProvider();
-    final folders = await urlStore.findAllFolders().first;
-    final urls = await urlStore.findAllUrl().first;
-
+  /// Builds one [FolderItem] per folder, with its URL count and first URL
+  /// taken from [urls].
+  List<FolderItem> _buildFolderItems(List<Folder> folders, List<Url> urls) {
     final urlCountByFolderId = UrlStore.countById(
       urls.map((url) => url.folderId),
     );

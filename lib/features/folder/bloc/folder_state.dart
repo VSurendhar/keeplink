@@ -44,24 +44,31 @@ final class FolderSuccessState extends FolderState {
   final int totalAvailableUrl;
 
   @override
-  List<Object?> get props => [folderItemsList, isFolderCreating, action];
+  List<Object?> get props => [
+    folderItemsList,
+    isFolderCreating,
+    action,
+    totalAvailableUrl,
+  ];
 
   FolderSuccessState copyWith({
     List<FolderItem>? folderItemsList,
     bool? isFolderCreating,
     FolderAction? action,
     bool clearAction = false,
+    int? totalAvailableUrl,
   }) {
     return FolderSuccessState(
       folderItemsList: folderItemsList ?? this.folderItemsList,
       isFolderCreating: isFolderCreating ?? this.isFolderCreating,
       action: clearAction ? null : (action ?? this.action),
+      totalAvailableUrl: totalAvailableUrl ?? this.totalAvailableUrl,
     );
   }
 
   @override
   String toString() {
-    return 'FolderSuccessState{folderItemsList: $folderItemsList, isFolderCreating: $isFolderCreating, action: $action}';
+    return 'FolderSuccessState{folderItemsList: $folderItemsList, isFolderCreating: $isFolderCreating, action: $action, totalAvailableUrl: $totalAvailableUrl}';
   }
 }
 
