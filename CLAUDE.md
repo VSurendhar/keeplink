@@ -34,9 +34,9 @@ Run `build_runner` after touching anything annotated for codegen: Floor entities
 2. View uses `BlocConsumer` with `listenWhen: current.action != null && previous.action != current.action`, switches on the action type, then dispatches `OnActionHandled`.
 3. `OnActionHandled` emits `copyWith(clearAction: true)`.
 
-See `lib/features/link_details/` as the reference implementation. States extend `Equatable` and expose `copyWith`; events are named `On...` (e.g. `OnDeleteTapped`).
+See `lib/features/add_new_link/` as the reference implementation. States extend `Equatable` and expose `copyWith`; events are named `On...` (e.g. `OnSaveClicked`). Loading on open is an `OnInitEvent` that the page dispatches when creating the BLoC (`..add(const OnInitEvent())`); BLoCs can only `emit` inside event handlers, so don't load or emit from plain methods.
 
-**Home / navigation**: `HomeCubit` drives the bottom nav (`HomeTab`); the Developer Options tab is only shown when `BuildConfig.isDeveloperOrDebug`. Pages expose a static `route(...)` returning a `MaterialPageRoute`.
+**Home / navigation**: `HomeCubit` drives the bottom nav (`HomeTab`); the Developer Options tab is only shown when `BuildConfig.isDeveloperOrDebug`. Pages are pushed inline with `Navigator.of(context).push(MaterialPageRoute<void>(builder: ...))`; there are no static `route(...)` helpers.
 
 **Developer options (`lib/features/developer_options/`)**: toggles mock vs. real `UrlStore`; `DeveloperOptionsCubit` itself seeds and prints the database and initializes default settings via `AppSettingsService`.
 
