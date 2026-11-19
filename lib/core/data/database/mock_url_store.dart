@@ -63,12 +63,18 @@ class MockUrlStore implements UrlStore {
   // Insert Operations
   @override
   Future<int> insertFolder(Folder folder) async {
-    // Mirrors the database's unique constraint on `folder_name`.
+    // Mirrors the database's unique constraint on `folder_name` and primary
+    // key on `id`.
     if (await findFolderByName(folder.folderName) != null) {
       throw StateError('Folder "${folder.folderName}" already exists');
     }
     final existingId = folder.id;
-    final int id = existingId ?? _folderIdSeq++;
+    if (existingId != null && await findFolderById(existingId) != null) {
+      throw StateError('Folder id $existingId already exists');
+    }
+    final int id = existingId ?? _folderIdSeq;
+    // Like SQLite's autoincrement, the next generated id is above any used id.
+    if (id >= _folderIdSeq) _folderIdSeq = id + 1;
     final newFolder = Folder(id: id, folderName: folder.folderName);
     _folders.add(newFolder);
     _notifyFolders();
@@ -77,12 +83,18 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<int> insertTag(Tag tag) async {
-    // Mirrors the database's unique constraint on `tag_name`.
+    // Mirrors the database's unique constraint on `tag_name` and primary key
+    // on `id`.
     if (await findTagByName(tag.tagName) != null) {
       throw StateError('Tag "${tag.tagName}" already exists');
     }
     final existingId = tag.id;
-    final int id = existingId ?? _tagIdSeq++;
+    if (existingId != null && await findTagById(existingId) != null) {
+      throw StateError('Tag id $existingId already exists');
+    }
+    final int id = existingId ?? _tagIdSeq;
+    // Like SQLite's autoincrement, the next generated id is above any used id.
+    if (id >= _tagIdSeq) _tagIdSeq = id + 1;
     final newTag = Tag(id: id, tagName: tag.tagName);
     _tags.add(newTag);
     _notifyTags();

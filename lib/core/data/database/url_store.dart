@@ -104,8 +104,10 @@ abstract class UrlStore {
   /// Tags with no URLs are not in the map; read them as `counts[id] ?? 0`.
   Future<Map<int, int>> findUrlCountPerTag();
 
-  /// Deletes all URL-tag links, URLs, tags and folders, in one transaction.
-  /// Returns nothing.
+  /// Deletes all URL-tag links, URLs, tags and folders. Returns nothing.
+  ///
+  /// The database store runs it in one transaction, so on failure nothing is
+  /// deleted.
   ///
   /// The default folder and tags are deleted too; call
   /// [seedDefaultFolderIfNotExist] and [seedDefaultTagsIfNotExist] afterwards
@@ -118,8 +120,9 @@ abstract class UrlStore {
   /// The only way to save a URL. Never creates folders or tags: they must
   /// already exist (the selection sheets create them). Everything is checked
   /// before anything is inserted, so on any failure nothing is saved. The
-  /// database store also runs it in one transaction, and its unique
-  /// constraints on address and title reject duplicates as a last resort.
+  /// database store also runs it in one transaction, and as a last resort its
+  /// unique constraints reject a duplicate address or title, and its foreign
+  /// keys reject a missing folder or tag.
   ///
   /// Special cases:
   /// - **Duplicate URL**: throws `DuplicateUrlException` if a URL with the
