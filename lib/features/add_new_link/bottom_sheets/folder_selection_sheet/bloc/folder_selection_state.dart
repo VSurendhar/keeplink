@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_action.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_action.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
 
-export 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_action.dart';
+export 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_action.dart';
 
 final class FolderSelectionState extends Equatable {
   const FolderSelectionState({

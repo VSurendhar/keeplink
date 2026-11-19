@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-class MindfulLinksTheme {
+class KeepLinksTheme {
   static const Color primary = Color(0xFFFFB38E);
   static const Color primaryDark = Color(0xFFE28A63);
 

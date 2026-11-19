@@ -1,6 +1,6 @@
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/hive/models/app_settings.dart';
 
 class AppDefaults {
   static final defaultFolders = List.unmodifiable([

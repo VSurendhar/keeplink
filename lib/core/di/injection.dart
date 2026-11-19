@@ -1,7 +1,7 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
-import 'package:mindful_links/core/data/hive/hive_service.dart';
-import 'package:mindful_links/features/logger/logger.dart';
+import 'package:keep_links/core/data/hive/hive_service.dart';
+import 'package:keep_links/features/logger/logger.dart';
 
 import 'injection.config.dart';
 

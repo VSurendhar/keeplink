@@ -1,6 +1,6 @@
-# Mindful Links
+# Keep Links
 
-A mindful link management Flutter application for saving, reading, updating and deleting URLs.
+A link management Flutter application for saving, reading, updating and deleting URLs.
 
 The main goal of the application is to bring AI-based categorization and search to saved links.
 
@@ -42,7 +42,7 @@ The main goal of the application is to bring AI-based categorization and search 
 - Save any number of links while avoiding duplicates.
 - Run on both Android and iOS, built with Flutter.
 - Security: never open a saved URL in a WebView, and never render or execute the content a URL points to. The metadata crawler may fetch a page only to read its meta title, meta description and meta image. It must not run scripts, render the page, or download, decode or process any other resource.
-- Data URLs are not supported because they embed the resource content itself, which makes them large (Base64 encoding alone adds about 33% to the data's size). Storing such payloads in SQLite would increase database size, disk I/O and memory use, and passing them to future AI integrations as plain text would waste input tokens and raise processing costs. Mindful Links manages links, not embedded resources, so supporting them adds overhead with no functional benefit.
+- Data URLs are not supported because they embed the resource content itself, which makes them large (Base64 encoding alone adds about 33% to the data's size). Storing such payloads in SQLite would increase database size, disk I/O and memory use, and passing them to future AI integrations as plain text would waste input tokens and raise processing costs. Keep Links manages links, not embedded resources, so supporting them adds overhead with no functional benefit.
 
 ### Out of Scope
 
@@ -72,4 +72,4 @@ fvm dart run build_runner build --delete-conflicting-outputs
 Format code under lib directory to maintain the uniform formatting practice
 ```bash
 fvm dart format lib/
-```
+```

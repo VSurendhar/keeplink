@@ -1,9 +1,9 @@
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:injectable/injectable.dart';
-import 'package:mindful_links/core/app_defaults.dart';
-import 'package:mindful_links/core/data/hive/constant.dart';
-import 'package:mindful_links/core/data/hive/hive_service.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
+import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/data/hive/constant.dart';
+import 'package:keep_links/core/data/hive/hive_service.dart';
+import 'package:keep_links/core/data/hive/models/app_settings.dart';
 
 @lazySingleton
 class AppSettingsService {

@@ -3,22 +3,22 @@ import 'dart:io';
 import 'package:image_cropper/image_cropper.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:injectable/injectable.dart';
-import 'package:mindful_links/core/constants.dart';
-import 'package:mindful_links/features/theme/theme.dart';
+import 'package:keep_links/core/constants.dart';
+import 'package:keep_links/features/theme/theme.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
 
 /// Picks, crops and stores links' preview images.
 ///
-/// Images are kept in `<app documents>/mindful_links/`, which the OS doesn't
+/// Images are kept in `<app documents>/keep_links/`, which the OS doesn't
 /// clear, and are identified by file name only; build the full path with
 /// [filePathFor].
 ///
 /// Errors are not caught here: callers in the business layer handle them.
 @lazySingleton
 class PreviewImageStorage {
-  static const folderName = 'mindful_links';
+  static const folderName = 'keep_links';
 
   final _picker = ImagePicker();
   final _cropper = ImageCropper();
@@ -45,10 +45,10 @@ class PreviewImageStorage {
       uiSettings: [
         AndroidUiSettings(
           toolbarTitle: 'Crop image',
-          toolbarColor: MindfulLinksTheme.secondaryLight,
-          toolbarWidgetColor: MindfulLinksTheme.textPrimary,
+          toolbarColor: KeepLinksTheme.secondaryLight,
+          toolbarWidgetColor: KeepLinksTheme.textPrimary,
           statusBarLight: true,
-          activeControlsWidgetColor: MindfulLinksTheme.primaryDark,
+          activeControlsWidgetColor: KeepLinksTheme.primaryDark,
           lockAspectRatio: true,
         ),
         IOSUiSettings(

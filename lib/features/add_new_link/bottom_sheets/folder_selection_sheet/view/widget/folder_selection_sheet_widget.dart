@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mindful_links/common/widgets/delete_icon_button.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_state.dart';
-import 'package:mindful_links/features/theme/theme.dart';
-import 'package:mindful_links/utils/utils.dart';
+import 'package:keep_links/common/widgets/delete_icon_button.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_state.dart';
+import 'package:keep_links/features/theme/theme.dart';
+import 'package:keep_links/utils/utils.dart';
 
 class FolderSelectionSheetWidget extends StatelessWidget {
   const FolderSelectionSheetWidget({super.key});
@@ -145,7 +145,7 @@ class FolderSelectionSheetWidget extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: MindfulLinksTheme.primary,
+                    color: KeepLinksTheme.primary,
                     borderRadius: BorderRadius.circular(8),
                   ),
                   alignment: Alignment.center,

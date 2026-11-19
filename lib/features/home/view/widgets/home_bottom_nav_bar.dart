@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mindful_links/features/home/cubit/home_cubit.dart';
+import 'package:keep_links/features/home/cubit/home_cubit.dart';
 import 'bottom_nav_icon.dart';
 
 class HomeBottomNavBar extends StatelessWidget {

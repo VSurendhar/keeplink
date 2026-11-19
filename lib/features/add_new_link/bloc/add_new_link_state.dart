@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/app_defaults.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/features/add_new_link/bloc/add_new_link_action.dart';
+import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/features/add_new_link/bloc/add_new_link_action.dart';
 
-export 'package:mindful_links/features/add_new_link/bloc/add_new_link_action.dart';
+export 'package:keep_links/features/add_new_link/bloc/add_new_link_action.dart';
 
 final class AddNewLinkState extends Equatable {
   const AddNewLinkState({

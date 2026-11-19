@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/view/widget/folder_selection_sheet_widget.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/view/widget/folder_selection_sheet_widget.dart';
 
 Future<Folder?> showFolderSelectionSheet(
   BuildContext context, {

@@ -1,10 +1,10 @@
 import 'package:bloc/bloc.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/url.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/features/folder/bloc/folder_event.dart';
-import 'package:mindful_links/features/folder/bloc/folder_state.dart';
-import 'package:mindful_links/features/logger/logger.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/url.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/features/folder/bloc/folder_event.dart';
+import 'package:keep_links/features/folder/bloc/folder_state.dart';
+import 'package:keep_links/features/logger/logger.dart';
 
 class FolderBloc extends Bloc<FolderEvent, FolderState> {
   FolderBloc({required UrlStore Function() urlStoreProvider})

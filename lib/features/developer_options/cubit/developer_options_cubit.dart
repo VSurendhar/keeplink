@@ -1,15 +1,15 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
-import 'package:mindful_links/core/app_defaults.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/core/data/database/entity/url.dart';
-import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
-import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/features/developer_options/cubit/developer_options_state.dart';
-import 'package:mindful_links/features/logger/logger.dart';
-import 'package:mindful_links/features/settings/service/app_settings_service.dart';
+import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/url.dart';
+import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
+import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/features/developer_options/cubit/developer_options_state.dart';
+import 'package:keep_links/features/logger/logger.dart';
+import 'package:keep_links/features/settings/service/app_settings_service.dart';
 
 class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
   DeveloperOptionsCubit({

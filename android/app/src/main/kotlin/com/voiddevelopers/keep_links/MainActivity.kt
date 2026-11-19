@@ -1,4 +1,4 @@
-package com.voiddevelopers.mindful_links
+package com.voiddevelopers.keep_links
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
 
 sealed class TagSelectionEvent extends Equatable {
   const TagSelectionEvent();

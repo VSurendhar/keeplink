@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
 
 sealed class AddNewLinkEvent extends Equatable {
   const AddNewLinkEvent();

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/features/developer_options/cubit/developer_options_action.dart';
+import 'package:keep_links/features/developer_options/cubit/developer_options_action.dart';
 
-export 'package:mindful_links/features/developer_options/cubit/developer_options_action.dart';
+export 'package:keep_links/features/developer_options/cubit/developer_options_action.dart';
 
 final class DeveloperOptionsState extends Equatable {
   const DeveloperOptionsState({required this.isMockStore, this.action});

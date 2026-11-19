@@ -1,5 +1,5 @@
 import 'package:get_it/get_it.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
 
 class UrlStoreSwitcher {
   static bool _isMock = false;

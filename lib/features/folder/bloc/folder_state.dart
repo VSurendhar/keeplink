@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/features/folder/bloc/folder_action.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/features/folder/bloc/folder_action.dart';
 
-export 'package:mindful_links/features/folder/bloc/folder_action.dart';
+export 'package:keep_links/features/folder/bloc/folder_action.dart';
 
 sealed class FolderState extends Equatable {
   const FolderState();

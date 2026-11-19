@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mindful_links/features/theme/theme.dart';
+import 'package:keep_links/features/theme/theme.dart';
 
 /// A "Save" button for pages that let the user edit data and then persist it explicitly
 ///
@@ -61,9 +61,9 @@ class SaveButton extends StatelessWidget {
     return FilledButton(
       style: FilledButton.styleFrom(
         backgroundColor: looksEnabled
-            ? MindfulLinksTheme.primary
+            ? KeepLinksTheme.primary
             : const Color(0xFFE0D5CE),
-        disabledBackgroundColor: isLoading ? MindfulLinksTheme.primary : null,
+        disabledBackgroundColor: isLoading ? KeepLinksTheme.primary : null,
         foregroundColor: textColor,
         elevation: 0,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),

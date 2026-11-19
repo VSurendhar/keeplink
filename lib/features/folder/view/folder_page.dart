@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/features/folder/bloc/folder_bloc.dart';
-import 'package:mindful_links/features/folder/bloc/folder_event.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/features/folder/bloc/folder_bloc.dart';
+import 'package:keep_links/features/folder/bloc/folder_event.dart';
 
 /// Lists the folders, with each folder's URL count and first URL.
 class FolderPage extends StatelessWidget {

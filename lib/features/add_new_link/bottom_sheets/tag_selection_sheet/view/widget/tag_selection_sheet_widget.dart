@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mindful_links/common/widgets/delete_icon_button.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_bloc.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_state.dart';
-import 'package:mindful_links/features/theme/theme.dart';
-import 'package:mindful_links/utils/utils.dart';
+import 'package:keep_links/common/widgets/delete_icon_button.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_bloc.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_state.dart';
+import 'package:keep_links/features/theme/theme.dart';
+import 'package:keep_links/utils/utils.dart';
 
 class TagSelectionSheetWidget extends StatelessWidget {
   const TagSelectionSheetWidget({super.key});
@@ -123,7 +123,7 @@ class TagSelectionSheetWidget extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: MindfulLinksTheme.primary,
+              color: KeepLinksTheme.primary,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Text(
@@ -184,7 +184,7 @@ class TagSelectionSheetWidget extends StatelessWidget {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: MindfulLinksTheme.primary,
+                    color: KeepLinksTheme.primary,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -383,7 +383,7 @@ class TagSelectionSheetWidget extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
               color: isSelected
-                  ? MindfulLinksTheme.primary
+                  ? KeepLinksTheme.primary
                   : const Color(0xFFF0E8E2),
               width: 1,
             ),

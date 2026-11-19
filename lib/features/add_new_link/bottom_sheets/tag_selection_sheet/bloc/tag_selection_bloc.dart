@@ -1,12 +1,12 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
-import 'package:mindful_links/core/app_defaults.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_state.dart';
-import 'package:mindful_links/features/logger/logger.dart';
+import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_event.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/tag_selection_sheet/bloc/tag_selection_state.dart';
+import 'package:keep_links/features/logger/logger.dart';
 
 class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
   TagSelectionBloc({

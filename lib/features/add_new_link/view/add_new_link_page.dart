@@ -3,24 +3,24 @@ import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/common/widgets/save_button.dart';
-import 'package:mindful_links/core/app_defaults.dart';
-import 'package:mindful_links/features/add_new_link/bloc/add_new_link_bloc.dart';
-import 'package:mindful_links/features/add_new_link/bloc/add_new_link_event.dart';
-import 'package:mindful_links/features/add_new_link/bloc/add_new_link_state.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/folder_selection_sheet/view/show_folder_selection_sheet.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/tag_selection_sheet/view/show_tag_selection_sheet.dart';
-import 'package:mindful_links/core/data/files/preview_image_storage.dart';
-import 'package:mindful_links/features/add_new_link/bottom_sheets/preview_image_source_sheet/view/show_preview_image_source_sheet.dart';
-import 'package:mindful_links/features/add_new_link/view/widgets/preview_image_box.dart';
-import 'package:mindful_links/features/add_new_link/view/widgets/tag_selection_widget.dart';
-import 'package:mindful_links/features/home/constants/constants.dart';
-import 'package:mindful_links/features/theme/colors.dart';
-import 'package:mindful_links/features/theme/theme.dart';
-import 'package:mindful_links/utils/utils.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/common/widgets/save_button.dart';
+import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/features/add_new_link/bloc/add_new_link_bloc.dart';
+import 'package:keep_links/features/add_new_link/bloc/add_new_link_event.dart';
+import 'package:keep_links/features/add_new_link/bloc/add_new_link_state.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/view/show_folder_selection_sheet.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/tag_selection_sheet/view/show_tag_selection_sheet.dart';
+import 'package:keep_links/core/data/files/preview_image_storage.dart';
+import 'package:keep_links/features/add_new_link/bottom_sheets/preview_image_source_sheet/view/show_preview_image_source_sheet.dart';
+import 'package:keep_links/features/add_new_link/view/widgets/preview_image_box.dart';
+import 'package:keep_links/features/add_new_link/view/widgets/tag_selection_widget.dart';
+import 'package:keep_links/features/home/constants/constants.dart';
+import 'package:keep_links/features/theme/colors.dart';
+import 'package:keep_links/features/theme/theme.dart';
+import 'package:keep_links/utils/utils.dart';
 
 class AddNewLinkPage extends StatelessWidget {
   const AddNewLinkPage({super.key});
@@ -70,16 +70,16 @@ class AddNewLinkView extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: MindfulLinksTheme.secondaryLight,
+          backgroundColor: KeepLinksTheme.secondaryLight,
           appBar: AppBar(
-            backgroundColor: MindfulLinksTheme.secondaryLight,
+            backgroundColor: KeepLinksTheme.secondaryLight,
             elevation: 0,
             scrolledUnderElevation: 0,
             centerTitle: true,
             leading: IconButton(
               icon: Icon(
                 Icons.arrow_back,
-                color: MindfulLinkColors.headerTitleColor,
+                color: KeepLinksColors.headerTitleColor,
                 size: 24,
               ),
               onPressed: () => Navigator.pop(context),
@@ -89,7 +89,7 @@ class AddNewLinkView extends StatelessWidget {
               style: TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.w600,
-                color: MindfulLinkColors.headerTitleColor,
+                color: KeepLinksColors.headerTitleColor,
               ),
             ),
             actions: [
@@ -163,7 +163,7 @@ class AddNewLinkView extends StatelessWidget {
           if (isRequired)
             TextSpan(
               text: ' *',
-              style: TextStyle(color: MindfulLinkColors.requiredMarkColor),
+              style: TextStyle(color: KeepLinksColors.requiredMarkColor),
             ),
         ],
       ),
@@ -203,7 +203,7 @@ class AddNewLinkView extends StatelessWidget {
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w400,
-          color: MindfulLinkColors.headerTitleColor,
+          color: KeepLinksColors.headerTitleColor,
         ),
         onChanged: (value) {
           context.read<AddNewLinkBloc>().add(OnNameChanged(value));
@@ -376,7 +376,7 @@ class AddNewLinkView extends StatelessWidget {
                     alignment: Alignment.center,
                     child: Icon(
                       Icons.folder_outlined,
-                      color: MindfulLinkColors.headerSubTitleColor,
+                      color: KeepLinksColors.headerSubTitleColor,
                       size: 20,
                     ),
                   ),

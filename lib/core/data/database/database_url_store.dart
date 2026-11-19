@@ -1,11 +1,11 @@
-import 'package:mindful_links/core/app_defaults.dart';
-import 'package:mindful_links/core/data/database/dao/url_dao.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/core/data/database/entity/url.dart';
-import 'package:mindful_links/core/data/database/entity/url_tag.dart';
-import 'package:mindful_links/core/data/database/url_database.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
+import 'package:keep_links/core/app_defaults.dart';
+import 'package:keep_links/core/data/database/dao/url_dao.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/url.dart';
+import 'package:keep_links/core/data/database/entity/url_tag.dart';
+import 'package:keep_links/core/data/database/url_database.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
 
 class DatabaseUrlStore implements UrlStore {
   DatabaseUrlStore() {
@@ -25,7 +25,7 @@ class DatabaseUrlStore implements UrlStore {
   Future<UrlDatabase> _buildDatabase() async {
     try {
       return await $FloorUrlDatabase
-          .databaseBuilder('mindful_links_db.db')
+          .databaseBuilder('keep_links_db.db')
           .build();
     } catch (_) {
       _dbFuture = null;

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/features/settings/bloc/app_settings_action.dart';
-import 'package:mindful_links/features/settings/bloc/app_settings_bloc.dart';
+import 'package:keep_links/features/settings/bloc/app_settings_action.dart';
+import 'package:keep_links/features/settings/bloc/app_settings_bloc.dart';
 
-export 'package:mindful_links/features/settings/bloc/app_settings_action.dart';
+export 'package:keep_links/features/settings/bloc/app_settings_action.dart';
 
 final class AppSettingsState extends Equatable {
   const AppSettingsState({

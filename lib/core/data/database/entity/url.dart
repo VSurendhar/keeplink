@@ -1,5 +1,5 @@
 import 'package:floor/floor.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
 
 @Entity(
   tableName: 'url',

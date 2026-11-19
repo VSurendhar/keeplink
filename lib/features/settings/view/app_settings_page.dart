@@ -2,21 +2,21 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
 import 'package:material_symbols_icons/symbols.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
-import 'package:mindful_links/common/widgets/save_button.dart';
-import 'package:mindful_links/features/home/constants/constants.dart';
-import 'package:mindful_links/features/settings/bloc/app_settings_bloc.dart';
-import 'package:mindful_links/features/settings/bloc/app_settings_event.dart';
-import 'package:mindful_links/features/settings/bloc/app_settings_state.dart';
-import 'package:mindful_links/features/settings/service/app_settings_service.dart';
-import 'package:mindful_links/features/settings/view/widgets/erase_all_confirmation_widget.dart';
-import 'package:mindful_links/features/settings/view/widgets/export_bottom_sheet_widget.dart';
-import 'package:mindful_links/features/settings/view/widgets/import_bottom_sheet_widget.dart';
-import 'package:mindful_links/features/settings/view/widgets/language_selection_sheet_widget.dart';
-import 'package:mindful_links/features/theme/colors.dart';
-import 'package:mindful_links/features/theme/theme.dart';
-import 'package:mindful_links/utils/utils.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/core/data/hive/models/app_settings.dart';
+import 'package:keep_links/common/widgets/save_button.dart';
+import 'package:keep_links/features/home/constants/constants.dart';
+import 'package:keep_links/features/settings/bloc/app_settings_bloc.dart';
+import 'package:keep_links/features/settings/bloc/app_settings_event.dart';
+import 'package:keep_links/features/settings/bloc/app_settings_state.dart';
+import 'package:keep_links/features/settings/service/app_settings_service.dart';
+import 'package:keep_links/features/settings/view/widgets/erase_all_confirmation_widget.dart';
+import 'package:keep_links/features/settings/view/widgets/export_bottom_sheet_widget.dart';
+import 'package:keep_links/features/settings/view/widgets/import_bottom_sheet_widget.dart';
+import 'package:keep_links/features/settings/view/widgets/language_selection_sheet_widget.dart';
+import 'package:keep_links/features/theme/colors.dart';
+import 'package:keep_links/features/theme/theme.dart';
+import 'package:keep_links/utils/utils.dart';
 
 class AppSettingsPage extends StatelessWidget {
   const AppSettingsPage({super.key});
@@ -65,16 +65,16 @@ class AppSettingsView extends StatelessWidget {
       },
       builder: (context, state) {
         return Scaffold(
-          backgroundColor: MindfulLinksTheme.secondaryLight,
+          backgroundColor: KeepLinksTheme.secondaryLight,
           appBar: AppBar(
-            backgroundColor: MindfulLinksTheme.secondaryLight,
+            backgroundColor: KeepLinksTheme.secondaryLight,
             elevation: 0,
             scrolledUnderElevation: 0,
             centerTitle: true,
             title: Text(
-              'MindfulLinks',
+              'Keep Links',
               style: TextStyle(
-                color: MindfulLinkColors.appBarTitleColor,
+                color: KeepLinksColors.appBarTitleColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 24,
               ),
@@ -107,7 +107,7 @@ class AppSettingsView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w600,
-                      color: MindfulLinkColors.headerTitleColor,
+                      color: KeepLinksColors.headerTitleColor,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -116,7 +116,7 @@ class AppSettingsView extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
-                      color: MindfulLinkColors.headerSubTitleColor,
+                      color: KeepLinksColors.headerSubTitleColor,
                     ),
                   ),
                   const SizedBox(height: 32),

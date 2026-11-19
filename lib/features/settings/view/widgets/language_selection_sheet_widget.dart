@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
-import 'package:mindful_links/features/theme/theme.dart';
+import 'package:keep_links/core/data/hive/models/app_settings.dart';
+import 'package:keep_links/features/theme/theme.dart';
 
 class LanguageSelectionSheetWidget extends StatelessWidget {
   const LanguageSelectionSheetWidget({
@@ -59,7 +59,7 @@ class LanguageSelectionSheetWidget extends StatelessWidget {
                     fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                     color: isSelected
                         ? selectedOptionColor
-                        : MindfulLinksTheme.textPrimary,
+                        : KeepLinksTheme.textPrimary,
                   ),
                 ),
                 trailing: isSelected

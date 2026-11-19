@@ -1,12 +1,12 @@
 import 'package:floor/floor.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/core/data/database/entity/url.dart';
-import 'package:mindful_links/core/data/database/entity/url_tag.dart';
-import 'package:mindful_links/core/data/database/exception/duplicate_title_exception.dart';
-import 'package:mindful_links/core/data/database/exception/duplicate_url_exception.dart';
-import 'package:mindful_links/core/data/database/exception/folder_not_found_exception.dart';
-import 'package:mindful_links/core/data/database/exception/tag_not_found_exception.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/url.dart';
+import 'package:keep_links/core/data/database/entity/url_tag.dart';
+import 'package:keep_links/core/data/database/exception/duplicate_title_exception.dart';
+import 'package:keep_links/core/data/database/exception/duplicate_url_exception.dart';
+import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
+import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
 
 @dao
 abstract class UrlDao {

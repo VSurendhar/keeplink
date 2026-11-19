@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
 
 class TagSelectionWidget extends StatelessWidget {
   const TagSelectionWidget({

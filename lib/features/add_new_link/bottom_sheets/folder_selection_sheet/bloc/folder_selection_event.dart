@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
 
 sealed class FolderSelectionEvent extends Equatable {
   const FolderSelectionEvent();

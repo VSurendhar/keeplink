@@ -1,13 +1,13 @@
 ﻿import 'package:injectable/injectable.dart';
-import 'package:mindful_links/core/data/database/database_url_store.dart';
-import 'package:mindful_links/core/data/database/entity/folder.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/core/data/database/entity/url.dart';
-import 'package:mindful_links/core/data/database/entity/url_tag.dart';
+import 'package:keep_links/core/data/database/database_url_store.dart';
+import 'package:keep_links/core/data/database/entity/folder.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/url.dart';
+import 'package:keep_links/core/data/database/entity/url_tag.dart';
 
-export 'package:mindful_links/core/data/database/database_url_store.dart';
-export 'package:mindful_links/core/data/database/mock_url_store.dart';
-export 'package:mindful_links/core/data/database/url_store_switcher.dart';
+export 'package:keep_links/core/data/database/database_url_store.dart';
+export 'package:keep_links/core/data/database/mock_url_store.dart';
+export 'package:keep_links/core/data/database/url_store_switcher.dart';
 
 @lazySingleton
 abstract class UrlStore {

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/features/add_new_link/view/add_new_link_page.dart';
-import 'package:mindful_links/features/developer_options/cubit/developer_options_cubit.dart';
-import 'package:mindful_links/features/developer_options/cubit/developer_options_state.dart';
-import 'package:mindful_links/features/home/constants/constants.dart';
-import 'package:mindful_links/features/settings/service/app_settings_service.dart';
-import 'package:mindful_links/features/settings/view/app_settings_page.dart';
-import 'package:mindful_links/features/theme/colors.dart';
-import 'package:mindful_links/features/theme/theme.dart';
-import 'package:mindful_links/utils/utils.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/features/add_new_link/view/add_new_link_page.dart';
+import 'package:keep_links/features/developer_options/cubit/developer_options_cubit.dart';
+import 'package:keep_links/features/developer_options/cubit/developer_options_state.dart';
+import 'package:keep_links/features/home/constants/constants.dart';
+import 'package:keep_links/features/settings/service/app_settings_service.dart';
+import 'package:keep_links/features/settings/view/app_settings_page.dart';
+import 'package:keep_links/features/theme/colors.dart';
+import 'package:keep_links/features/theme/theme.dart';
+import 'package:keep_links/utils/utils.dart';
 
 class DeveloperOptionPage extends StatelessWidget {
   const DeveloperOptionPage({super.key});
@@ -54,9 +54,9 @@ class DeveloperOptionView extends StatelessWidget {
     final cubit = context.read<DeveloperOptionsCubit>();
 
     return Scaffold(
-      backgroundColor: MindfulLinksTheme.secondaryLight,
+      backgroundColor: KeepLinksTheme.secondaryLight,
       appBar: AppBar(
-        backgroundColor: MindfulLinksTheme.secondaryLight,
+        backgroundColor: KeepLinksTheme.secondaryLight,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
@@ -65,7 +65,7 @@ class DeveloperOptionView extends StatelessWidget {
           style: TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.w600,
-            color: MindfulLinkColors.headerTitleColor,
+            color: KeepLinksColors.headerTitleColor,
           ),
         ),
       ),
@@ -177,7 +177,7 @@ class DeveloperOptionView extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
-                    color: MindfulLinkColors.headerTitleColor,
+                    color: KeepLinksColors.headerTitleColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -188,7 +188,7 @@ class DeveloperOptionView extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: MindfulLinkColors.headerSubTitleColor,
+                    color: KeepLinksColors.headerSubTitleColor,
                   ),
                 ),
               ],
@@ -196,7 +196,7 @@ class DeveloperOptionView extends StatelessWidget {
           ),
           Switch(
             value: isMock,
-            activeThumbColor: MindfulLinksTheme.primaryDark,
+            activeThumbColor: KeepLinksTheme.primaryDark,
             onChanged: onChanged,
           ),
         ],
@@ -213,7 +213,7 @@ class DeveloperOptionView extends StatelessWidget {
       height: 48,
       child: FilledButton(
         style: FilledButton.styleFrom(
-          backgroundColor: MindfulLinksTheme.primary,
+          backgroundColor: KeepLinksTheme.primary,
           foregroundColor: const Color(0xFF7A4326),
           elevation: 0,
           shape: RoundedRectangleBorder(

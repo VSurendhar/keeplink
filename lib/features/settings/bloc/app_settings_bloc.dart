@@ -1,11 +1,11 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/data/database/url_store.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
-import 'package:mindful_links/features/logger/logger.dart';
-import 'package:mindful_links/features/settings/bloc/app_settings_event.dart';
-import 'package:mindful_links/features/settings/bloc/app_settings_state.dart';
-import 'package:mindful_links/features/settings/service/app_settings_service.dart';
+import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/core/data/hive/models/app_settings.dart';
+import 'package:keep_links/features/logger/logger.dart';
+import 'package:keep_links/features/settings/bloc/app_settings_event.dart';
+import 'package:keep_links/features/settings/bloc/app_settings_state.dart';
+import 'package:keep_links/features/settings/service/app_settings_service.dart';
 
 class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
   AppSettingsBloc({

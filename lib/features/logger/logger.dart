@@ -3,10 +3,10 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logger/logger.dart';
 import 'dart:developer' as developer;
 
-import 'package:mindful_links/utils/Utils.dart';
+import 'package:keep_links/utils/Utils.dart';
 
 late Logger _logger;
-const String logTag = "mindful_links_tag";
+const String logTag = "keep_links_tag";
 bool isLoggingInitiated = false;
 
 enum LogLevel { info, debug, error }

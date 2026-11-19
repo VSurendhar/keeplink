@@ -1,5 +1,5 @@
 import 'package:hive_flutter/hive_flutter.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
+import 'package:keep_links/core/data/hive/models/app_settings.dart';
 
 class HiveService {
   static const String settingsBoxName = 'app_settings';

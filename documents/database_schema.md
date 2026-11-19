@@ -1,6 +1,6 @@
 # Database Schema
 
-The links data is stored in SQLite through Floor: database file `mindful_links_db.db`, schema version 1 (`UrlDatabase`). The entities are in `lib/core/data/database/entity/`.
+The links data is stored in SQLite through Floor: database file `keep_links_db.db`, schema version 1 (`UrlDatabase`). The entities are in `lib/core/data/database/entity/`.
 
 ## Overview
 

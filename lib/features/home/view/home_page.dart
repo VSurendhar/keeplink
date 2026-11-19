@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:mindful_links/features/dashboard/view/dashboard_page.dart';
-import 'package:mindful_links/features/developer_options/view/developer_option_page.dart';
-import 'package:mindful_links/features/folder/view/folder_page.dart';
-import 'package:mindful_links/features/home/cubit/home_cubit.dart';
-import 'package:mindful_links/features/home/cubit/home_state.dart';
-import 'package:mindful_links/features/home/view/widgets/home_bottom_nav_bar.dart';
-import 'package:mindful_links/features/settings/view/app_settings_page.dart';
+import 'package:keep_links/features/dashboard/view/dashboard_page.dart';
+import 'package:keep_links/features/developer_options/view/developer_option_page.dart';
+import 'package:keep_links/features/folder/view/folder_page.dart';
+import 'package:keep_links/features/home/cubit/home_cubit.dart';
+import 'package:keep_links/features/home/cubit/home_state.dart';
+import 'package:keep_links/features/home/view/widgets/home_bottom_nav_bar.dart';
+import 'package:keep_links/features/settings/view/app_settings_page.dart';
 
 class HomePage extends StatelessWidget {
   const HomePage({super.key});

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:mindful_links/core/data/hive/models/app_settings.dart';
+import 'package:keep_links/core/data/hive/models/app_settings.dart';
 
 sealed class AppSettingsEvent extends Equatable {
   const AppSettingsEvent();

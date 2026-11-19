@@ -1,6 +1,6 @@
 import 'package:floor/floor.dart';
-import 'package:mindful_links/core/data/database/entity/tag.dart';
-import 'package:mindful_links/core/data/database/entity/url.dart';
+import 'package:keep_links/core/data/database/entity/tag.dart';
+import 'package:keep_links/core/data/database/entity/url.dart';
 
 @Entity(
   tableName: 'url_tag',
