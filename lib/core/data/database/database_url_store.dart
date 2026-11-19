@@ -123,9 +123,8 @@ class DatabaseUrlStore implements UrlStore {
   @override
   Future<int> createUrl({
     required Url url,
-    required int folderId,
     List<int> tagIds = const [],
-  }) async => (await _dao).createUrl(url, folderId, tagIds);
+  }) async => (await _dao).createUrl(url, tagIds);
 
   @override
   Future<void> deleteFolderAndMoveUrls({

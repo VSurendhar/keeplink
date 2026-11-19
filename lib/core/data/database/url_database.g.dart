@@ -96,7 +96,7 @@ class _$UrlDatabase extends UrlDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `preview_image_name` TEXT)');
+            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `preview_image_name` TEXT, FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON UPDATE NO ACTION ON DELETE RESTRICT)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `url_tag` (`url_id` INTEGER NOT NULL, `tag_id` INTEGER NOT NULL, PRIMARY KEY (`url_id`, `tag_id`))');
         await database.execute(
@@ -107,6 +107,8 @@ class _$UrlDatabase extends UrlDatabase {
             .execute('CREATE UNIQUE INDEX `index_url_url` ON `url` (`url`)');
         await database.execute(
             'CREATE UNIQUE INDEX `index_url_title` ON `url` (`title`)');
+        await database.execute(
+            'CREATE INDEX `index_url_folder_id` ON `url` (`folder_id`)');
         await database.execute(
             'CREATE UNIQUE INDEX `index_folder_folder_name` ON `folder` (`folder_name`)');
         await database.execute(
@@ -237,7 +239,7 @@ class _$UrlDao extends UrlDao {
             title: row['title'] as String,
             metaImageUrl: row['meta_image_url'] as String,
             metaDescription: row['meta_description'] as String,
-            folderId: row['folder_id'] as int?,
+            folderId: row['folder_id'] as int,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
@@ -283,8 +285,7 @@ class _$UrlDao extends UrlDao {
 
   @override
   Future<List<int>> findAllUrlFolderIds() async {
-    return _queryAdapter.queryList(
-        'SELECT folder_id FROM url WHERE folder_id IS NOT NULL',
+    return _queryAdapter.queryList('SELECT folder_id FROM url',
         mapper: (Map<String, Object?> row) => row.values.first as int);
   }
 
@@ -303,7 +304,7 @@ class _$UrlDao extends UrlDao {
             title: row['title'] as String,
             metaImageUrl: row['meta_image_url'] as String,
             metaDescription: row['meta_description'] as String,
-            folderId: row['folder_id'] as int?,
+            folderId: row['folder_id'] as int,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
@@ -364,7 +365,7 @@ class _$UrlDao extends UrlDao {
             title: row['title'] as String,
             metaImageUrl: row['meta_image_url'] as String,
             metaDescription: row['meta_description'] as String,
-            folderId: row['folder_id'] as int?,
+            folderId: row['folder_id'] as int,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
@@ -381,7 +382,7 @@ class _$UrlDao extends UrlDao {
             title: row['title'] as String,
             metaImageUrl: row['meta_image_url'] as String,
             metaDescription: row['meta_description'] as String,
-            folderId: row['folder_id'] as int?,
+            folderId: row['folder_id'] as int,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
@@ -398,7 +399,7 @@ class _$UrlDao extends UrlDao {
             title: row['title'] as String,
             metaImageUrl: row['meta_image_url'] as String,
             metaDescription: row['meta_description'] as String,
-            folderId: row['folder_id'] as int?,
+            folderId: row['folder_id'] as int,
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
@@ -494,17 +495,16 @@ class _$UrlDao extends UrlDao {
   @override
   Future<int> createUrl(
     Url url,
-    int folderId,
     List<int> tagIds,
   ) async {
     if (database is sqflite.Transaction) {
-      return super.createUrl(url, folderId, tagIds);
+      return super.createUrl(url, tagIds);
     } else {
       return (database as sqflite.Database)
           .transaction<int>((transaction) async {
         final transactionDatabase = _$UrlDatabase(changeListener)
           ..database = transaction;
-        return transactionDatabase.urlDao.createUrl(url, folderId, tagIds);
+        return transactionDatabase.urlDao.createUrl(url, tagIds);
       });
     }
   }

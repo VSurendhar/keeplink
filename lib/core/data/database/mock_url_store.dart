@@ -106,9 +106,7 @@ class MockUrlStore implements UrlStore {
       }
     }
     if (matchedUrl == null) return null;
-    final folderId = matchedUrl.folderId;
-    if (folderId == null) return null;
-    return findFolderById(folderId);
+    return findFolderById(matchedUrl.folderId);
   }
 
   @override
@@ -137,7 +135,7 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<Map<int, int>> findUrlCountPerFolder() async =>
-      UrlStore.countById(_urls.map((url) => url.folderId).nonNulls);
+      UrlStore.countById(_urls.map((url) => url.folderId));
 
   @override
   Future<Map<int, int>> findUrlCountPerTag() async =>
@@ -222,18 +220,17 @@ class MockUrlStore implements UrlStore {
   @override
   Future<int> createUrl({
     required Url url,
-    required int folderId,
     List<int> tagIds = const [],
   }) async {
     // Validate everything before inserting, so nothing is saved on failure.
     await _checkIfUrlExists(url);
-    await _checkIfFolderExists(folderId);
+    await _checkIfFolderExists(url.folderId);
     // A Set links a tag listed twice only once.
     final uniqueTagIds = tagIds.toSet();
     await _checkIfTagsExist(uniqueTagIds);
 
     final urlId = url.id ?? _urlIdSeq++;
-    _urls.add(url.copyWith(id: urlId, folderId: folderId));
+    _urls.add(url.copyWith(id: urlId));
     _notifyUrls();
     for (final tagId in uniqueTagIds) {
       await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));

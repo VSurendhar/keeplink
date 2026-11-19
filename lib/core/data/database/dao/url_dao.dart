@@ -27,8 +27,8 @@ abstract class UrlDao {
   @Query('SELECT * FROM folder')
   Stream<List<Folder>> findAllFolders();
 
-  /// One `folder_id` per URL that has a folder, for counting URLs per folder.
-  @Query('SELECT folder_id FROM url WHERE folder_id IS NOT NULL')
+  /// One `folder_id` per URL, for counting URLs per folder.
+  @Query('SELECT folder_id FROM url')
   Future<List<int>> findAllUrlFolderIds();
 
   /// One `tag_id` per URL-tag link, for counting URLs per tag.
@@ -112,14 +112,14 @@ abstract class UrlDao {
   }
 
   @transaction
-  Future<int> createUrl(Url url, int folderId, List<int> tagIds) async {
+  Future<int> createUrl(Url url, List<int> tagIds) async {
     // Validate everything before inserting, so nothing is saved on failure.
     await checkIfUrlExists(url);
-    await checkIfFolderExists(folderId);
+    await checkIfFolderExists(url.folderId);
     final uniqueTagIds = tagIds.toSet();
     await checkIfTagsExist(uniqueTagIds);
 
-    final urlId = await insertUrl(url.copyWith(folderId: folderId));
+    final urlId = await insertUrl(url);
     for (final tagId in uniqueTagIds) {
       await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
     }

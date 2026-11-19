@@ -1,10 +1,23 @@
 import 'package:floor/floor.dart';
+import 'package:mindful_links/core/data/database/entity/folder.dart';
 
 @Entity(
   tableName: 'url',
+  foreignKeys: [
+    // A folder can't be deleted while it still has URLs; move them first.
+    ForeignKey(
+      childColumns: ['folder_id'],
+      parentColumns: ['id'],
+      entity: Folder,
+      onDelete: ForeignKeyAction.restrict,
+    ),
+  ],
   indices: [
     Index(value: ['url'], unique: true),
     Index(value: ['title'], unique: true),
+    // Speeds up finding a folder's URLs and the foreign-key check when a
+    // folder is deleted.
+    Index(value: ['folder_id']),
   ],
 )
 class Url {
@@ -14,7 +27,7 @@ class Url {
     required this.title,
     required this.metaImageUrl,
     required this.metaDescription,
-    this.folderId,
+    required this.folderId,
     required this.createdAt,
     required this.updatedAt,
     required this.isFavorite,
@@ -33,7 +46,7 @@ class Url {
   final String metaDescription;
 
   @ColumnInfo(name: 'folder_id')
-  final int? folderId;
+  final int folderId;
 
   @ColumnInfo(name: 'created_at')
   final int createdAt;

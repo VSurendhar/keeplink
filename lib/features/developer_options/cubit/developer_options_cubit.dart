@@ -105,18 +105,18 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
     final databaseTagId = await insertTag('database');
     final tutorialTagId = await insertTag('tutorial');
 
-    final records = <(Url url, int folderId, List<int> tagIds)>[
+    final records = <(Url url, List<int> tagIds)>[
       (
         Url(
           url: 'https://flutter.dev',
           title: 'Flutter',
           metaImageUrl: 'https://flutter.dev/og.png',
           metaDescription: 'Description of Flutter',
+          folderId: flutterFolderId,
           createdAt: now,
           updatedAt: now,
           isFavorite: false,
         ),
-        flutterFolderId,
         [flutterTagId, dartTagId, mobileTagId],
       ),
       (
@@ -125,11 +125,11 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
           title: 'Dart',
           metaImageUrl: 'https://dart.dev/og.png',
           metaDescription: 'Description of Dart',
+          folderId: flutterFolderId,
           createdAt: now,
           updatedAt: now,
           isFavorite: false,
         ),
-        flutterFolderId,
         [mobileTagId, databaseTagId, tutorialTagId],
       ),
       (
@@ -138,11 +138,11 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
           title: 'pub.dev',
           metaImageUrl: 'https://pub.dev/og.png',
           metaDescription: 'Description of pub.dev',
+          folderId: flutterFolderId,
           createdAt: now,
           updatedAt: now,
           isFavorite: false,
         ),
-        flutterFolderId,
         const <int>[],
       ),
       (
@@ -151,11 +151,11 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
           title: 'Floor',
           metaImageUrl: 'https://pub.dev/packages/floor/og.png',
           metaDescription: 'Description of Floor',
+          folderId: dbFolderId,
           createdAt: now,
           updatedAt: now,
           isFavorite: false,
         ),
-        dbFolderId,
         const <int>[],
       ),
       (
@@ -164,17 +164,17 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
           title: 'SQLite',
           metaImageUrl: 'https://sqlite.org/og.png',
           metaDescription: 'Description of SQLite',
+          folderId: dbFolderId,
           createdAt: now,
           updatedAt: now,
           isFavorite: false,
         ),
-        dbFolderId,
         const <int>[],
       ),
     ];
 
-    for (final (url, folderId, tagIds) in records) {
-      await urlStore.createUrl(url: url, folderId: folderId, tagIds: tagIds);
+    for (final (url, tagIds) in records) {
+      await urlStore.createUrl(url: url, tagIds: tagIds);
     }
     await urlStore.seedDefaultFolderIfNotExist();
     await urlStore.seedDefaultTagsIfNotExist();

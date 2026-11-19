@@ -42,7 +42,7 @@ abstract class UrlStore {
 
   /// Returns the folder of the URL with this [id].
   ///
-  /// Returns `null` if the URL doesn't exist or has no folder.
+  /// Returns `null` if the URL doesn't exist or its folder no longer exists.
   Future<Folder?> findFolderForUrlId(int id);
 
   /// Emits all folders now and again whenever the folder table changes.
@@ -110,8 +110,8 @@ abstract class UrlStore {
   /// to restore them.
   Future<void> clearAll();
 
-  /// Saves [url] in the folder [folderId] and links it to [tagIds]. Returns
-  /// the new URL's id.
+  /// Saves [url] in its folder (`url.folderId`) and links it to [tagIds].
+  /// Returns the new URL's id.
   ///
   /// The only way to save a URL. Never creates folders or tags: they must
   /// already exist (the selection sheets create them). Everything is checked
@@ -125,13 +125,12 @@ abstract class UrlStore {
   /// - **Duplicate title**: throws `DuplicateTitleException` if a URL with
   ///   the same title already exists.
   /// - **Missing folder**: throws `FolderNotFoundException` if no folder has
-  ///   [folderId].
+  ///   `url.folderId`.
   /// - **Missing tag**: throws `TagNotFoundException` for the first id in
   ///   [tagIds] that has no tag.
   /// - **Repeated tag id**: an id listed twice in [tagIds] is linked once.
   Future<int> createUrl({
     required Url url,
-    required int folderId,
     List<int> tagIds = const [],
   });
 

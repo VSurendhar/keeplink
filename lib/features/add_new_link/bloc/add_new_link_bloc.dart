@@ -223,12 +223,12 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
           title: state.urlName.trim(),
           metaImageUrl: state.imageUrl,
           metaDescription: '',
+          folderId: folderId,
           createdAt: now,
           updatedAt: now,
           isFavorite: false,
           previewImageName: state.previewImageName,
         ),
-        folderId: folderId,
         tagIds: tagIds,
       );
       emit(
