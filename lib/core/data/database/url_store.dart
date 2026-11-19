@@ -34,8 +34,10 @@ abstract class UrlStore {
 
   /// Links a URL to a tag. Returns nothing.
   ///
-  /// The database store throws if the same URL-tag link already exists (the
-  /// mock store adds a duplicate); check with [findUrlTag] first.
+  /// The database store throws if the same URL-tag link already exists, or if
+  /// the URL or the tag doesn't exist (foreign keys). The mock store checks
+  /// none of these: it adds the link as it is. Check with [findUrlTag],
+  /// [findUrlById] and [findTagById] first.
   Future<void> insertUrlTag(UrlTag urlTag);
 
   // Query Operations
