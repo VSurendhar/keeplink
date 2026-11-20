@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:get_it/get_it.dart';
+import 'package:keep_links/core/analytics/app_analytics.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
 import 'package:keep_links/features/add_new_link/view/add_new_link_page.dart';
 import 'package:keep_links/features/developer_options/cubit/developer_options_cubit.dart';
@@ -20,6 +21,7 @@ class DeveloperOptionPage extends StatelessWidget {
     return BlocProvider(
       create: (_) => DeveloperOptionsCubit(
         appSettingsService: GetIt.instance.get<AppSettingsService>(),
+        appAnalytics: GetIt.instance.get<AppAnalytics>(),
         urlStoreProvider: GetIt.instance.get<UrlStore>,
       ),
       child: const DeveloperOptionView(),
@@ -121,6 +123,12 @@ class DeveloperOptionView extends StatelessWidget {
               _buildButton(
                 title: 'Initialize App Settings',
                 onPressed: cubit.initialAppSettings,
+              ),
+              const SizedBox(height: 24),
+              _buildSectionHeader('Analytics'),
+              _buildButton(
+                title: 'Trigger a Test Analytics',
+                onPressed: cubit.onTestAnalyticsClicked,
               ),
               const SizedBox(height: 16),
             ],

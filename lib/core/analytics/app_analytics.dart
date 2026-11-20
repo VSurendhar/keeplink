@@ -61,4 +61,12 @@ class AppAnalytics {
       }
     }
   }
+
+  Future<void> onTestAnalyticsClicked() async {
+    await trackEvent(
+      eventName: 'clicked_test_analytics',
+      properties: {'param1': 'value1', 'param2': 'value2'},
+    );
+    flush();
+  }
 }

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:keep_links/core/analytics/app_analytics.dart';
 import 'package:keep_links/core/utils/app_defaults.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/entity/tag.dart';
@@ -14,12 +15,15 @@ import 'package:keep_links/features/settings/service/app_settings_service.dart';
 class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
   DeveloperOptionsCubit({
     required AppSettingsService appSettingsService,
+    required AppAnalytics appAnalytics,
     required UrlStore Function() urlStoreProvider,
   }) : _appSettingsService = appSettingsService,
+       _appAnalytics = appAnalytics,
        _urlStoreProvider = urlStoreProvider,
        super(DeveloperOptionsState(isMockStore: UrlStoreSwitcher.isMock));
 
   final AppSettingsService _appSettingsService;
+  final AppAnalytics _appAnalytics;
 
   /// Resolved on every use so the store picked by [setMockStore] is used.
   final UrlStore Function() _urlStoreProvider;
@@ -204,6 +208,13 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
         ),
       );
     }
+  }
+
+  /// Sends a test event to every analytics client.
+  ///
+  /// [AppAnalytics] catches and logs each client's errors itself.
+  Future<void> onTestAnalyticsClicked() async {
+    _appAnalytics.onTestAnalyticsClicked();
   }
 
   void actionHandled() => emit(state.copyWith(clearAction: true));
