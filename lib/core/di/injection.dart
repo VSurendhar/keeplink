@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:injectable/injectable.dart';
+import 'package:keep_links/core/analytics/app_analytics.dart';
 import 'package:keep_links/core/data/hive/hive_service.dart';
 import 'package:keep_links/features/logger/logger.dart';
 
@@ -29,4 +30,5 @@ Future<void> configureDependencies() async {
       isShowToastInDebug: true,
     );
   }
+  await _getIt.get<AppAnalytics>().init();
 }
