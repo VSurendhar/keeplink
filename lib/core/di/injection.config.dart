@@ -12,6 +12,7 @@ import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
 import '../../features/settings/service/app_settings_service.dart' as _i732;
+import '../analytics/app_analytics.dart' as _i1033;
 import '../data/database/url_store.dart' as _i994;
 import '../data/files/preview_image_storage.dart' as _i939;
 
@@ -26,6 +27,7 @@ extension GetItInjectableX on _i174.GetIt {
       environment,
       environmentFilter,
     );
+    gh.lazySingleton<_i1033.AppAnalytics>(() => _i1033.AppAnalytics());
     gh.lazySingleton<_i994.UrlStore>(() => _i994.UrlStore());
     gh.lazySingleton<_i939.PreviewImageStorage>(
         () => _i939.PreviewImageStorage());
