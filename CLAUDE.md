@@ -10,10 +10,12 @@ The project uses FVM; prefix `flutter`/`dart` with `fvm`.
 
 ```bash
 fvm flutter pub get
-fvm flutter run lib/main.dart                                  # single entry point (debug enables dev features)
+fvm flutter run lib/main.dart --dart-define-from-file=secrets.json   # single entry point (debug enables dev features)
 fvm dart run build_runner build --delete-conflicting-outputs   # regenerate Floor, injectable, Hive adapters
 fvm dart analyze <changed_files>                               # required after Dart changes
 ```
+
+Secrets (e.g. `MIXPANEL_TOKEN`) live in the gitignored `secrets.json` at the project root (copy `secrets.example.json`) and are exposed as `String.fromEnvironment` constants on `BuildConfig` (`lib/core/utils/build_config.dart`), so read them from there; always pass `--dart-define-from-file=secrets.json` to `flutter run`/`build`.
 
 Run `build_runner` after touching anything annotated for codegen: Floor entities/DAO/`@Database` (`*.g.dart`), `@injectable`/`@lazySingleton` classes (`lib/core/di/injection.config.dart`), or Hive `@HiveType` models.
 

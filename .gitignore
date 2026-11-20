@@ -47,3 +47,5 @@ app.*.map.json
 
 # FVM Version Cache
 .fvm/
+# Build-time secrets (passed via --dart-define-from-file); see secrets.example.json
+secrets.json
