@@ -1,0 +1,20 @@
+name: Dart Analysis
+run-name: Dart Analysis
+on:
+  pull_request:
+    branches: [ master ]
+jobs:
+  Dart-Analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v3
+        with:
+          channel: stable
+          version: 3.35.4
+      - name: Check out repository code
+        uses: actions/checkout@v6
+      - name: Get Dependencies
+        run: flutter pub get
+      - name: Run Flutter Analyze
+        run: flutter analyze --no-fatal-infos --no-fatal-warnings
