@@ -1,0 +1,44 @@
+name: Dart Formatting
+run-name: Dart Formatting
+
+on: pull_request
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+      - name: Setup Flutter SDK
+        uses: flutter-actions/setup-flutter@v3
+        with:
+          channel: stable
+          version: 3.35.4
+
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.head_ref }}
+
+      - name: Get Dependencies
+        run: flutter pub get
+
+      - name: Run Dart Format
+        run: dart format .
+
+      - name: Check changed files
+        id: changes
+        run: |
+          if ! git diff --quiet HEAD; then
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Commit If Files Changed
+        if: steps.changes.outputs.changed == 'true'
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "style: apply code formatting."
