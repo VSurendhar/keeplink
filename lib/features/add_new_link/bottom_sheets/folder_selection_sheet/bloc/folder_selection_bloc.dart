@@ -62,11 +62,11 @@ class FolderSelectionBloc
   ) async {
     createFolderFocusNode.unfocus();
     final name = createFolderController.text.trim();
-    if (name.isEmpty || name.length > 40) {
+    if (name.isEmpty || name.length > AppDefaults.folderNameMaxLength) {
       emit(
         state.copyWith(
           action: const ShowToast(
-            'Folder name must be between 1 and 40 characters',
+            'Folder name must be between 1 and ${AppDefaults.folderNameMaxLength} characters',
           ),
         ),
       );
