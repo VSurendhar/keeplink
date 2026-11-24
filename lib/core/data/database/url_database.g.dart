@@ -96,7 +96,7 @@ class _$UrlDatabase extends UrlDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `preview_image_name` TEXT, FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON UPDATE NO ACTION ON DELETE RESTRICT)');
+            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `preview_image_name` TEXT, `trash` INTEGER NOT NULL, FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON UPDATE NO ACTION ON DELETE RESTRICT)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `url_tag` (`url_id` INTEGER NOT NULL, `tag_id` INTEGER NOT NULL, FOREIGN KEY (`url_id`) REFERENCES `url` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`url_id`, `tag_id`))');
         await database.execute(
@@ -146,7 +146,8 @@ class _$UrlDao extends UrlDao {
                   'created_at': item.createdAt,
                   'updated_at': item.updatedAt,
                   'is_favorite': item.isFavorite ? 1 : 0,
-                  'preview_image_name': item.previewImageName
+                  'preview_image_name': item.previewImageName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _folderInsertionAdapter = InsertionAdapter(
@@ -183,7 +184,8 @@ class _$UrlDao extends UrlDao {
                   'created_at': item.createdAt,
                   'updated_at': item.updatedAt,
                   'is_favorite': item.isFavorite ? 1 : 0,
-                  'preview_image_name': item.previewImageName
+                  'preview_image_name': item.previewImageName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _folderDeletionAdapter = DeletionAdapter(
@@ -245,7 +247,8 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         queryableName: 'url',
         isView: false);
   }
@@ -310,7 +313,8 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [folderId]);
   }
 
@@ -371,7 +375,8 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
@@ -388,7 +393,8 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [url]);
   }
 
@@ -405,7 +411,8 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [title]);
   }
 

@@ -64,6 +64,7 @@ Floor turns on SQLite's foreign-key checks (`PRAGMA foreign_keys = ON`) whenever
 | updated_at | INTEGER | No | | Milliseconds since epoch |
 | is_favorite | INTEGER | No | | Boolean: 0 or 1 |
 | preview_image_name | TEXT | Yes | | File name only (not the full path) of the user's preview image in `PreviewImageStorage`'s folder; `NULL` if the link has none |
+| trash | INTEGER | No | | Boolean: 0 or 1; 1 means marked to be deleted |
 
 ### folder
 

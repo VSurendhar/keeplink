@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'package:bloc/bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:keep_links/core/analytics/app_analytics.dart';
@@ -79,11 +80,15 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
   /// tags are inserted first, and their names recorded in [folderNames] and
   /// [tagNames]. The default folder and tags are restored at the end, since
   /// clearing removes them.
+  ///
+  /// Each seeded URL is randomly marked as trash or not.
   Future<void> _seedDatabase(
     UrlStore urlStore,
     Map<int, String> folderNames,
     Map<int, String> tagNames,
   ) async {
+    final random = Random();
+
     Future<int> insertFolder(String name) async {
       final id = await urlStore.insertFolder(Folder(folderName: name));
       folderNames[id] = name;
@@ -178,7 +183,10 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
     ];
 
     for (final (url, tagIds) in records) {
-      await urlStore.createUrl(url: url, tagIds: tagIds);
+      await urlStore.createUrl(
+        url: url.copyWith(trash: random.nextBool()),
+        tagIds: tagIds,
+      );
     }
     await urlStore.seedDefaultFolderIfNotExist();
     await urlStore.seedDefaultTagsIfNotExist();
@@ -243,7 +251,7 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
         debugPrint(
           'id=${u.id}, title=${u.title}, url=${u.url}, '
           'folderId=${u.folderId} (${folder?.folderName}), '
-          'isFavorite=${u.isFavorite}, createdAt=${u.createdAt}',
+          'isFavorite=${u.isFavorite}, createdAt=${u.createdAt}, trash=${u.trash}',
         );
       }
 
