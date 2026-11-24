@@ -5,6 +5,7 @@ import 'package:keep_links/core/data/database/url_store.dart';
 import 'package:keep_links/features/folder/bloc/folder_bloc.dart';
 import 'package:keep_links/features/folder/bloc/folder_event.dart';
 import 'package:keep_links/features/folder/bloc/folder_state.dart';
+import 'package:keep_links/features/folder/bottom_sheets/create_folder_sheet/view/show_create_folder_sheet.dart';
 import 'package:keep_links/features/folder/view/widgets/folder_card.dart';
 import 'package:keep_links/features/home/constants/constants.dart';
 import 'package:keep_links/features/theme/colors.dart';
@@ -38,10 +39,20 @@ class FolderView extends StatelessWidget {
     return Scaffold(
       backgroundColor: KeepLinksTheme.secondaryLight,
       appBar: _buildAppBar(context),
-      floatingActionButton: _buildFab(),
+      floatingActionButton: _buildFab(context),
       body: SafeArea(
         top: false,
-        child: BlocBuilder<FolderBloc, FolderState>(
+        child: BlocConsumer<FolderBloc, FolderState>(
+          listenWhen: (previous, current) =>
+              _actionOf(current) != null &&
+              _actionOf(previous) != _actionOf(current),
+          listener: (context, state) {
+            if (_actionOf(state) is ShowCreateFolderSheet) {
+              showCreateFolderSheet(context);
+            }
+
+            context.read<FolderBloc>().add(const OnActionHandled());
+          },
           builder: (context, state) {
             return switch (state) {
               FolderLoadingState() => Center(
@@ -57,6 +68,10 @@ class FolderView extends StatelessWidget {
       ),
     );
   }
+
+  /// Actions only exist on [FolderSuccessState].
+  static FolderAction? _actionOf(FolderState state) =>
+      state is FolderSuccessState ? state.action : null;
 
   PreferredSizeWidget _buildAppBar(BuildContext context) {
     return AppBar(
@@ -106,7 +121,7 @@ class FolderView extends StatelessWidget {
     );
   }
 
-  Widget _buildFab() {
+  Widget _buildFab(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: paddingForBottomNavBar),
       child: SizedBox.square(
@@ -118,7 +133,7 @@ class FolderView extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
           ),
           onPressed: () {
-            // TODO: Add the FAB functionality.
+            context.read<FolderBloc>().add(const OnCreateFolderClicked());
           },
           child: const Icon(Icons.add_rounded, size: 32),
         ),

@@ -7,9 +7,9 @@ sealed class FolderAction extends Equatable {
   List<Object?> get props => [];
 }
 
-/// Triggered when the view should open the create folder dialog.
-final class ShowCreateFolderDialog extends FolderAction {
-  const ShowCreateFolderDialog();
+/// Triggered when the view should open the create folder bottom sheet.
+final class ShowCreateFolderSheet extends FolderAction {
+  const ShowCreateFolderSheet();
 }
 
 /// Triggered when the view should open the screen listing the URLs of the

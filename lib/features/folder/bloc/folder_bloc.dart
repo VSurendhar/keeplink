@@ -160,7 +160,12 @@ class FolderBloc extends Bloc<FolderEvent, FolderState> {
   void _onCreateFolderClicked(
     OnCreateFolderClicked event,
     Emitter<FolderState> emit,
-  ) {}
+  ) {
+    final current = state;
+    if (current is FolderSuccessState) {
+      emit(current.copyWith(action: const ShowCreateFolderSheet()));
+    }
+  }
 
   /// Clears the action the view has just performed. Actions only exist on
   /// [FolderSuccessState].

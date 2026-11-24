@@ -27,7 +27,7 @@ final class OnFolderItemClicked extends FolderEvent {
   List<Object?> get props => [folderId];
 }
 
-/// Triggered when the "Create Folder" button is clicked.
+/// Triggered when the floating button is tapped, to create a folder.
 final class OnCreateFolderClicked extends FolderEvent {
   const OnCreateFolderClicked();
 }
