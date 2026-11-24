@@ -61,6 +61,7 @@ class FolderSelectionBloc
     OnSaveFolderClicked event,
     Emitter<FolderSelectionState> emit,
   ) async {
+    if (state.isSaving) return;
     createFolderFocusNode.unfocus();
     final name = createFolderController.text.trim();
     final nameError = FolderNameValidator.validate(name);
@@ -69,6 +70,7 @@ class FolderSelectionBloc
       return;
     }
 
+    emit(state.copyWith(isSaving: true));
     try {
       if (await urlStore.findFolderByName(name) != null) {
         emit(state.copyWith(action: const ShowToast('Folder already exists')));
@@ -87,6 +89,8 @@ class FolderSelectionBloc
       emit(
         state.copyWith(action: const ShowToast('Error While Creating Folder')),
       );
+    } finally {
+      emit(state.copyWith(isSaving: false));
     }
   }
 
