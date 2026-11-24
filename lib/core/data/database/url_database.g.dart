@@ -236,7 +236,7 @@ class _$UrlDao extends UrlDao {
 
   @override
   Stream<List<Url>> findAllUrl() {
-    return _queryAdapter.queryListStream('SELECT * FROM url',
+    return _queryAdapter.queryListStream('SELECT * FROM url WHERE trash = 0',
         mapper: (Map<String, Object?> row) => Url(
             id: row['id'] as int?,
             url: row['url'] as String,

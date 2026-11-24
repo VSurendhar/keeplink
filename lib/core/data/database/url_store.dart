@@ -50,7 +50,8 @@ abstract class UrlStore {
   /// Emits all folders now and again whenever the folder table changes.
   Stream<List<Folder>> findAllFolders();
 
-  /// Emits all URLs now and again whenever the URL table changes.
+  /// Emits all URLs that are not in the trash, now and again whenever the URL
+  /// table changes.
   Stream<List<Url>> findAllUrl();
 
   /// Emits all tags now and again whenever the tag table changes.

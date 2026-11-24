@@ -53,7 +53,10 @@ class MockUrlStore implements UrlStore {
   void _notifyFolders() =>
       _folderStreamController.add(List.unmodifiable(_folders));
 
-  void _notifyUrls() => _urlStreamController.add(List.unmodifiable(_urls));
+  List<Url> get _untrashedUrls =>
+      List.unmodifiable(_urls.where((url) => !url.trash));
+
+  void _notifyUrls() => _urlStreamController.add(_untrashedUrls);
 
   void _notifyTags() => _tagStreamController.add(List.unmodifiable(_tags));
 
@@ -129,7 +132,7 @@ class MockUrlStore implements UrlStore {
 
   @override
   Stream<List<Url>> findAllUrl() async* {
-    yield List.unmodifiable(_urls);
+    yield _untrashedUrls;
     yield* _urlStreamController.stream;
   }
 

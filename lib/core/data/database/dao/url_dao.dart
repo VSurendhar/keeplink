@@ -10,7 +10,7 @@ import 'package:keep_links/core/data/database/exception/tag_not_found_exception.
 
 @dao
 abstract class UrlDao {
-  @Query('SELECT * FROM url')
+  @Query('SELECT * FROM url WHERE trash = 0')
   Stream<List<Url>> findAllUrl();
 
   @Query(
