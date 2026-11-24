@@ -175,10 +175,7 @@ class AddNewLinkBloc extends Bloc<AddNewLinkEvent, AddNewLinkState> {
 
     final previousFileName = state.previewImageName;
     emit(
-      state.copyWith(
-        previewImageName: fileName,
-        isSavingPreviewImage: false,
-      ),
+      state.copyWith(previewImageName: fileName, isSavingPreviewImage: false),
     );
     if (previousFileName != null) {
       await _deletePreviewImage(previousFileName);

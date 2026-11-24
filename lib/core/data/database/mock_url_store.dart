@@ -230,10 +230,7 @@ class MockUrlStore implements UrlStore {
   }
 
   @override
-  Future<int> createUrl({
-    required Url url,
-    List<int> tagIds = const [],
-  }) async {
+  Future<int> createUrl({required Url url, List<int> tagIds = const []}) async {
     // Validate everything before inserting, so nothing is saved on failure.
     await _checkIfUrlExists(url);
     await _checkIfFolderExists(url.folderId);

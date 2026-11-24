@@ -1,4 +1,4 @@
-﻿import 'package:injectable/injectable.dart';
+import 'package:injectable/injectable.dart';
 import 'package:keep_links/core/data/database/database_url_store.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/entity/tag.dart';
@@ -134,10 +134,7 @@ abstract class UrlStore {
   /// - **Missing tag**: throws `TagNotFoundException` for the first id in
   ///   [tagIds] that has no tag.
   /// - **Repeated tag id**: an id listed twice in [tagIds] is linked once.
-  Future<int> createUrl({
-    required Url url,
-    List<int> tagIds = const [],
-  });
+  Future<int> createUrl({required Url url, List<int> tagIds = const []});
 
   /// Deletes the folder [sourceFolderId] and moves its URLs into the folder
   /// [targetFolderId]. Returns nothing.
