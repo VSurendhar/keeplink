@@ -69,15 +69,11 @@ class FolderSelectionBloc
       return;
     }
 
-    final alreadyExists = state.folders.any(
-      (item) => item.folder.folderName.trim() == name,
-    );
-    if (alreadyExists) {
-      emit(state.copyWith(action: ShowToast('Folder already exists')));
-      return;
-    }
-
     try {
+      if (await urlStore.findFolderByName(name) != null) {
+        emit(state.copyWith(action: const ShowToast('Folder already exists')));
+        return;
+      }
       final id = await urlStore.insertFolder(Folder(folderName: name));
       createFolderController.clear();
       emit(
