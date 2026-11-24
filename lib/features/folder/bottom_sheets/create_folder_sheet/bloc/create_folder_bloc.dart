@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/core/utils/folder_name_validator.dart';
 import 'package:keep_links/features/folder/bottom_sheets/create_folder_sheet/bloc/create_folder_event.dart';
 import 'package:keep_links/features/folder/bottom_sheets/create_folder_sheet/bloc/create_folder_state.dart';
 import 'package:keep_links/features/logger/logger.dart';
@@ -26,6 +27,11 @@ class CreateFolderBloc extends Bloc<CreateFolderEvent, CreateFolderState> {
   ) async {
     if (!state.isCreateEnabled) return;
     final name = state.name.trim();
+    final nameError = FolderNameValidator.validate(name);
+    if (nameError != null) {
+      emit(state.copyWith(action: ShowToast(nameError)));
+      return;
+    }
 
     emit(state.copyWith(isCreating: true));
     try {

@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:keep_links/core/utils/app_defaults.dart';
+import 'package:keep_links/core/utils/folder_name_validator.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
 import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
@@ -62,14 +63,9 @@ class FolderSelectionBloc
   ) async {
     createFolderFocusNode.unfocus();
     final name = createFolderController.text.trim();
-    if (name.isEmpty || name.length > AppDefaults.folderNameMaxLength) {
-      emit(
-        state.copyWith(
-          action: const ShowToast(
-            'Folder name must be between 1 and ${AppDefaults.folderNameMaxLength} characters',
-          ),
-        ),
-      );
+    final nameError = FolderNameValidator.validate(name);
+    if (nameError != null) {
+      emit(state.copyWith(action: ShowToast(nameError)));
       return;
     }
 
