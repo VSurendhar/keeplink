@@ -27,12 +27,14 @@ abstract class UrlDao {
   @Query('SELECT * FROM folder')
   Stream<List<Folder>> findAllFolders();
 
-  /// One `folder_id` per URL, for counting URLs per folder.
-  @Query('SELECT folder_id FROM url')
+  /// One `folder_id` per saved URL, for counting URLs per folder.
+  @Query('SELECT folder_id FROM url WHERE trash = 0')
   Future<List<int>> findAllUrlFolderIds();
 
-  /// One `tag_id` per URL-tag link, for counting URLs per tag.
-  @Query('SELECT tag_id FROM url_tag')
+  /// One `tag_id` per tag link of a saved URL, for counting URLs per tag.
+  @Query(
+    'SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 0)',
+  )
   Future<List<int>> findAllUrlTagIds();
 
   /// Internal to [createUrl], which validates the URL first; call

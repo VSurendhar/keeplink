@@ -286,13 +286,14 @@ class _$UrlDao extends UrlDao {
 
   @override
   Future<List<int>> findAllUrlFolderIds() async {
-    return _queryAdapter.queryList('SELECT folder_id FROM url',
+    return _queryAdapter.queryList('SELECT folder_id FROM url WHERE trash = 0',
         mapper: (Map<String, Object?> row) => row.values.first as int);
   }
 
   @override
   Future<List<int>> findAllUrlTagIds() async {
-    return _queryAdapter.queryList('SELECT tag_id FROM url_tag',
+    return _queryAdapter.queryList(
+        'SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 0)',
         mapper: (Map<String, Object?> row) => row.values.first as int);
   }
 

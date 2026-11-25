@@ -150,11 +150,17 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<Map<int, int>> findUrlCountPerFolder() async =>
-      UrlStore.countById(_urls.map((url) => url.folderId));
+      UrlStore.countById(_untrashedUrls.map((url) => url.folderId));
 
   @override
-  Future<Map<int, int>> findUrlCountPerTag() async =>
-      UrlStore.countById(_urlTags.map((urlTag) => urlTag.tagId));
+  Future<Map<int, int>> findUrlCountPerTag() async {
+    final untrashedUrlIds = _untrashedUrls.map((url) => url.id).toSet();
+    return UrlStore.countById(
+      _urlTags
+          .where((urlTag) => untrashedUrlIds.contains(urlTag.urlId))
+          .map((urlTag) => urlTag.tagId),
+    );
+  }
 
   @override
   Future<Folder?> findFolderById(int id) async {

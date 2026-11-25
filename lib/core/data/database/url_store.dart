@@ -95,14 +95,16 @@ abstract class UrlStore {
   /// linked.
   Future<UrlTag?> findUrlTag(int urlId, int tagId);
 
-  /// Number of URLs in each folder, keyed by folder id.
+  /// Number of saved URLs in each folder, keyed by folder id. Trashed URLs
+  /// aren't counted.
   ///
-  /// Folders with no URLs are not in the map; read them as `counts[id] ?? 0`.
+  /// Folders with no saved URLs are not in the map; read them as `counts[id] ?? 0`.
   Future<Map<int, int>> findUrlCountPerFolder();
 
-  /// Number of URLs with each tag, keyed by tag id.
+  /// Number of saved URLs with each tag, keyed by tag id. Trashed URLs aren't
+  /// counted.
   ///
-  /// Tags with no URLs are not in the map; read them as `counts[id] ?? 0`.
+  /// Tags with no saved URLs are not in the map; read them as `counts[id] ?? 0`.
   Future<Map<int, int>> findUrlCountPerTag();
 
   /// Deletes all URL-tag links, URLs, tags and folders. Returns nothing.

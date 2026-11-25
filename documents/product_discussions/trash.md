@@ -15,7 +15,7 @@ The tasks are in the order to build them.
 3. [x] **Uniqueness:** a trashed link doesn't reserve its URL or title, so the user can save the same ones again, and the trash may hold several links with the same URL or title.
     - `url` and `title` are unique only where `trash = 0`: remove the two unique indexes from `url.dart`, and create partial unique indexes (`WHERE trash = 0`) in Floor's `onCreate` callback.
     - Duplicate checks look at saved links only, in both stores. Do this together with the indexes, because allowing duplicates makes the unfiltered checks throw.
-4. [ ] **Visibility:** a trashed link appears only on the Trash page. It isn't in lists, counts or exports. The folder and tag selection sheets count saved links only.
+4. [x] **Visibility:** a trashed link appears only on the Trash page. It isn't in lists, counts or exports. The folder and tag selection sheets count saved links only.
 5. [ ] **Remembering a deleted folder:** deleting a folder moves its trashed links too, so the original folder's name is stored on the trashed link and cleared on restore.
 6. [ ] **Remembering a deleted tag:** deleting a tag removes its links, so the deleted tag's name is kept for each trashed link in a small table.
 7. [ ] **Timestamps:** trashing a link sets `updated_at` to that time, and restoring it sets `updated_at` to the time of the restore. `created_at` never changes. There is no `trashed_at` column.
