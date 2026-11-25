@@ -141,3 +141,26 @@ These apply on top of the design from the external source.
 - The screen from which the user moves a single link to the trash. It is separate work, and calls `moveUrlToTrash` (task 22).
 - Permanently deleting a single link. It is separate work, right after restore. The link and its `url_tag` rows go first, then its trashed folder and tags if no other link, saved or trashed, uses them.
 - Automatic deletion (trash retention).
+
+## Developer notes
+
+**Done this way now, could change later**
+
+- `updated_at` is also the time a link was trashed or restored, so a list sorted by it shows restored links first. This is intentional, and no separate column is needed.
+- `findTrashedUrls()` updates only when the `url` table changes. If folders or tags can be renamed later, an open Trash page won't refresh by itself.
+- The Trash Retention card is only hidden (`_showTrashRetentionCard` in `app_settings_page.dart`). Its setting is still saved.
+- A folder or tag has only a name today, so reusing a trashed one (task 9) looks like a new one. If it gets more fields, decide whether to reset them.
+
+**Must check before releasing**
+
+- The schema changed but its version is still 1 with no migration. If a build without the `trash` columns was ever released, add a migration that also creates the partial indexes.
+- The Trash page needs an entry point in release builds, because Developer Options is hidden there.
+- Preview images of permanently deleted links, and of erased data, stay in storage until the startup sweep is built.
+
+**When changing the code**
+
+- Any database built without `urlDatabaseCallback` has no unique `url` and `title`. Don't put `unique: true` back on them in `url.dart`.
+- A query that returns one row must filter by `trash` where values can repeat, because Floor throws if it finds more than one.
+- `findUrlById`, `findFolderById` and `findTagById` also return trashed rows. Screens that open or edit a link must check `trash` (task 16).
+- When link editing is built, add a store function for it that refuses trashed folders and tags, as `createUrl` does.
+- Run the task 10 check again after adding an operation that edits or deletes links, folders or tags.
