@@ -13,8 +13,8 @@ import 'package:keep_links/core/data/database/entity/folder.dart';
     ),
   ],
   indices: [
-    Index(value: ['url'], unique: true),
-    Index(value: ['title'], unique: true),
+    // `url` and `title` are unique among saved URLs only. Floor can't declare
+    // partial indexes, so `urlDatabaseCallback` creates them.
     // Speeds up finding a folder's URLs and the foreign-key check when a
     // folder is deleted.
     Index(value: ['folder_id']),

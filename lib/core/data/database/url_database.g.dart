@@ -103,10 +103,6 @@ class _$UrlDatabase extends UrlDatabase {
             'CREATE TABLE IF NOT EXISTS `folder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `folder_name` TEXT NOT NULL)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `tag` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `tag_name` TEXT NOT NULL)');
-        await database
-            .execute('CREATE UNIQUE INDEX `index_url_url` ON `url` (`url`)');
-        await database.execute(
-            'CREATE UNIQUE INDEX `index_url_title` ON `url` (`title`)');
         await database.execute(
             'CREATE INDEX `index_url_folder_id` ON `url` (`folder_id`)');
         await database.execute(
@@ -382,7 +378,7 @@ class _$UrlDao extends UrlDao {
 
   @override
   Future<Url?> findUrlByUrlString(String url) async {
-    return _queryAdapter.query('SELECT * FROM url WHERE url = ?1',
+    return _queryAdapter.query('SELECT * FROM url WHERE url = ?1 AND trash = 0',
         mapper: (Map<String, Object?> row) => Url(
             id: row['id'] as int?,
             url: row['url'] as String,
@@ -400,7 +396,8 @@ class _$UrlDao extends UrlDao {
 
   @override
   Future<Url?> findUrlByTitle(String title) async {
-    return _queryAdapter.query('SELECT * FROM url WHERE title = ?1',
+    return _queryAdapter.query(
+        'SELECT * FROM url WHERE title = ?1 AND trash = 0',
         mapper: (Map<String, Object?> row) => Url(
             id: row['id'] as int?,
             url: row['url'] as String,

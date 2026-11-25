@@ -14,9 +14,9 @@ folder 1 ──── * url * ──── * tag
 
 ## Uniqueness
 
-Each table's `id` is its primary key, so it is always unique. On top of that, the following columns are unique, enforced with unique indexes on the Floor entities:
+Each table's `id` is its primary key, so it is always unique. On top of that, the following columns are unique, enforced with unique indexes. They are declared on the Floor entities, except the two on `url`: Floor can't declare partial indexes, so `urlDatabaseCallback` (`url_database.dart`) creates those when the database is created.
 
-- **url**: `url` and `title` — two links can't share the same URL or the same title.
+- **url**: `url` and `title` — two saved links (`trash = 0`) can't share the same URL or the same title. A trashed link doesn't reserve its URL or title, and the trash may hold several links with the same ones.
 - **folder**: `folder_name` — two folders can't have the same name.
 - **tag**: `tag_name` — two tags can't have the same name.
 - **url_tag**: the composite primary key (`url_id`, `tag_id`) — a tag can be attached to a link only once.
@@ -39,8 +39,8 @@ Floor turns on SQLite's foreign-key checks (`PRAGMA foreign_keys = ON`) whenever
 
 | Index | Table (columns) | Unique | Purpose |
 |---|---|---|---|
-| `index_url_url` | `url` (`url`) | Yes | No duplicate URLs; fast duplicate check |
-| `index_url_title` | `url` (`title`) | Yes | No duplicate titles; fast duplicate check |
+| `index_url_url` | `url` (`url`) | Yes, where `trash = 0` | No duplicate URLs among saved links; fast duplicate check |
+| `index_url_title` | `url` (`title`) | Yes, where `trash = 0` | No duplicate titles among saved links; fast duplicate check |
 | `index_url_folder_id` | `url` (`folder_id`) | No | Fast lookup of a folder's links and the foreign-key check on folder delete |
 | `index_folder_folder_name` | `folder` (`folder_name`) | Yes | No duplicate folder names |
 | `index_tag_tag_name` | `tag` (`tag_name`) | Yes | No duplicate tag names |
@@ -55,8 +55,8 @@ Floor turns on SQLite's foreign-key checks (`PRAGMA foreign_keys = ON`) whenever
 | Column | Type | Null | Constraint | Notes |
 |---|---|---|---|---|
 | id | INTEGER | No | Primary Key (auto-increment) | |
-| url | TEXT | No | Unique | |
-| title | TEXT | No | Unique | |
+| url | TEXT | No | Unique where `trash = 0` | |
+| title | TEXT | No | Unique where `trash = 0` | |
 | meta_image_url | TEXT | No | | |
 | meta_description | TEXT | No | | |
 | folder_id | INTEGER | No | Foreign Key → `folder.id` (restrict), indexed | |

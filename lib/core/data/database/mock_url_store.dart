@@ -183,7 +183,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Url?> findUrlByUrlString(String url) async {
     for (final item in _urls) {
-      if (item.url == url) return item;
+      if (!item.trash && item.url == url) return item;
     }
     return null;
   }
@@ -191,7 +191,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Url?> findUrlByTitle(String title) async {
     for (final item in _urls) {
-      if (item.title == title) return item;
+      if (!item.trash && item.title == title) return item;
     }
     return null;
   }
@@ -285,12 +285,21 @@ class MockUrlStore implements UrlStore {
     _notifyTags();
   }
 
-  /// Throws [DuplicateUrlException] if a URL with the same id or address
-  /// exists, or [DuplicateTitleException] if one with the same title exists.
+  /// Throws [DuplicateUrlException] if any URL has the same id or a saved URL
+  /// has the same address, or [DuplicateTitleException] if a saved URL has the
+  /// same title.
+  ///
+  /// A trashed [url] may share its address and title with any other URL, so
+  /// only its id is checked.
   Future<void> _checkIfUrlExists(Url url) async {
     final id = url.id;
     final idTaken = id != null && await findUrlById(id) != null;
-    if (idTaken || await findUrlByUrlString(url.url) != null) {
+    if (idTaken) {
+      throw DuplicateUrlException(url.url);
+    }
+    if (url.trash) return;
+
+    if (await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
     }
     if (await findUrlByTitle(url.title) != null) {

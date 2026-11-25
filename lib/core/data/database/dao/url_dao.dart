@@ -88,10 +88,10 @@ abstract class UrlDao {
   @Query('SELECT * FROM url WHERE id = :id')
   Future<Url?> findUrlById(int id);
 
-  @Query('SELECT * FROM url WHERE url = :url')
+  @Query('SELECT * FROM url WHERE url = :url AND trash = 0')
   Future<Url?> findUrlByUrlString(String url);
 
-  @Query('SELECT * FROM url WHERE title = :title')
+  @Query('SELECT * FROM url WHERE title = :title AND trash = 0')
   Future<Url?> findUrlByTitle(String title);
 
   @Query('SELECT * FROM tag WHERE id = :id')
@@ -158,12 +158,21 @@ abstract class UrlDao {
     await deleteTag(tag);
   }
 
-  /// Throws [DuplicateUrlException] if a URL with the same id or address
-  /// exists, or [DuplicateTitleException] if one with the same title exists.
+  /// Throws [DuplicateUrlException] if any URL has the same id or a saved URL
+  /// has the same address, or [DuplicateTitleException] if a saved URL has the
+  /// same title.
+  ///
+  /// A trashed [url] may share its address and title with any other URL, so
+  /// only its id is checked.
   Future<void> checkIfUrlExists(Url url) async {
     final id = url.id;
     final idTaken = id != null && await findUrlById(id) != null;
-    if (idTaken || await findUrlByUrlString(url.url) != null) {
+    if (idTaken) {
+      throw DuplicateUrlException(url.url);
+    }
+    if (url.trash) return;
+
+    if (await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
     }
     if (await findUrlByTitle(url.title) != null) {

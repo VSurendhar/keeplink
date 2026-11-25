@@ -74,11 +74,11 @@ abstract class UrlStore {
   Future<Url?> findUrlById(int id);
 
   /// Returns the saved URL whose address is exactly [url], or `null` if there
-  /// is none. Used for the duplicate check.
+  /// is none. Trashed URLs are ignored. Used for the duplicate check.
   Future<Url?> findUrlByUrlString(String url);
 
   /// Returns the saved URL whose title is exactly [title], or `null` if there
-  /// is none. Used for the duplicate check.
+  /// is none. Trashed URLs are ignored. Used for the duplicate check.
   ///
   /// Case-sensitive, for the same reason as [findFolderByName].
   Future<Url?> findUrlByTitle(String title);
@@ -126,10 +126,12 @@ abstract class UrlStore {
   /// keys reject a missing folder or tag.
   ///
   /// Special cases:
-  /// - **Duplicate URL**: throws `DuplicateUrlException` if a URL with the
-  ///   same address (or the same `id`, when [url] has one) already exists.
-  /// - **Duplicate title**: throws `DuplicateTitleException` if a URL with
-  ///   the same title already exists.
+  /// - **Duplicate URL**: throws `DuplicateUrlException` if a saved URL
+  ///   has the same address, or any URL has the same `id` (when [url] has one).
+  /// - **Duplicate title**: throws `DuplicateTitleException` if a saved
+  ///   URL has the same title.
+  /// - **Trashed URL**: if [url] is trashed, its address and title aren't
+  ///   checked, since they can repeat in the trash.
   /// - **Missing folder**: throws `FolderNotFoundException` if no folder has
   ///   `url.folderId`.
   /// - **Missing tag**: throws `TagNotFoundException` for the first id in

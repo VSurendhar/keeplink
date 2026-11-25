@@ -1,6 +1,6 @@
 # Trash
 
-Status: confirmed. Done so far: the `url.trash` column, and `findAllUrl()` leaves out trashed links. Everything else is not started.
+Status: confirmed. Done so far: the `url.trash` column, and `findAllUrl()` leaves out trashed links. Checked tasks are done too.
 
 ## Goal
 
@@ -12,7 +12,7 @@ The tasks are in the order to build them.
 
 1. [ ] **Saved or trashed:** a link is either **saved** (`url.trash = 0`) or **trashed** (`url.trash = 1`). Folders and tags are never trashed.
 2. [ ] **Schema changes:** update `database_schema.md` with every schema change. No migrations are needed during development; existing databases must be cleared after a schema change.
-3. [ ] **Uniqueness:** a trashed link doesn't reserve its URL or title, so the user can save the same ones again, and the trash may hold several links with the same URL or title.
+3. [x] **Uniqueness:** a trashed link doesn't reserve its URL or title, so the user can save the same ones again, and the trash may hold several links with the same URL or title.
     - `url` and `title` are unique only where `trash = 0`: remove the two unique indexes from `url.dart`, and create partial unique indexes (`WHERE trash = 0`) in Floor's `onCreate` callback.
     - Duplicate checks look at saved links only, in both stores. Do this together with the indexes, because allowing duplicates makes the unfiltered checks throw.
 4. [ ] **Visibility:** a trashed link appears only on the Trash page. It isn't in lists, counts or exports. The folder and tag selection sheets count saved links only.

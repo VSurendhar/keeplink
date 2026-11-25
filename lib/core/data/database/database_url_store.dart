@@ -26,6 +26,7 @@ class DatabaseUrlStore implements UrlStore {
     try {
       return await $FloorUrlDatabase
           .databaseBuilder('keep_links_db.db')
+          .addCallback(urlDatabaseCallback)
           .build();
     } catch (_) {
       _dbFuture = null;
