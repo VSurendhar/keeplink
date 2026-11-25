@@ -6,7 +6,7 @@ The planned startup cleanup deletes preview images in the `keep_links/` folder t
 
 ## Must not remove images of trashed links
 
-- A link's preview image stays in storage while the link is in the trash. Trashing and restoring only change `url.trash`; they never touch the image. See [trash.md](trash.md).
+- A link's preview image stays in storage while the link is in the trash. Trashing and restoring a link never touch its image. See [trash.md](trash.md).
 - Treat the image as in use until the link is permanently deleted.
 - `findAllUrl()` returns only untrashed links, so the cleanup must not use it alone to decide which images are in use. It must check trashed links too.
 
