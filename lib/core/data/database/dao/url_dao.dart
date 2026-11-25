@@ -22,10 +22,10 @@ abstract class UrlDao {
   @Query('SELECT * FROM url_tag')
   Stream<List<UrlTag>> findAllUrlTags();
 
-  @Query('SELECT * FROM tag')
+  @Query('SELECT * FROM tag WHERE trash = 0')
   Stream<List<Tag>> findAllTags();
 
-  @Query('SELECT * FROM folder')
+  @Query('SELECT * FROM folder WHERE trash = 0')
   Stream<List<Folder>> findAllFolders();
 
   /// One `folder_id` per saved URL, for counting URLs per folder.
@@ -130,9 +130,9 @@ abstract class UrlDao {
   Future<int> createUrl(Url url, List<int> tagIds) async {
     // Validate everything before inserting, so nothing is saved on failure.
     await checkIfUrlExists(url);
-    await checkIfFolderExists(url.folderId);
+    await checkIfFolderExists(url.folderId, allowTrashed: url.trash);
     final uniqueTagIds = tagIds.toSet();
-    await checkIfTagsExist(uniqueTagIds);
+    await checkIfTagsExist(uniqueTagIds, allowTrashed: url.trash);
 
     final urlId = await insertUrl(url);
     for (final tagId in uniqueTagIds) {
@@ -215,17 +215,27 @@ abstract class UrlDao {
     }
   }
 
-  /// Throws [FolderNotFoundException] if no folder has [folderId].
-  Future<void> checkIfFolderExists(int folderId) async {
-    if (await findFolderById(folderId) == null) {
+  /// Throws [FolderNotFoundException] if no folder has [folderId], or if it is
+  /// trashed and not [allowTrashed].
+  Future<void> checkIfFolderExists(
+    int folderId, {
+    bool allowTrashed = false,
+  }) async {
+    final folder = await findFolderById(folderId);
+    if (folder == null || (folder.trash && !allowTrashed)) {
       throw FolderNotFoundException(folderId);
     }
   }
 
-  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag.
-  Future<void> checkIfTagsExist(Iterable<int> tagIds) async {
+  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag, or
+  /// whose tag is trashed and not [allowTrashed].
+  Future<void> checkIfTagsExist(
+    Iterable<int> tagIds, {
+    bool allowTrashed = false,
+  }) async {
     for (final tagId in tagIds) {
-      if (await findTagById(tagId) == null) {
+      final tag = await findTagById(tagId);
+      if (tag == null || (tag.trash && !allowTrashed)) {
         throw TagNotFoundException(tagId);
       }
     }

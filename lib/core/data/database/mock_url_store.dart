@@ -50,15 +50,20 @@ class MockUrlStore implements UrlStore {
     }
   }
 
-  void _notifyFolders() =>
-      _folderStreamController.add(List.unmodifiable(_folders));
+  List<Folder> get _untrashedFolders =>
+      List.unmodifiable(_folders.where((folder) => !folder.trash));
+
+  void _notifyFolders() => _folderStreamController.add(_untrashedFolders);
 
   List<Url> get _untrashedUrls =>
       List.unmodifiable(_urls.where((url) => !url.trash));
 
   void _notifyUrls() => _urlStreamController.add(_untrashedUrls);
 
-  void _notifyTags() => _tagStreamController.add(List.unmodifiable(_tags));
+  List<Tag> get _untrashedTags =>
+      List.unmodifiable(_tags.where((tag) => !tag.trash));
+
+  void _notifyTags() => _tagStreamController.add(_untrashedTags);
 
   void _notifyUrlTags() =>
       _urlTagStreamController.add(List.unmodifiable(_urlTags));
@@ -126,7 +131,7 @@ class MockUrlStore implements UrlStore {
 
   @override
   Stream<List<Folder>> findAllFolders() async* {
-    yield List.unmodifiable(_folders);
+    yield _untrashedFolders;
     yield* _folderStreamController.stream;
   }
 
@@ -138,7 +143,7 @@ class MockUrlStore implements UrlStore {
 
   @override
   Stream<List<Tag>> findAllTags() async* {
-    yield List.unmodifiable(_tags);
+    yield _untrashedTags;
     yield* _tagStreamController.stream;
   }
 
@@ -245,10 +250,10 @@ class MockUrlStore implements UrlStore {
   }) async {
     // Validate everything before inserting, so nothing is saved on failure.
     await _checkIfUrlExists(url);
-    await _checkIfFolderExists(url.folderId);
+    await _checkIfFolderExists(url.folderId, allowTrashed: url.trash);
     // A Set links a tag listed twice only once.
     final uniqueTagIds = tagIds.toSet();
-    await _checkIfTagsExist(uniqueTagIds);
+    await _checkIfTagsExist(uniqueTagIds, allowTrashed: url.trash);
 
     final urlId = url.id ?? _urlIdSeq++;
     _urls.add(url.copyWith(id: urlId));
@@ -342,17 +347,27 @@ class MockUrlStore implements UrlStore {
     }
   }
 
-  /// Throws [FolderNotFoundException] if no folder has [folderId].
-  Future<void> _checkIfFolderExists(int folderId) async {
-    if (await findFolderById(folderId) == null) {
+  /// Throws [FolderNotFoundException] if no folder has [folderId], or if it is
+  /// trashed and not [allowTrashed].
+  Future<void> _checkIfFolderExists(
+    int folderId, {
+    bool allowTrashed = false,
+  }) async {
+    final folder = await findFolderById(folderId);
+    if (folder == null || (folder.trash && !allowTrashed)) {
       throw FolderNotFoundException(folderId);
     }
   }
 
-  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag.
-  Future<void> _checkIfTagsExist(Iterable<int> tagIds) async {
+  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag, or
+  /// whose tag is trashed and not [allowTrashed].
+  Future<void> _checkIfTagsExist(
+    Iterable<int> tagIds, {
+    bool allowTrashed = false,
+  }) async {
     for (final tagId in tagIds) {
-      if (await findTagById(tagId) == null) {
+      final tag = await findTagById(tagId);
+      if (tag == null || (tag.trash && !allowTrashed)) {
         throw TagNotFoundException(tagId);
       }
     }

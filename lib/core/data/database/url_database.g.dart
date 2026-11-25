@@ -300,7 +300,7 @@ class _$UrlDao extends UrlDao {
 
   @override
   Stream<List<Tag>> findAllTags() {
-    return _queryAdapter.queryListStream('SELECT * FROM tag',
+    return _queryAdapter.queryListStream('SELECT * FROM tag WHERE trash = 0',
         mapper: (Map<String, Object?> row) => Tag(
             id: row['id'] as int?,
             tagName: row['tag_name'] as String,
@@ -311,7 +311,7 @@ class _$UrlDao extends UrlDao {
 
   @override
   Stream<List<Folder>> findAllFolders() {
-    return _queryAdapter.queryListStream('SELECT * FROM folder',
+    return _queryAdapter.queryListStream('SELECT * FROM folder WHERE trash = 0',
         mapper: (Map<String, Object?> row) => Folder(
             id: row['id'] as int?,
             folderName: row['folder_name'] as String,

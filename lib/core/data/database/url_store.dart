@@ -47,14 +47,16 @@ abstract class UrlStore {
   /// Returns `null` if the URL doesn't exist or its folder no longer exists.
   Future<Folder?> findFolderForUrlId(int id);
 
-  /// Emits all folders now and again whenever the folder table changes.
+  /// Emits all folders that are not trashed, now and again whenever the folder
+  /// table changes.
   Stream<List<Folder>> findAllFolders();
 
   /// Emits all URLs that are not in the trash, now and again whenever the URL
   /// table changes.
   Stream<List<Url>> findAllUrl();
 
-  /// Emits all tags now and again whenever the tag table changes.
+  /// Emits all tags that are not trashed, now and again whenever the tag table
+  /// changes.
   Stream<List<Tag>> findAllTags();
 
   /// Emits all URL-tag links now and again whenever they change.
@@ -133,11 +135,12 @@ abstract class UrlStore {
   /// - **Duplicate title**: throws `DuplicateTitleException` if a saved
   ///   URL has the same title.
   /// - **Trashed URL**: if [url] is trashed, its address and title aren't
-  ///   checked, since they can repeat in the trash.
+  ///   checked, since they can repeat in the trash. Its folder and tags may be
+  ///   trashed too.
   /// - **Missing folder**: throws `FolderNotFoundException` if no folder has
-  ///   `url.folderId`.
+  ///   `url.folderId`, or if that folder is trashed.
   /// - **Missing tag**: throws `TagNotFoundException` for the first id in
-  ///   [tagIds] that has no tag.
+  ///   [tagIds] that has no tag, or whose tag is trashed.
   /// - **Repeated tag id**: an id listed twice in [tagIds] is linked once.
   Future<int> createUrl({
     required Url url,
@@ -158,7 +161,7 @@ abstract class UrlStore {
   /// Special cases:
   /// - **Same folder**: throws `ArgumentError` if both ids are equal.
   /// - **Missing folder**: throws `FolderNotFoundException` if either folder
-  ///   doesn't exist.
+  ///   doesn't exist, or if the target folder is trashed.
   /// - **Default folder**: throws `ArgumentError` if [sourceFolderId] is a
   ///   default folder (`AppDefaults.isDefaultFolder`).
   /// - **Empty folder**: no URLs to move; the folder is just deleted.
