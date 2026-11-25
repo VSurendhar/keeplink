@@ -185,6 +185,18 @@ abstract class UrlStore {
   ///   exists.
   Future<void> restoreUrl(int urlId);
 
+  /// Permanently deletes all trashed URLs and their URL-tag links, then the
+  /// trashed folders and tags that no URL uses. Returns nothing.
+  ///
+  /// Saved URLs, and folders and tags that aren't trashed, aren't touched.
+  /// Preview images aren't deleted either; the startup sweep removes them. The
+  /// database store runs it in one transaction, so on failure nothing is
+  /// deleted.
+  ///
+  /// Special cases:
+  /// - **Empty trash**: nothing to delete; it does nothing.
+  Future<void> emptyTrash();
+
   /// Deletes the folder [sourceFolderId] and moves its saved URLs into the
   /// folder [targetFolderId]. Returns nothing.
   ///

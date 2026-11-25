@@ -444,6 +444,29 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<void> deleteUrlTagsOfTrashedUrls() async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)');
+  }
+
+  @override
+  Future<void> deleteTrashedUrls() async {
+    await _queryAdapter.queryNoReturn('DELETE FROM url WHERE trash = 1');
+  }
+
+  @override
+  Future<void> deleteUnusedTrashedFolders() async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM folder WHERE trash = 1 AND id NOT IN (SELECT folder_id FROM url)');
+  }
+
+  @override
+  Future<void> deleteUnusedTrashedTags() async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM tag WHERE trash = 1 AND id NOT IN (SELECT tag_id FROM url_tag)');
+  }
+
+  @override
   Future<Folder?> findFolderById(int id) async {
     return _queryAdapter.query('SELECT * FROM folder WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Folder(
@@ -696,6 +719,20 @@ class _$UrlDao extends UrlDao {
         final transactionDatabase = _$UrlDatabase(changeListener)
           ..database = transaction;
         await transactionDatabase.urlDao.restoreUrl(urlId);
+      });
+    }
+  }
+
+  @override
+  Future<void> emptyTrash() async {
+    if (database is sqflite.Transaction) {
+      await super.emptyTrash();
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.emptyTrash();
       });
     }
   }

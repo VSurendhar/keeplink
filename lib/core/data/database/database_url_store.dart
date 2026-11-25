@@ -149,6 +149,9 @@ class DatabaseUrlStore implements UrlStore {
   Future<void> restoreUrl(int urlId) async => (await _dao).restoreUrl(urlId);
 
   @override
+  Future<void> emptyTrash() async => (await _dao).emptyTrash();
+
+  @override
   Future<void> deleteFolderAndMoveUrls({
     required int sourceFolderId,
     required int targetFolderId,

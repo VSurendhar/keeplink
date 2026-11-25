@@ -123,6 +123,27 @@ abstract class UrlDao {
   @Query('DELETE FROM folder')
   Future<void> deleteAllFolders();
 
+  @Query(
+    'DELETE FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)',
+  )
+  Future<void> deleteUrlTagsOfTrashedUrls();
+
+  @Query('DELETE FROM url WHERE trash = 1')
+  Future<void> deleteTrashedUrls();
+
+  /// Deletes the trashed folders that no URL, saved or trashed, uses.
+  @Query(
+    'DELETE FROM folder WHERE trash = 1 AND id NOT IN (SELECT folder_id FROM url)',
+  )
+  Future<void> deleteUnusedTrashedFolders();
+
+  /// Deletes the trashed tags that no URL, saved or trashed, uses.
+  /// Checking if not in url_tag coze url_tag is deleted first for trash removal.
+  @Query(
+    'DELETE FROM tag WHERE trash = 1 AND id NOT IN (SELECT tag_id FROM url_tag)',
+  )
+  Future<void> deleteUnusedTrashedTags();
+
   @Query('SELECT * FROM folder WHERE id = :id')
   Future<Folder?> findFolderById(int id);
 
@@ -227,6 +248,14 @@ abstract class UrlDao {
         updatedAt: DateTime.now().millisecondsSinceEpoch,
       ),
     ]);
+  }
+
+  @transaction
+  Future<void> emptyTrash() async {
+    await deleteUrlTagsOfTrashedUrls();
+    await deleteTrashedUrls();
+    await deleteUnusedTrashedFolders();
+    await deleteUnusedTrashedTags();
   }
 
   @transaction
