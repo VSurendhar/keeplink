@@ -25,11 +25,11 @@ The tasks are in the order to build them.
 10. [ ] **No stale data:** verify that the `url`, `folder`, `tag` and `url_tag` tables hold no stale or unlinked data. This is a check only, done after tasks 13, 15 and 19. Folders and tags that aren't trashed are kept, even with no links, so they aren't stale.
 11. [ ] **Timestamps:** verify that trashing a link sets `updated_at` to that time, and restoring it sets `updated_at` to the time of the restore. This is a check only, done after tasks 13 and 19. `created_at` never changes. There is no `trashed_at` column.
 12. [x] **Reading the trash:** both stores have a query for trashed links with their folder and tags, including trashed folders and tags. The most recently trashed link comes first, ordered by `updated_at`.
-13. [ ] **Restoring:** both stores have one transactional `restoreUrl`. A restore either fully succeeds or changes nothing.
+13. [x] **Restoring:** both stores have one transactional `restoreUrl`. A restore either fully succeeds or changes nothing. Refer on how we are creating the url using `createUrl`
     - The link becomes saved again (`url.trash = 0`) with its original folder and tags. If its folder or any of its tags are trashed, they become visible again (`trash = 0`).
     - Accepted downside: a folder or tag deleted on purpose comes back when one of its links is restored.
     - Example: "Pasta" is saved in the folder **Recipes** with the tag **dinner**, then moved to the trash. **Recipes** is deleted: its saved links move to **Defaults**, and **Recipes** is marked as trashed. **dinner** is deleted and marked as trashed too. "Pasta" isn't touched. Restoring "Pasta" makes **Recipes** and **dinner** visible again, and "Pasta" is back in **Recipes** with the tag **dinner**.
-14. [ ] **Restore conflicts:** a restore is blocked with a message if a saved link already has the same URL or title. The user can't rename the link to get around it. The URL is checked first, and the title only if the URL passes, so at most one clash is reported per attempt. The toast says "Duplicate link found" or "Duplicate title found".
+14. [x] **Restore conflicts:** a restore is blocked if a saved link already has the same URL or title. The user can't rename the link to get around it. The URL is checked first, and the title only if the URL passes, so at most one clash is reported per attempt.
 15. [ ] **Emptying the trash:** both stores have an operation that permanently deletes all trashed links and all trashed folders and tags. The links and their `url_tag` rows go first, then the trashed folders and tags that no link uses. It all runs in one transaction. It never touches the preview images, which stay in storage until the startup sweep removes them. See [startup_sweep.md](startup_sweep.md).
 16. [ ] **No access to trashed links:** a trashed link can't be opened or edited. It can only be restored or permanently deleted.
 17. [ ] **Trash page:** build it from the external design and the UI changes below.
@@ -111,6 +111,15 @@ The tasks are in the order to build them.
     - All saved links move to the trash, and their `updated_at` is set to the current time. Links already in the trash keep their `updated_at`.
     - All folders and tags are deleted, except **Defaults** and **Tag1**. As in tasks 6 and 7, the ones a trashed link uses are marked as trashed, so restoring a link brings them back, and unused ones are permanently deleted.
 20. [ ] **No automatic deletion:** no link is deleted automatically in version 1.
+21. [ ] **Restore toasts:** `TrashBloc` handles every failed restore: it catches the exception from `restoreUrl`, logs it and shows a toast. Done with task 17, when `TrashBloc` exists.
+
+    | Exception | Toast |
+    |---|---|
+    | `DuplicateUrlException` | "Duplicate link found" |
+    | `DuplicateTitleException` | "Duplicate title found" |
+    | `FolderNotFoundException` | "Folder does not exist" |
+    | `TagNotFoundException` | "Tag does not exist" |
+    | Anything else, including `UrlNotFoundException` | "Error While Restoring Link" |
 
 ## UI changes
 

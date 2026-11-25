@@ -7,6 +7,7 @@ import 'package:keep_links/core/data/database/exception/duplicate_title_exceptio
 import 'package:keep_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
+import 'package:keep_links/core/data/database/exception/url_not_found_exception.dart';
 import 'package:keep_links/core/utils/app_defaults.dart';
 
 @dao
@@ -91,6 +92,9 @@ abstract class UrlDao {
 
   @Query('SELECT * FROM url_tag WHERE tag_id = :tagId')
   Future<List<UrlTag>> findUrlTagsByTagId(int tagId);
+
+  @Query('SELECT * FROM url_tag WHERE url_id = :urlId')
+  Future<List<UrlTag>> findUrlTagsByUrlId(int urlId);
 
   /// The tag links of saved URLs with this tag.
   @Query(
@@ -195,6 +199,37 @@ abstract class UrlDao {
   }
 
   @transaction
+  Future<void> restoreUrl(int urlId) async {
+    // Validate everything before updating, so nothing changes on failure.
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+    await checkIfSavedUrlExists(url);
+    await checkIfFolderExists(url.folderId, allowTrashed: true);
+    final urlTags = await findUrlTagsByUrlId(urlId);
+    final tagIds = urlTags.map((urlTag) => urlTag.tagId).toSet();
+    await checkIfTagsExist(tagIds, allowTrashed: true);
+
+    final folder = await findFolderById(url.folderId);
+    if (folder != null && folder.trash) {
+      await updateFolder(folder.copyWith(trash: false));
+    }
+    for (final tagId in tagIds) {
+      final tag = await findTagById(tagId);
+      if (tag != null && tag.trash) {
+        await updateTag(tag.copyWith(trash: false));
+      }
+    }
+    await updateUrls([
+      url.copyWith(
+        trash: false,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      ),
+    ]);
+  }
+
+  @transaction
   Future<void> deleteFolderAndMoveUrls(
     int sourceFolderId,
     int targetFolderId,
@@ -260,6 +295,12 @@ abstract class UrlDao {
     }
     if (url.trash) return;
 
+    await checkIfSavedUrlExists(url);
+  }
+
+  /// Throws [DuplicateUrlException] if a saved URL has the same address as
+  /// [url], or [DuplicateTitleException] if a saved URL has the same title.
+  Future<void> checkIfSavedUrlExists(Url url) async {
     if (await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
     }

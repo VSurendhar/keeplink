@@ -8,6 +8,7 @@ import 'package:keep_links/core/data/database/exception/duplicate_title_exceptio
 import 'package:keep_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
+import 'package:keep_links/core/data/database/exception/url_not_found_exception.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
 
 class MockUrlStore implements UrlStore {
@@ -321,6 +322,42 @@ class MockUrlStore implements UrlStore {
   }
 
   @override
+  Future<void> restoreUrl(int urlId) async {
+    // Validate everything before updating, so nothing changes on failure.
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+    await _checkIfSavedUrlExists(url);
+    await _checkIfFolderExists(url.folderId, allowTrashed: true);
+    final tagIds = _urlTags
+        .where((urlTag) => urlTag.urlId == urlId)
+        .map((urlTag) => urlTag.tagId)
+        .toSet();
+    await _checkIfTagsExist(tagIds, allowTrashed: true);
+
+    for (var i = 0; i < _folders.length; i++) {
+      final folder = _folders[i];
+      if (folder.id == url.folderId && folder.trash) {
+        _folders[i] = folder.copyWith(trash: false);
+      }
+    }
+    for (var i = 0; i < _tags.length; i++) {
+      final tag = _tags[i];
+      if (tagIds.contains(tag.id) && tag.trash) {
+        _tags[i] = tag.copyWith(trash: false);
+      }
+    }
+    _urls[_urls.indexOf(url)] = url.copyWith(
+      trash: false,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    _notifyFolders();
+    _notifyTags();
+    _notifyUrls();
+  }
+
+  @override
   Future<void> deleteFolderAndMoveUrls({
     required int sourceFolderId,
     required int targetFolderId,
@@ -395,6 +432,12 @@ class MockUrlStore implements UrlStore {
     }
     if (url.trash) return;
 
+    await _checkIfSavedUrlExists(url);
+  }
+
+  /// Throws [DuplicateUrlException] if a saved URL has the same address as
+  /// [url], or [DuplicateTitleException] if a saved URL has the same title.
+  Future<void> _checkIfSavedUrlExists(Url url) async {
     if (await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
     }

@@ -408,6 +408,14 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<List<UrlTag>> findUrlTagsByUrlId(int urlId) async {
+    return _queryAdapter.queryList('SELECT * FROM url_tag WHERE url_id = ?1',
+        mapper: (Map<String, Object?> row) =>
+            UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int),
+        arguments: [urlId]);
+  }
+
+  @override
   Future<List<UrlTag>> findSavedUrlTagsByTagId(int tagId) async {
     return _queryAdapter.queryList(
         'SELECT * FROM url_tag WHERE tag_id = ?1 AND url_id IN (SELECT id FROM url WHERE trash = 0)',
@@ -674,6 +682,20 @@ class _$UrlDao extends UrlDao {
         final transactionDatabase = _$UrlDatabase(changeListener)
           ..database = transaction;
         return transactionDatabase.urlDao.createUrl(url, tagIds);
+      });
+    }
+  }
+
+  @override
+  Future<void> restoreUrl(int urlId) async {
+    if (database is sqflite.Transaction) {
+      await super.restoreUrl(urlId);
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.restoreUrl(urlId);
       });
     }
   }
