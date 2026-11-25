@@ -140,12 +140,6 @@ class MockUrlStore implements UrlStore {
     return id;
   }
 
-  @override
-  Future<void> insertUrlTag(UrlTag urlTag) async {
-    _urlTags.add(urlTag);
-    _notifyUrlTags();
-  }
-
   // Query Operations
   @override
   Future<Folder?> findFolderForUrlId(int id) async {
@@ -311,8 +305,9 @@ class MockUrlStore implements UrlStore {
     final urlId = url.id ?? _urlIdSeq++;
     _urls.add(url.copyWith(id: urlId));
     for (final tagId in uniqueTagIds) {
-      await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
+      _urlTags.add(UrlTag(urlId: urlId, tagId: tagId));
     }
+    _notifyUrlTags();
     // After the tags are linked, so listeners see the URL with its tags.
     _notifyUrls();
     return urlId;

@@ -47,10 +47,6 @@ class DatabaseUrlStore implements UrlStore {
   @override
   Future<int> insertTag(Tag tag) async => (await _dao).createTag(tag);
 
-  @override
-  Future<void> insertUrlTag(UrlTag urlTag) async =>
-      (await _dao).insertUrlTag(urlTag);
-
   // Query Operations
   @override
   Future<Folder?> findFolderForUrlId(int id) async =>

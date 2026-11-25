@@ -75,6 +75,8 @@ abstract class UrlDao {
   @insert
   Future<int> insertTag(Tag tag);
 
+  /// Internal to [createUrl], which checks the tags first; call [createUrl]
+  /// instead of this.
   @insert
   Future<void> insertUrlTag(UrlTag urlTag);
 
