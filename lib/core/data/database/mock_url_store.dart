@@ -294,10 +294,28 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<void> deleteTagAndUrlTags(int tagId) async {
-    await _checkIfTagsExist([tagId]);
+    final tag = await findTagById(tagId);
+    if (tag == null) {
+      throw TagNotFoundException(tagId);
+    }
+    if (AppDefaults.isDefaultTag(tag)) {
+      throw ArgumentError('Cannot delete the default tag');
+    }
 
-    _urlTags.removeWhere((urlTag) => urlTag.tagId == tagId);
-    _tags.removeWhere((tag) => tag.id == tagId);
+    final trashedUrlIds = _urls
+        .where((url) => url.trash)
+        .map((url) => url.id)
+        .toSet();
+    _urlTags.removeWhere(
+      (urlTag) =>
+          urlTag.tagId == tagId && !trashedUrlIds.contains(urlTag.urlId),
+    );
+    // Trashed URLs keep their tag links, so the tag is kept for restoring them.
+    if (_urlTags.any((urlTag) => urlTag.tagId == tagId)) {
+      _tags[_tags.indexOf(tag)] = tag.copyWith(trash: true);
+    } else {
+      _tags.remove(tag);
+    }
     _notifyUrlTags();
     _notifyTags();
   }

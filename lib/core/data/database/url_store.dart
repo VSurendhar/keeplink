@@ -167,7 +167,12 @@ abstract class UrlStore {
     required int targetFolderId,
   });
 
-  /// Deletes the tag [tagId] and all its URL-tag links. Returns nothing.
+  /// Deletes the tag [tagId] and its URL-tag links to saved URLs. Returns
+  /// nothing.
+  ///
+  /// The tag links of trashed URLs aren't touched. If there are any, the tag is
+  /// marked as trashed (`Tag.trash`) instead of deleted, so the URLs can be
+  /// restored with it.
   ///
   /// URLs are never changed or deleted: each linked URL keeps its other
   /// tags, and a URL whose only tag was [tagId] is left with no tags. No
@@ -177,6 +182,8 @@ abstract class UrlStore {
   ///
   /// Special cases:
   /// - **Missing tag**: throws `TagNotFoundException` if no tag has [tagId].
+  /// - **Default tag**: throws `ArgumentError` if [tagId] is a default tag
+  ///   (`AppDefaults.isDefaultTag`).
   /// - **Unused tag**: no links to delete; the tag is just deleted.
   Future<void> deleteTagAndUrlTags(int tagId);
 

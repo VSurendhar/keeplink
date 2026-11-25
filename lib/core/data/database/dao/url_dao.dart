@@ -67,8 +67,17 @@ abstract class UrlDao {
   @Query('SELECT * FROM url_tag WHERE tag_id = :tagId')
   Future<List<UrlTag>> findUrlTagsByTagId(int tagId);
 
+  /// The tag links of saved URLs with this tag.
+  @Query(
+    'SELECT * FROM url_tag WHERE tag_id = :tagId AND url_id IN (SELECT id FROM url WHERE trash = 0)',
+  )
+  Future<List<UrlTag>> findSavedUrlTagsByTagId(int tagId);
+
   @delete
   Future<void> deleteUrlTags(List<UrlTag> urlTags);
+
+  @update
+  Future<void> updateTag(Tag tag);
 
   @delete
   Future<void> deleteTag(Tag tag);
@@ -170,9 +179,18 @@ abstract class UrlDao {
     if (tag == null) {
       throw TagNotFoundException(tagId);
     }
+    if (AppDefaults.isDefaultTag(tag)) {
+      throw ArgumentError('Cannot delete the default tag');
+    }
 
-    await deleteUrlTags(await findUrlTagsByTagId(tagId));
-    await deleteTag(tag);
+    await deleteUrlTags(await findSavedUrlTagsByTagId(tagId));
+    // Trashed URLs keep their tag links, so the tag is kept for restoring them.
+    final trashedUrlTags = await findUrlTagsByTagId(tagId);
+    if (trashedUrlTags.isNotEmpty) {
+      await updateTag(tag.copyWith(trash: true));
+    } else {
+      await deleteTag(tag);
+    }
   }
 
   /// Throws [DuplicateUrlException] if any URL has the same id or a saved URL

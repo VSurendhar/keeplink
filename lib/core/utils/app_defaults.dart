@@ -18,4 +18,8 @@ class AppDefaults {
   static bool isDefaultFolder(Folder folder) => defaultFolders.any(
     (defaultFolder) => defaultFolder.folderName == folder.folderName,
   );
+
+  /// Whether [tag] is a default tag, which can't be deleted or trashed.
+  static bool isDefaultTag(Tag tag) =>
+      defaultTags.any((defaultTag) => defaultTag.tagName == tag.tagName);
 }

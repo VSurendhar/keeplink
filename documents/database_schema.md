@@ -29,7 +29,7 @@ Inserting or updating a row that breaks one of these constraints throws an error
 |---|---|---|
 | `url.folder_id` | `folder.id` | **Restrict**: a folder that still has links can't be deleted. `deleteFolderAndMoveUrls` moves its saved links to another folder first. If trashed links use the folder, it is marked as trashed (`folder.trash = 1`) instead of deleted. |
 | `url_tag.url_id` | `url.id` | **Cascade**: deleting a link deletes its tag links. |
-| `url_tag.tag_id` | `tag.id` | **Cascade**: deleting a tag deletes its links to URLs. |
+| `url_tag.tag_id` | `tag.id` | **Cascade**: deleting a tag deletes its links to URLs. `deleteTagAndUrlTags` deletes its links to saved URLs first. If trashed links use the tag, it is marked as trashed (`tag.trash = 1`) instead of deleted. |
 
 Floor turns on SQLite's foreign-key checks (`PRAGMA foreign_keys = ON`) whenever it opens the database. Inserting a row whose foreign key points to a missing row throws an error.
 

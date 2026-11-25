@@ -198,6 +198,16 @@ class _$UrlDao extends UrlDao {
                   'trash': item.trash ? 1 : 0
                 },
             changeListener),
+        _tagUpdateAdapter = UpdateAdapter(
+            database,
+            'tag',
+            ['id'],
+            (Tag item) => <String, Object?>{
+                  'id': item.id,
+                  'tag_name': item.tagName,
+                  'trash': item.trash ? 1 : 0
+                },
+            changeListener),
         _folderDeletionAdapter = DeletionAdapter(
             database,
             'folder',
@@ -243,6 +253,8 @@ class _$UrlDao extends UrlDao {
   final UpdateAdapter<Url> _urlUpdateAdapter;
 
   final UpdateAdapter<Folder> _folderUpdateAdapter;
+
+  final UpdateAdapter<Tag> _tagUpdateAdapter;
 
   final DeletionAdapter<Folder> _folderDeletionAdapter;
 
@@ -344,6 +356,14 @@ class _$UrlDao extends UrlDao {
     return _queryAdapter.queryList('SELECT * FROM url_tag WHERE tag_id = ?1',
         mapper: (Map<String, Object?> row) =>
             UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int),
+        arguments: [tagId]);
+  }
+
+  @override
+  Future<List<UrlTag>> findSavedUrlTagsByTagId(int tagId) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM url_tag WHERE tag_id = ?1 AND url_id IN (SELECT id FROM url WHERE trash = 0)',
+        mapper: (Map<String, Object?> row) => UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int),
         arguments: [tagId]);
   }
 
@@ -505,6 +525,11 @@ class _$UrlDao extends UrlDao {
   @override
   Future<void> updateFolder(Folder folder) async {
     await _folderUpdateAdapter.update(folder, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateTag(Tag tag) async {
+    await _tagUpdateAdapter.update(tag, OnConflictStrategy.abort);
   }
 
   @override
