@@ -1,0 +1,2 @@
+- Okay we also need to make the count in the folder section show only the URLs that are URLs and then folders that actually exist, which are unsaved not trashed. 
+- And then we should only show the "you" folders that actually exist, that are actually saved, and that are not trashed. It applies to the folders and then the URLs too.

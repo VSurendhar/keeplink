@@ -13,6 +13,7 @@ class AppDefaults {
   static const int trashRetention = 10;
   static const AppTheme appTheme = AppTheme.light;
   static const int linkNameMaxLength = 40;
+  static const int folderNameMaxLength = 40;
 
   /// Whether [folder] is a default folder, which can't be deleted or trashed.
   static bool isDefaultFolder(Folder folder) => defaultFolders.any(

@@ -41,7 +41,9 @@ class DashedBorderPainter extends CustomPainter {
       size.height - strokeWidth,
     );
     final border = Path()
-      ..addRRect(RRect.fromRectAndRadius(rect, Radius.circular(radius - inset)));
+      ..addRRect(
+        RRect.fromRectAndRadius(rect, Radius.circular(radius - inset)),
+      );
 
     for (final PathMetric metric in border.computeMetrics()) {
       var distance = 0.0;

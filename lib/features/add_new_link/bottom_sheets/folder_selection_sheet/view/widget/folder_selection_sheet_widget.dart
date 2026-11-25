@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:keep_links/common/widgets/delete_icon_button.dart';
+import 'package:keep_links/common/widgets/sheet_drag_handle.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_bloc.dart';
 import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
@@ -51,7 +52,7 @@ class FolderSelectionSheetWidget extends StatelessWidget {
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDragHandle(),
+                    const SheetDragHandle(),
                     const SizedBox(height: 16),
                     _buildHeader(),
                     const SizedBox(height: 4),
@@ -80,19 +81,6 @@ class FolderSelectionSheetWidget extends StatelessWidget {
           ),
         );
       },
-    );
-  }
-
-  Widget _buildDragHandle() {
-    return Center(
-      child: Container(
-        width: 32,
-        height: 4,
-        decoration: BoxDecoration(
-          color: const Color(0xFFE0D5CE),
-          borderRadius: BorderRadius.circular(2),
-        ),
-      ),
     );
   }
 

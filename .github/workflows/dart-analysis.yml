@@ -2,7 +2,7 @@ name: Dart Analysis
 run-name: Dart Analysis
 on:
   pull_request:
-    branches: [ master ]
+    branches: [ main ]
 jobs:
   Dart-Analysis:
     runs-on: ubuntu-latest

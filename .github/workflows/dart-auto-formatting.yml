@@ -25,8 +25,8 @@ jobs:
       - name: Get Dependencies
         run: flutter pub get
 
-      - name: Run Dart Format
-        run: dart format .
+      - name: Run Dart Format (skips generated files)
+        run: git ls-files -z '*.dart' ':!*.g.dart' ':!*.config.dart' ':!*.freezed.dart' ':!*.gr.dart' | xargs -0 dart format
 
       - name: Check changed files
         id: changes

@@ -9,6 +9,7 @@ import 'package:keep_links/core/data/database/entity/url.dart';
 import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
+import 'package:keep_links/features/developer_options/constants/constants.dart';
 import 'package:keep_links/features/developer_options/cubit/developer_options_state.dart';
 import 'package:keep_links/features/logger/logger.dart';
 import 'package:keep_links/features/settings/service/app_settings_service.dart';
@@ -87,8 +88,6 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
     Map<int, String> folderNames,
     Map<int, String> tagNames,
   ) async {
-    final random = Random();
-
     Future<int> insertFolder(String name) async {
       final id = await urlStore.insertFolder(Folder(folderName: name));
       folderNames[id] = name;
@@ -105,88 +104,37 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
 
     await urlStore.clearAll();
 
-    final flutterFolderId = await insertFolder('Flutter Resources');
-    final dbFolderId = await insertFolder('Database Resources');
+    final tagIds = <int>[];
+    for (final name in seedTagNames) {
+      tagIds.add(await insertTag(name));
+    }
 
-    final flutterTagId = await insertTag('flutter');
-    final dartTagId = await insertTag('dart');
-    final mobileTagId = await insertTag('mobile');
-    final databaseTagId = await insertTag('database');
-    final tutorialTagId = await insertTag('tutorial');
-
-    final records = <(Url url, List<int> tagIds)>[
-      (
-        Url(
-          url: 'https://flutter.dev',
-          title: 'Flutter',
-          metaImageUrl: 'https://flutter.dev/og.png',
-          metaDescription: 'Description of Flutter',
-          folderId: flutterFolderId,
-          createdAt: now,
-          updatedAt: now,
-          isFavorite: false,
-        ),
-        [flutterTagId, dartTagId, mobileTagId],
-      ),
-      (
-        Url(
-          url: 'https://dart.dev',
-          title: 'Dart',
-          metaImageUrl: 'https://dart.dev/og.png',
-          metaDescription: 'Description of Dart',
-          folderId: flutterFolderId,
-          createdAt: now,
-          updatedAt: now,
-          isFavorite: false,
-        ),
-        [mobileTagId, databaseTagId, tutorialTagId],
-      ),
-      (
-        Url(
-          url: 'https://pub.dev',
-          title: 'pub.dev',
-          metaImageUrl: 'https://pub.dev/og.png',
-          metaDescription: 'Description of pub.dev',
-          folderId: flutterFolderId,
-          createdAt: now,
-          updatedAt: now,
-          isFavorite: false,
-        ),
-        const <int>[],
-      ),
-      (
-        Url(
-          url: 'https://pub.dev/packages/floor',
-          title: 'Floor',
-          metaImageUrl: 'https://pub.dev/packages/floor/og.png',
-          metaDescription: 'Description of Floor',
-          folderId: dbFolderId,
-          createdAt: now,
-          updatedAt: now,
-          isFavorite: false,
-        ),
-        const <int>[],
-      ),
-      (
-        Url(
-          url: 'https://sqlite.org',
-          title: 'SQLite',
-          metaImageUrl: 'https://sqlite.org/og.png',
-          metaDescription: 'Description of SQLite',
-          folderId: dbFolderId,
-          createdAt: now,
-          updatedAt: now,
-          isFavorite: false,
-        ),
-        const <int>[],
-      ),
-    ];
-
-    for (final (url, tagIds) in records) {
-      await urlStore.createUrl(
-        url: url.copyWith(trash: random.nextBool()),
-        tagIds: tagIds,
-      );
+    var index = 0;
+    for (final MapEntry(key: folderName, value: links)
+        in seedLinksByFolder.entries) {
+      final folderId = await insertFolder(folderName);
+      for (final link in links) {
+        // Increasing, so each folder's first link is the first one listed.
+        final createdAt = now + index;
+        await urlStore.createUrl(
+          url: Url(
+            url: link.url,
+            title: link.title,
+            metaImageUrl: '${link.url}/og.png',
+            metaDescription: 'Description of ${link.title}',
+            folderId: folderId,
+            createdAt: createdAt,
+            updatedAt: createdAt,
+            isFavorite: false,
+          ),
+          // Between 0 and 3 tags per link.
+          tagIds: List.generate(
+            index % 4,
+            (offset) => tagIds[(index + offset) % tagIds.length],
+          ),
+        );
+        index++;
+      }
     }
     await urlStore.seedDefaultFolderIfNotExist();
     await urlStore.seedDefaultTagsIfNotExist();
