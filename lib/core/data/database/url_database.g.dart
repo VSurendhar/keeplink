@@ -282,6 +282,54 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Stream<List<Url>> findTrashedUrls() {
+    return _queryAdapter.queryListStream(
+        'SELECT * FROM url WHERE trash = 1 ORDER BY updated_at DESC, id DESC',
+        mapper: (Map<String, Object?> row) => Url(
+            id: row['id'] as int?,
+            url: row['url'] as String,
+            title: row['title'] as String,
+            metaImageUrl: row['meta_image_url'] as String,
+            metaDescription: row['meta_description'] as String,
+            folderId: row['folder_id'] as int,
+            createdAt: row['created_at'] as int,
+            updatedAt: row['updated_at'] as int,
+            isFavorite: (row['is_favorite'] as int) != 0,
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
+        queryableName: 'url',
+        isView: false);
+  }
+
+  @override
+  Future<List<Folder>> findFoldersOfTrashedUrls() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM folder WHERE id IN (SELECT folder_id FROM url WHERE trash = 1)',
+        mapper: (Map<String, Object?> row) => Folder(
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0));
+  }
+
+  @override
+  Future<List<Tag>> findTagsOfTrashedUrls() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM tag WHERE id IN (SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1))',
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0));
+  }
+
+  @override
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)',
+        mapper: (Map<String, Object?> row) =>
+            UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int));
+  }
+
+  @override
   Future<Folder?> findFolderForUrlId(int id) async {
     return _queryAdapter.query(
         'SELECT * FROM folder f where f.id = (SELECT folder_id FROM url u WHERE u.id = ?1)',

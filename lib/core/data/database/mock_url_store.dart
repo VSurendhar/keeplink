@@ -58,6 +58,16 @@ class MockUrlStore implements UrlStore {
   List<Url> get _untrashedUrls =>
       List.unmodifiable(_urls.where((url) => !url.trash));
 
+  List<Url> get _trashedUrls {
+    final urls = _urls.where((url) => url.trash).toList()
+      ..sort((a, b) {
+        final byUpdatedAt = b.updatedAt.compareTo(a.updatedAt);
+        if (byUpdatedAt != 0) return byUpdatedAt;
+        return (b.id ?? 0).compareTo(a.id ?? 0);
+      });
+    return List.unmodifiable(urls);
+  }
+
   void _notifyUrls() => _urlStreamController.add(_untrashedUrls);
 
   List<Tag> get _untrashedTags =>
@@ -159,6 +169,31 @@ class MockUrlStore implements UrlStore {
   Stream<List<Url>> findAllUrl() async* {
     yield _untrashedUrls;
     yield* _urlStreamController.stream;
+  }
+
+  @override
+  Stream<List<Url>> findTrashedUrls() async* {
+    yield _trashedUrls;
+    yield* _urlStreamController.stream.map((_) => _trashedUrls);
+  }
+
+  @override
+  Future<List<Folder>> findFoldersOfTrashedUrls() async {
+    final folderIds = _trashedUrls.map((url) => url.folderId).toSet();
+    return _folders.where((folder) => folderIds.contains(folder.id)).toList();
+  }
+
+  @override
+  Future<List<Tag>> findTagsOfTrashedUrls() async {
+    final urlTags = await findUrlTagsOfTrashedUrls();
+    final tagIds = urlTags.map((urlTag) => urlTag.tagId).toSet();
+    return _tags.where((tag) => tagIds.contains(tag.id)).toList();
+  }
+
+  @override
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls() async {
+    final urlIds = _trashedUrls.map((url) => url.id).toSet();
+    return _urlTags.where((urlTag) => urlIds.contains(urlTag.urlId)).toList();
   }
 
   @override
@@ -277,10 +312,11 @@ class MockUrlStore implements UrlStore {
 
     final urlId = url.id ?? _urlIdSeq++;
     _urls.add(url.copyWith(id: urlId));
-    _notifyUrls();
     for (final tagId in uniqueTagIds) {
       await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
     }
+    // After the tags are linked, so listeners see the URL with its tags.
+    _notifyUrls();
     return urlId;
   }
 

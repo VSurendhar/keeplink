@@ -14,6 +14,27 @@ abstract class UrlDao {
   @Query('SELECT * FROM url WHERE trash = 0')
   Stream<List<Url>> findAllUrl();
 
+  @Query('SELECT * FROM url WHERE trash = 1 ORDER BY updated_at DESC, id DESC')
+  Stream<List<Url>> findTrashedUrls();
+
+  /// The folders of trashed URLs, including trashed folders.
+  @Query(
+    'SELECT * FROM folder WHERE id IN (SELECT folder_id FROM url WHERE trash = 1)',
+  )
+  Future<List<Folder>> findFoldersOfTrashedUrls();
+
+  /// The tags of trashed URLs, including trashed tags.
+  @Query(
+    'SELECT * FROM tag WHERE id IN (SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1))',
+  )
+  Future<List<Tag>> findTagsOfTrashedUrls();
+
+  /// The tag links of trashed URLs.
+  @Query(
+    'SELECT * FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)',
+  )
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls();
+
   @Query(
     'SELECT * FROM folder f where f.id = (SELECT folder_id FROM url u WHERE u.id = :id)',
   )

@@ -61,6 +61,20 @@ abstract class UrlStore {
   /// table changes.
   Stream<List<Url>> findAllUrl();
 
+  /// Emits all trashed URLs, now and again whenever the URL table changes.
+  ///
+  /// The most recently trashed URL comes first (`updatedAt`, newest first).
+  Stream<List<Url>> findTrashedUrls();
+
+  /// Returns the folders of trashed URLs, including trashed folders.
+  Future<List<Folder>> findFoldersOfTrashedUrls();
+
+  /// Returns the tags of trashed URLs, including trashed tags.
+  Future<List<Tag>> findTagsOfTrashedUrls();
+
+  /// Returns the URL-tag links of trashed URLs.
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls();
+
   /// Emits all tags that are not trashed, now and again whenever the tag table
   /// changes.
   Stream<List<Tag>> findAllTags();
@@ -149,10 +163,7 @@ abstract class UrlStore {
   /// - **Missing tag**: throws `TagNotFoundException` for the first id in
   ///   [tagIds] that has no tag, or whose tag is trashed.
   /// - **Repeated tag id**: an id listed twice in [tagIds] is linked once.
-  Future<int> createUrl({
-    required Url url,
-    List<int> tagIds = const [],
-  });
+  Future<int> createUrl({required Url url, List<int> tagIds = const []});
 
   /// Deletes the folder [sourceFolderId] and moves its saved URLs into the
   /// folder [targetFolderId]. Returns nothing.

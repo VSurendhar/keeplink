@@ -69,6 +69,24 @@ class DatabaseUrlStore implements UrlStore {
   }
 
   @override
+  Stream<List<Url>> findTrashedUrls() async* {
+    final dao = await _dao;
+    yield* dao.findTrashedUrls();
+  }
+
+  @override
+  Future<List<Folder>> findFoldersOfTrashedUrls() async =>
+      (await _dao).findFoldersOfTrashedUrls();
+
+  @override
+  Future<List<Tag>> findTagsOfTrashedUrls() async =>
+      (await _dao).findTagsOfTrashedUrls();
+
+  @override
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls() async =>
+      (await _dao).findUrlTagsOfTrashedUrls();
+
+  @override
   Stream<List<Tag>> findAllTags() async* {
     final dao = await _dao;
     yield* dao.findAllTags();
