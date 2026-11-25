@@ -11,8 +11,8 @@ final class ShowLanguageSheet extends AppSettingsAction {
   const ShowLanguageSheet();
 }
 
-final class ShowEraseDialog extends AppSettingsAction {
-  const ShowEraseDialog();
+final class ShowMoveAllToTrashDialog extends AppSettingsAction {
+  const ShowMoveAllToTrashDialog();
 }
 
 final class ShowExportSheet extends AppSettingsAction {

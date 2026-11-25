@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-class EraseAllConfirmationWidget extends StatelessWidget {
-  const EraseAllConfirmationWidget({super.key, required this.onErase});
+class MoveAllToTrashConfirmationWidget extends StatelessWidget {
+  const MoveAllToTrashConfirmationWidget({super.key, required this.onConfirm});
 
-  final VoidCallback onErase;
+  final VoidCallback onConfirm;
 
   @override
   Widget build(BuildContext context) {
@@ -19,7 +19,7 @@ class EraseAllConfirmationWidget extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text(
-              'Erase All Data',
+              'Move All Links to Trash',
               style: TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
@@ -28,7 +28,7 @@ class EraseAllConfirmationWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Are you sure you want to erase all your saved URLs, folders, and tags?\nThis action cannot be undone.',
+              'Are you sure you want to move all your saved links to the trash?\nTheir folders and tags move too, and come back when you restore a link. Folders and tags that no link uses are permanently deleted.',
               style: TextStyle(fontSize: 14, color: Color(0xFF7A4326)),
             ),
             const SizedBox(height: 8),
@@ -54,9 +54,9 @@ class EraseAllConfirmationWidget extends StatelessWidget {
                   ),
                   onPressed: () {
                     Navigator.pop(context);
-                    onErase();
+                    onConfirm();
                   },
-                  child: const Text('Erase'),
+                  child: const Text('Move'),
                 ),
               ],
             ),

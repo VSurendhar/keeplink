@@ -19,8 +19,8 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     on<TrashRetentionChanged>(_onTrashRetentionChanged);
     on<SaveSettingsRequested>(_onSaveSettingsRequested);
     on<ShowLanguageSheetRequested>(_onShowLanguageSheetRequested);
-    on<ShowEraseDialogRequested>(_onShowEraseDialogRequested);
-    on<EraseAllRequested>(_onEraseAllRequested);
+    on<ShowMoveAllToTrashDialogRequested>(_onShowMoveAllToTrashDialogRequested);
+    on<MoveAllToTrashRequested>(_onMoveAllToTrashRequested);
     on<ExportUrlsRequested>(_onExportUrlsRequested);
     on<ImportUrlsRequested>(_onImportUrlsRequested);
     on<ExportUrlsConfirmed>(_onExportUrlsConfirmed);
@@ -111,26 +111,27 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     emit(state.copyWith(action: const ShowLanguageSheet()));
   }
 
-  void _onShowEraseDialogRequested(
-    ShowEraseDialogRequested event,
+  void _onShowMoveAllToTrashDialogRequested(
+    ShowMoveAllToTrashDialogRequested event,
     Emitter<AppSettingsState> emit,
   ) {
-    emit(state.copyWith(action: const ShowEraseDialog()));
+    emit(state.copyWith(action: const ShowMoveAllToTrashDialog()));
   }
 
-  Future<void> _onEraseAllRequested(
-    EraseAllRequested event,
+  Future<void> _onMoveAllToTrashRequested(
+    MoveAllToTrashRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
     try {
-      final urlStore = _urlStoreProvider();
-      await urlStore.clearAll();
-      await urlStore.seedDefaultFolderIfNotExist();
-      await urlStore.seedDefaultTagsIfNotExist();
-      emit(state.copyWith(action: const ShowToast('Data Erased')));
+      await _urlStoreProvider().moveAllUrlsToTrash();
+      emit(state.copyWith(action: const ShowToast('Links Moved to Trash')));
     } catch (e, st) {
-      logError('Failed to erase all data', e, stackTrace: st);
-      emit(state.copyWith(action: const ShowToast('Error While Erasing Data')));
+      logError('Failed to move all links to trash', e, stackTrace: st);
+      emit(
+        state.copyWith(
+          action: const ShowToast('Error While Moving Links to Trash'),
+        ),
+      );
     }
   }
 

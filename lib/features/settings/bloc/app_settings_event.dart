@@ -48,14 +48,14 @@ final class ShowLanguageSheetRequested extends AppSettingsEvent {
   const ShowLanguageSheetRequested();
 }
 
-/// Triggered when the user requests to open erase confirmation dialog.
-final class ShowEraseDialogRequested extends AppSettingsEvent {
-  const ShowEraseDialogRequested();
+/// Triggered when the user requests to open the move all to trash dialog.
+final class ShowMoveAllToTrashDialogRequested extends AppSettingsEvent {
+  const ShowMoveAllToTrashDialogRequested();
 }
 
-/// Triggered when the user requests to erase all data.
-final class EraseAllRequested extends AppSettingsEvent {
-  const EraseAllRequested();
+/// Triggered when the user confirms moving all links to the trash.
+final class MoveAllToTrashRequested extends AppSettingsEvent {
+  const MoveAllToTrashRequested();
 }
 
 /// Triggered when the user requests to export URLs.
