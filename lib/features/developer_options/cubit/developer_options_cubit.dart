@@ -88,6 +88,8 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
     Map<int, String> folderNames,
     Map<int, String> tagNames,
   ) async {
+    final random = Random();
+
     Future<int> insertFolder(String name) async {
       final id = await urlStore.insertFolder(Folder(folderName: name));
       folderNames[id] = name;
@@ -126,6 +128,7 @@ class DeveloperOptionsCubit extends Cubit<DeveloperOptionsState> {
             createdAt: createdAt,
             updatedAt: createdAt,
             isFavorite: false,
+            trash: random.nextBool(),
           ),
           // Between 0 and 3 tags per link.
           tagIds: List.generate(
