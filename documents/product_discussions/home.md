@@ -39,7 +39,7 @@ Status: confirmed, not implemented.
   - **4.3.2** "All Items" removes the filter and shows all the saved links again.
   - **4.3.3** Search and tags apply together: while a tag is selected, search looks only in the links with that tag. With "All Items", it looks in all the saved links.
   - **4.3.4** Only one tag is selected at a time. Tapping another tag replaces the selected one.
-  - **4.3.5** If the selected tag no longer has any saved links, or is deleted, "All Items" is selected and the search is kept.
+  - **4.3.5** If a tag no longer has any saved links, or is deleted, its chip is removed. If it was the selected tag, "All Items" is selected and the search is kept. This happens whenever the tag data in the database changes, without a manual refresh.
 - **4.4** **View toggle:** switches between the thumbnail view (grid) and the list view. The selected icon is highlighted. Every app start opens in the thumbnail view; the choice isn't saved.
 - **4.5** **Card, in both views:** only the preview image, the title and the URL.
   - **4.5.1** Title: at most two lines, then an ellipsis.
@@ -52,7 +52,7 @@ Status: confirmed, not implemented.
 
 ## 5. How
 
-- **5.1** **Data:** listen to `findAllUrl()`, so a newly saved link appears by itself. Resolve `UrlStore` from GetIt. Tags come from `findAllTags()` and `findAllUrlTags()`.
+- **5.1** **Data:** listen to `findAllUrl()`, so a newly saved link appears by itself. Resolve `UrlStore` from GetIt. The tag chips come from listening to `findAllTags()` and `findAllUrlTags()` together with `findAllUrl()`. Whenever any of them changes, the chips, the selected tag (4.3.5) and the list are worked out again.
 - **5.2** **`trash = 0`:** build on `findAllUrl()` as it is now. It leaves out trashed links by itself once `feat/trash_page`, which adds the `url.trash` column and the filter, is merged. Until then, nothing can be in the trash on this branch.
 - **5.3** **State:** a BLoC with the Action pattern, as in `lib/features/add_new_link/`, with separate event, action and state files.
 - **5.4** **Icons:** `Symbols.tile_small` (thumbnail view), `Icons.view_list` (list view), `Icons.photo` (placeholder).
@@ -61,18 +61,18 @@ Status: confirmed, not implemented.
 - **5.7** **Dimensions:** match Settings and Add New Link: 16 horizontal and 8 vertical page padding, 16 between sections, white cards with radius 16 and the same soft shadow. Follow the dimension rules for anything new.
 - **5.8** **Bottom space:** the list's bottom padding is `paddingForBottomNavBar` plus the FAB's size and margin. The FAB sits above the bottom navigation bar.
 - **5.9** **Errors:** handled in the BLoC, following the project's error handling rule.
-- **5.10** **Knowing a link was saved:** Add New Link returns a result when it closes after a save, so Home resets the tag and search (4.6.1) only then. Today it closes without a result.
+- **5.10** **Knowing a link was saved:** Add New Link returns nothing to Home and isn't changed. Home learns about a new link from `findAllUrl()`: when an update has a link whose id wasn't in the previous one, Home resets the tag and search (4.6.1). The first load doesn't count.
 
 ## 6. Tasks
 
 - [ ] **6.1** Load the links only through `findAllUrl()`, and check that trashed links are hidden once `feat/trash_page` is merged.
 - [ ] **6.2** Make preview image paths available after an app restart.
-- [ ] **6.3** Create the Home BLoC: load links and tags, keep them up to date, and order the links by `updated_at`.
+- [ ] **6.3** Create the Home BLoC: listen to the links, tags and URL-tag streams, keep the links and chips up to date, and order the links by `updated_at`.
 - [ ] **6.4** Build the app bar and the "Your Archive" heading. The trash icon does nothing: `// TODO: Wire it to the trash page once it is done.`
 - [ ] **6.5** Build the search bar (title and URL).
-- [ ] **6.6** Build the tag chips, and filter the list by the selected tag. Go back to "All Items" when the selected tag disappears (4.3.5).
+- [ ] **6.6** Build the tag chips, and filter the list by the selected tag. When the database changes, remove the chip of a tag that disappears, and go back to "All Items" if it was selected (4.3.5).
 - [ ] **6.7** Build the view toggle, starting in the thumbnail view.
 - [ ] **6.8** Build the thumbnail card and grid, and the list card and list. The tap callback does nothing: `// TODO: Wire it when the link preview page is available.`
-- [ ] **6.9** Add the FAB, opening Add New Link. After a save, select "All Items" and clear the search (4.6.1).
+- [ ] **6.9** Add the FAB, opening Add New Link. When the stream brings a new link, select "All Items" and clear the search (4.6.1, 5.10).
 - [ ] **6.10** Add the bottom padding for the navigation bar and the FAB.
 - [ ] **6.11** Show the empty messages (4.8).
