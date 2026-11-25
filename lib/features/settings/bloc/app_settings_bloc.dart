@@ -19,8 +19,8 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     on<TrashRetentionChanged>(_onTrashRetentionChanged);
     on<SaveSettingsRequested>(_onSaveSettingsRequested);
     on<ShowLanguageSheetRequested>(_onShowLanguageSheetRequested);
-    on<ShowMoveAllToTrashDialogRequested>(_onShowMoveAllToTrashDialogRequested);
-    on<MoveAllToTrashRequested>(_onMoveAllToTrashRequested);
+    on<ShowEraseDialogRequested>(_onShowEraseDialogRequested);
+    on<EraseAllRequested>(_onEraseAllRequested);
     on<ExportUrlsRequested>(_onExportUrlsRequested);
     on<ImportUrlsRequested>(_onImportUrlsRequested);
     on<ExportUrlsConfirmed>(_onExportUrlsConfirmed);
@@ -111,27 +111,26 @@ class AppSettingsBloc extends Bloc<AppSettingsEvent, AppSettingsState> {
     emit(state.copyWith(action: const ShowLanguageSheet()));
   }
 
-  void _onShowMoveAllToTrashDialogRequested(
-    ShowMoveAllToTrashDialogRequested event,
+  void _onShowEraseDialogRequested(
+    ShowEraseDialogRequested event,
     Emitter<AppSettingsState> emit,
   ) {
-    emit(state.copyWith(action: const ShowMoveAllToTrashDialog()));
+    emit(state.copyWith(action: const ShowEraseDialog()));
   }
 
-  Future<void> _onMoveAllToTrashRequested(
-    MoveAllToTrashRequested event,
+  Future<void> _onEraseAllRequested(
+    EraseAllRequested event,
     Emitter<AppSettingsState> emit,
   ) async {
     try {
-      await _urlStoreProvider().moveAllUrlsToTrash();
-      emit(state.copyWith(action: const ShowToast('Links Moved to Trash')));
+      final urlStore = _urlStoreProvider();
+      await urlStore.clearAll();
+      await urlStore.seedDefaultFolderIfNotExist();
+      await urlStore.seedDefaultTagsIfNotExist();
+      emit(state.copyWith(action: const ShowToast('Data Erased')));
     } catch (e, st) {
-      logError('Failed to move all links to trash', e, stackTrace: st);
-      emit(
-        state.copyWith(
-          action: const ShowToast('Error While Moving Links to Trash'),
-        ),
-      );
+      logError('Failed to erase all data', e, stackTrace: st);
+      emit(state.copyWith(action: const ShowToast('Error While Erasing Data')));
     }
   }
 

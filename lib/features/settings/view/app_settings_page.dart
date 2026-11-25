@@ -10,10 +10,10 @@ import 'package:keep_links/features/settings/bloc/app_settings_bloc.dart';
 import 'package:keep_links/features/settings/bloc/app_settings_event.dart';
 import 'package:keep_links/features/settings/bloc/app_settings_state.dart';
 import 'package:keep_links/features/settings/service/app_settings_service.dart';
+import 'package:keep_links/features/settings/view/widgets/erase_all_confirmation_widget.dart';
 import 'package:keep_links/features/settings/view/widgets/export_bottom_sheet_widget.dart';
 import 'package:keep_links/features/settings/view/widgets/import_bottom_sheet_widget.dart';
 import 'package:keep_links/features/settings/view/widgets/language_selection_sheet_widget.dart';
-import 'package:keep_links/features/settings/view/widgets/move_all_to_trash_confirmation_widget.dart';
 import 'package:keep_links/features/theme/colors.dart';
 import 'package:keep_links/features/theme/theme.dart';
 import 'package:keep_links/utils/utils.dart';
@@ -56,8 +56,8 @@ class AppSettingsView extends StatelessWidget {
           );
         } else if (action is ShowToast) {
           Utils.showToast(action.message);
-        } else if (action is ShowMoveAllToTrashDialog) {
-          _showMoveAllToTrashConfirmation(context);
+        } else if (action is ShowEraseDialog) {
+          _showEraseDataConfirmation(context);
         } else if (action is ShowExportSheet) {
           _showExportBottomSheet(context, action.count);
         } else if (action is ShowImportSheet) {
@@ -143,7 +143,7 @@ class AppSettingsView extends StatelessWidget {
                     ),
                     const SizedBox(height: 16),
                   ],
-                  _buildMoveAllToTrashCard(context),
+                  _buildEraseDataCard(context),
                   const SizedBox(height: paddingForBottomNavBar),
                 ],
               ),
@@ -543,16 +543,14 @@ class AppSettingsView extends StatelessWidget {
     );
   }
 
-  Widget _buildMoveAllToTrashCard(BuildContext context) {
+  Widget _buildEraseDataCard(BuildContext context) {
     const dangerActionColor = Color(0xFFBA1A1A);
 
     return Material(
       color: Colors.transparent,
       child: InkWell(
         onTap: () {
-          context.read<AppSettingsBloc>().add(
-            const ShowMoveAllToTrashDialogRequested(),
-          );
+          context.read<AppSettingsBloc>().add(const ShowEraseDialogRequested());
         },
         borderRadius: BorderRadius.circular(24),
         child: Container(
@@ -577,14 +575,14 @@ class AppSettingsView extends StatelessWidget {
                 ),
                 alignment: Alignment.center,
                 child: const Icon(
-                  Symbols.delete,
+                  Symbols.delete_forever,
                   color: dangerActionColor,
                   size: 18,
                 ),
               ),
               const SizedBox(width: 12),
               const Text(
-                'Move All Links to Trash',
+                'Erase All Data',
                 style: TextStyle(
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -617,12 +615,12 @@ class AppSettingsView extends StatelessWidget {
     );
   }
 
-  void _showMoveAllToTrashConfirmation(BuildContext context) {
+  void _showEraseDataConfirmation(BuildContext context) {
     showDialog<void>(
       context: context,
-      builder: (_) => MoveAllToTrashConfirmationWidget(
-        onConfirm: () {
-          context.read<AppSettingsBloc>().add(const MoveAllToTrashRequested());
+      builder: (_) => EraseAllConfirmationWidget(
+        onErase: () {
+          context.read<AppSettingsBloc>().add(const EraseAllRequested());
         },
       ),
     );

@@ -22,8 +22,8 @@ The tasks are in the order to build them.
 8. [x] **Hiding trashed folders and tags:** they aren't in any list or selection sheet, and the number of folders and the number of tags don't include them. Their names are shown only on the cards of trashed links that use them.
     - A saved link never points to a trashed folder or tag: when saving a link, the stores treat a trashed folder or tag as missing.
 9. [x] **Reusing a trashed name:** creating a folder or tag with the name of a trashed one makes the trashed one visible again (`trash = 0`) instead of adding a second one, because names are unique.
-10. [ ] **No stale data:** verify that the `url`, `folder`, `tag` and `url_tag` tables hold no stale or unlinked data. This is a check only, done after tasks 13, 15 and 19. Folders and tags that aren't trashed are kept, even with no links, so they aren't stale.
-11. [ ] **Timestamps:** verify that trashing a link sets `updated_at` to that time, and restoring it sets `updated_at` to the time of the restore. This is a check only, done after tasks 13 and 19. `created_at` never changes. There is no `trashed_at` column.
+10. [ ] **No stale data:** verify that the `url`, `folder`, `tag` and `url_tag` tables hold no stale or unlinked data. This is a check only, done after tasks 13, 15 and 19 (restoring, emptying the trash and Erase All Data). Folders and tags that aren't trashed are kept, even with no links, so they aren't stale.
+11. [ ] **Timestamps:** verify that trashing a link sets `updated_at` to that time, and restoring it sets `updated_at` to the time of the restore. This is a check only: restoring is checked after task 13, and trashing when moving a single link to the trash is built. `created_at` never changes. There is no `trashed_at` column.
 12. [x] **Reading the trash:** both stores have a query for trashed links with their folder and tags, including trashed folders and tags. The most recently trashed link comes first, ordered by `updated_at`.
 13. [x] **Restoring:** both stores have one transactional `restoreUrl`. A restore either fully succeeds or changes nothing. Refer on how we are creating the url using `createUrl`
     - The link becomes saved again (`url.trash = 0`) with its original folder and tags. If its folder or any of its tags are trashed, they become visible again (`trash = 0`).
@@ -107,10 +107,7 @@ The tasks are in the order to build them.
     }
     ```
 18. [ ] **Entry point:** for now, the Trash page opens only from a button in Developer Options. Create no other entry point: the trash bin icon on the Folders page must not be wired to it, even once that icon is available.
-19. [ ] **Move All Links to Trash:** this replaces Erase All Data, which deletes everything (`clearAll`).
-    - All saved links move to the trash, and their `updated_at` is set to the current time. Links already in the trash keep their `updated_at`.
-    - All folders and tags that a link uses move to the trash (`trash = 1`), except **Defaults** and **Tag1**. They aren't deleted, and restoring a link brings back its folder and tags.
-    - Folders and tags that no link uses are permanently deleted, as in tasks 6 and 7, so no stale data is left.
+19. [x] **Erase All Data:** it stays a real erase and doesn't use the trash. It permanently deletes all links, including those in the trash, and all folders and tags (`clearAll`). The default folder (**Defaults**) and the default tag (**Tag1**) are then created again. It is the only exception to the goal, so its dialog must say clearly that it can't be undone. Preview images stay in storage until the startup sweep removes them.
 20. [ ] **No automatic deletion:** no link is deleted automatically in version 1.
 21. [ ] **Restore toasts:** `TrashBloc` handles every failed restore: it catches the exception from `restoreUrl`, logs it and shows a toast. Done with task 17, when `TrashBloc` exists.
 
@@ -131,7 +128,7 @@ These apply on top of the design from the external source.
 - Each card has a visible restore button.
 - The Trash page has a delete icon that empties the trash. Pressing it shows a dialog asking whether to delete everything in the trash. Confirming permanently deletes all links in the trash, and all trashed folders and tags.
 - Developer Options has a button that opens the Trash page.
-- In Settings, "Erase All Data" and its warning dialog change to "Move All Links to Trash". The warning no longer says that the action can't be undone.
+- In Settings, "Erase All Data" keeps its name. Its dialog says: "This permanently deletes all your links, including those in the trash, and all your folders and tags. This action cannot be undone."
 - In Settings, the Trash Retention card is hidden.
 
 ## Out of scope
