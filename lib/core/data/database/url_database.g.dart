@@ -450,6 +450,18 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<void> deleteUrlTagsByUrlId(int urlId) async {
+    await _queryAdapter.queryNoReturn('DELETE FROM url_tag WHERE url_id = ?1',
+        arguments: [urlId]);
+  }
+
+  @override
+  Future<void> deleteUrlById(int urlId) async {
+    await _queryAdapter
+        .queryNoReturn('DELETE FROM url WHERE id = ?1', arguments: [urlId]);
+  }
+
+  @override
   Future<void> deleteTrashedUrls() async {
     await _queryAdapter.queryNoReturn('DELETE FROM url WHERE trash = 1');
   }
@@ -733,6 +745,20 @@ class _$UrlDao extends UrlDao {
         final transactionDatabase = _$UrlDatabase(changeListener)
           ..database = transaction;
         await transactionDatabase.urlDao.restoreUrl(urlId);
+      });
+    }
+  }
+
+  @override
+  Future<void> deleteTrashedUrl(int urlId) async {
+    if (database is sqflite.Transaction) {
+      await super.deleteTrashedUrl(urlId);
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.deleteTrashedUrl(urlId);
       });
     }
   }

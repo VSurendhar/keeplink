@@ -187,6 +187,18 @@ abstract class UrlStore {
   ///   exists.
   Future<void> restoreUrl(int urlId);
 
+  /// Permanently deletes the trashed URL [urlId] and its URL-tag links, then its
+  /// folder and tags if they are trashed and no other URL uses them. Returns
+  /// nothing.
+  ///
+  /// Its preview image isn't deleted; the startup sweep removes it. The database
+  /// store runs it in one transaction, so on failure nothing is deleted.
+  ///
+  /// Special cases:
+  /// - **Missing URL**: throws `UrlNotFoundException` if no trashed URL has
+  ///   [urlId]. A saved URL is never deleted.
+  Future<void> deleteTrashedUrl(int urlId);
+
   /// Permanently deletes all trashed URLs and their URL-tag links, then the
   /// trashed folders and tags that no URL uses. Returns nothing.
   ///

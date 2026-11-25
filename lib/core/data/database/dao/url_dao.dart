@@ -130,6 +130,12 @@ abstract class UrlDao {
   )
   Future<void> deleteUrlTagsOfTrashedUrls();
 
+  @Query('DELETE FROM url_tag WHERE url_id = :urlId')
+  Future<void> deleteUrlTagsByUrlId(int urlId);
+
+  @Query('DELETE FROM url WHERE id = :urlId')
+  Future<void> deleteUrlById(int urlId);
+
   @Query('DELETE FROM url WHERE trash = 1')
   Future<void> deleteTrashedUrls();
 
@@ -265,6 +271,19 @@ abstract class UrlDao {
         updatedAt: DateTime.now().millisecondsSinceEpoch,
       ),
     ]);
+  }
+
+  @transaction
+  Future<void> deleteTrashedUrl(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+
+    await deleteUrlTagsByUrlId(urlId);
+    await deleteUrlById(urlId);
+    await deleteUnusedTrashedFolders();
+    await deleteUnusedTrashedTags();
   }
 
   @transaction

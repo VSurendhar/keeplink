@@ -365,11 +365,24 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<void> emptyTrash() async {
-    final trashedUrlIds = _trashedUrls.map((url) => url.id).toSet();
-    _urlTags.removeWhere((urlTag) => trashedUrlIds.contains(urlTag.urlId));
-    _urls.removeWhere((url) => url.trash);
+    _deleteUrlsById(_trashedUrls.map((url) => url.id).toSet());
+  }
 
-    // Only trashed folders and tags that no URL uses are deleted.
+  @override
+  Future<void> deleteTrashedUrl(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+    _deleteUrlsById({urlId});
+  }
+
+  /// Deletes the URLs in [urlIds] and their tag links, then the trashed folders
+  /// and tags that no URL uses.
+  void _deleteUrlsById(Set<int?> urlIds) {
+    _urlTags.removeWhere((urlTag) => urlIds.contains(urlTag.urlId));
+    _urls.removeWhere((url) => urlIds.contains(url.id));
+
     final usedFolderIds = _urls.map((url) => url.folderId).toSet();
     _folders.removeWhere(
       (folder) => folder.trash && !usedFolderIds.contains(folder.id),

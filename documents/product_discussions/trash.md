@@ -109,7 +109,7 @@ The tasks are in the order to build them.
 18. [ ] **Entry point:** for now, the Trash page opens only from a button in Developer Options. Create no other entry point: the trash bin icon on the Folders page must not be wired to it, even once that icon is available.
 19. [x] **Erase All Data:** it stays a real erase and doesn't use the trash. It permanently deletes all links, including those in the trash, and all folders and tags (`clearAll`). The default folder (**Defaults**) and the default tag (**Tag1**) are then created again. It is the only exception to the goal, so its dialog must say clearly that it can't be undone. Preview images stay in storage until the startup sweep removes them.
 20. [ ] **No automatic deletion:** no link is deleted automatically in version 1.
-21. [ ] **Restore toasts:** `TrashBloc` handles every failed restore: it catches the exception from `restoreUrl`, logs it and shows a toast. Done with task 17, when `TrashBloc` exists.
+21. [ ] **Toasts:** `TrashBloc` handles every failed restore: it catches the exception from `restoreUrl`, logs it and shows a toast. Done with task 17, when `TrashBloc` exists.
 
     | Exception | Toast |
     |---|---|
@@ -119,19 +119,31 @@ The tasks are in the order to build them.
     | `TagNotFoundException` | "Tag does not exist" |
     | Anything else, including `UrlNotFoundException` | "Error While Restoring Link" |
 
+    It does the same for deleting a link (`deleteTrashedUrl`) and emptying the trash (`emptyTrash`), and also shows a toast when they succeed.
+
+    | Operation | Success | Failure |
+    |---|---|---|
+    | Delete a link permanently | "Link Deleted" | "Error While Deleting Link" |
+    | Empty the trash | "Trash Emptied" | "Error While Emptying Trash" |
+
 22. [x] **Moving a single link to the trash:** both stores have one transactional `moveUrlToTrash`.
     - The saved link becomes trashed (`url.trash = 1`), and its `updated_at` is set to the current time. `created_at` doesn't change.
     - The link keeps its folder, tags and preview image. The folder and tags aren't touched, even if no other link uses them.
     - If the link doesn't exist or is already in the trash, it throws `UrlNotFoundException` and changes nothing.
+23. [x] **Permanently deleting a single link:** both stores have one transactional `deleteTrashedUrl`.
+    - The link and its `url_tag` rows go first, then its folder and tags if they are trashed and no other link, saved or trashed, uses them.
+    - The preview image stays in storage until the startup sweep removes it.
+    - If the link doesn't exist or isn't in the trash, it throws `UrlNotFoundException` and changes nothing, so a saved link is never deleted this way.
 
 ## UI changes
 
 These apply on top of the design from the external source.
 
-- Each trashed link shows its preview image (or a placeholder), name, full URL, folder, and tags in a single scrollable line. Every card has the same fixed height.
+- Each trashed link shows its preview image (or a placeholder), name, full URL, folder, and tags in a single scrollable line and also the single delete icon to delete permanently that url from trash. Every card has the same fixed height.
 - The folder and tags shown are the original ones, which the link returns to when restored, even if they have been deleted.
 - Each card has a visible restore button.
-- The Trash page has a delete icon that empties the trash. Pressing it shows a dialog asking whether to delete everything in the trash. Confirming permanently deletes all links in the trash, and all trashed folders and tags.
+- Pressing a card's delete icon shows a dialog: "Delete this link permanently? This action cannot be undone." Confirming permanently deletes that link (task 23).
+- The Trash page has a delete button on top right in app bar that empties the trash. Pressing it shows a dialog asking whether to delete everything in the trash. Confirming permanently deletes all links in the trash, and all trashed folders and tags.
 - Developer Options has a button that opens the Trash page.
 - In Settings, "Erase All Data" keeps its name. Its dialog says: "This permanently deletes all your links, including those in the trash, and all your folders and tags. This action cannot be undone."
 - In Settings, the Trash Retention card is hidden.
@@ -139,7 +151,6 @@ These apply on top of the design from the external source.
 ## Out of scope
 
 - The screen from which the user moves a single link to the trash. It is separate work, and calls `moveUrlToTrash` (task 22).
-- Permanently deleting a single link. It is separate work, right after restore. The link and its `url_tag` rows go first, then its trashed folder and tags if no other link, saved or trashed, uses them.
 - Automatic deletion (trash retention).
 
 ## Developer notes
