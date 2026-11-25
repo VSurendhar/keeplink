@@ -22,7 +22,7 @@ The tasks are in the order to build them.
 8. [x] **Hiding trashed folders and tags:** they aren't in any list or selection sheet, and the number of folders and the number of tags don't include them. Their names are shown only on the cards of trashed links that use them.
     - A saved link never points to a trashed folder or tag: when saving a link, the stores treat a trashed folder or tag as missing.
 9. [x] **Reusing a trashed name:** creating a folder or tag with the name of a trashed one makes the trashed one visible again (`trash = 0`) instead of adding a second one, because names are unique.
-10. [ ] **No stale data:** the `url`, `folder`, `tag` and `url_tag` tables never hold stale or unlinked data. Whenever links are permanently deleted, the links and their `url_tag` rows go first. Then each trashed folder and tag they used is permanently deleted if no other link, saved or trashed, uses it. Folders and tags that aren't trashed are kept, even with no links. It all runs in one transaction.
+10. [ ] **No stale data:** verify that the `url`, `folder`, `tag` and `url_tag` tables hold no stale or unlinked data. This is a check only, done after tasks 13, 15 and 19. Folders and tags that aren't trashed are kept, even with no links, so they aren't stale.
 11. [ ] **Timestamps:** trashing a link sets `updated_at` to that time, and restoring it sets `updated_at` to the time of the restore. `created_at` never changes. There is no `trashed_at` column.
 12. [ ] **Reading the trash:** both stores have a query for trashed links with their folder and tags, including trashed folders and tags. The most recently trashed link comes first, ordered by `updated_at`.
 13. [ ] **Restoring:** both stores have one transactional `restoreUrl`. A restore either fully succeeds or changes nothing.
@@ -30,7 +30,7 @@ The tasks are in the order to build them.
     - Accepted downside: a folder or tag deleted on purpose comes back when one of its links is restored.
     - Example: "Pasta" is saved in the folder **Recipes** with the tag **dinner**, then moved to the trash. **Recipes** is deleted: its saved links move to **Defaults**, and **Recipes** is marked as trashed. **dinner** is deleted and marked as trashed too. "Pasta" isn't touched. Restoring "Pasta" makes **Recipes** and **dinner** visible again, and "Pasta" is back in **Recipes** with the tag **dinner**.
 14. [ ] **Restore conflicts:** a restore is blocked with a message if a saved link already has the same URL or title. The user can't rename the link to get around it. The URL is checked first, and the title only if the URL passes, so at most one clash is reported per attempt. The toast says "Duplicate link found" or "Duplicate title found".
-15. [ ] **Emptying the trash:** both stores have an operation that permanently deletes all trashed links and, as in task 10, all trashed folders and tags. It never touches the preview images, which stay in storage until the startup sweep removes them. See [startup_sweep.md](startup_sweep.md).
+15. [ ] **Emptying the trash:** both stores have an operation that permanently deletes all trashed links and all trashed folders and tags. The links and their `url_tag` rows go first, then the trashed folders and tags that no link uses. It all runs in one transaction. It never touches the preview images, which stay in storage until the startup sweep removes them. See [startup_sweep.md](startup_sweep.md).
 16. [ ] **No access to trashed links:** a trashed link can't be opened or edited. It can only be restored or permanently deleted.
 17. [ ] **Trash page:** build it from the external design and the UI changes below.
 18. [ ] **Entry point:** for now, the Trash page opens only from a button in Developer Options. Create no other entry point: the trash bin icon on the Folders page must not be wired to it, even once that icon is available.
@@ -54,5 +54,5 @@ These apply on top of the design from the external source.
 ## Out of scope
 
 - How a single link is moved to the trash. It is separate work.
-- Permanently deleting a single link. It is separate work, right after restore, and follows task 10.
+- Permanently deleting a single link. It is separate work, right after restore. The link and its `url_tag` rows go first, then its trashed folder and tags if no other link, saved or trashed, uses them.
 - Automatic deletion (trash retention).
