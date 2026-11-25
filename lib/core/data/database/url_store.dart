@@ -75,6 +75,8 @@ abstract class UrlStore {
   Stream<List<UrlTag>> findAllUrlTags();
 
   /// Returns the folder with this [id], or `null` if there is none.
+  ///
+  /// Also returns trashed folders.
   Future<Folder?> findFolderById(int id);
 
   /// Returns the folder named exactly [folderName], or `null` if there is
@@ -85,6 +87,9 @@ abstract class UrlStore {
   Future<Folder?> findFolderByName(String folderName);
 
   /// Returns the URL with this [id], or `null` if there is none.
+  ///
+  /// Also returns trashed URLs: a screen that opens or edits a URL must check
+  /// [Url.trash].
   Future<Url?> findUrlById(int id);
 
   /// Returns the saved URL whose address is exactly [url], or `null` if there
@@ -98,6 +103,8 @@ abstract class UrlStore {
   Future<Url?> findUrlByTitle(String title);
 
   /// Returns the tag with this [id], or `null` if there is none.
+  ///
+  /// Also returns trashed tags.
   Future<Tag?> findTagById(int id);
 
   /// Returns the tag named exactly [tagName], or `null` if there is none.

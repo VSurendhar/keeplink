@@ -119,10 +119,11 @@ The tasks are in the order to build them.
     | `TagNotFoundException` | "Tag does not exist" |
     | Anything else, including `UrlNotFoundException` | "Error While Restoring Link" |
 
-    It does the same for deleting a link (`deleteTrashedUrl`) and emptying the trash (`emptyTrash`), and also shows a toast when they succeed.
+    It does the same for deleting a link (`deleteTrashedUrl`) and emptying the trash (`emptyTrash`). All three also show a toast when they succeed.
 
     | Operation | Success | Failure |
     |---|---|---|
+    | Restore a link | "Link Restored" | See the table above |
     | Delete a link permanently | "Link Deleted" | "Error While Deleting Link" |
     | Empty the trash | "Trash Emptied" | "Error While Emptying Trash" |
 
