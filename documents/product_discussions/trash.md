@@ -16,7 +16,7 @@ The tasks are in the order to build them.
     - `url` and `title` are unique only where `trash = 0`: remove the two unique indexes from `url.dart`, and create partial unique indexes (`WHERE trash = 0`) in Floor's `onCreate` callback.
     - Duplicate checks look at saved links only, in both stores. Do this together with the indexes, because allowing duplicates makes the unfiltered checks throw.
 4. [x] **Visibility:** a trashed link appears only on the Trash page. It isn't in lists, counts or exports. The folder and tag selection sheets count saved links only.
-5. [ ] **Trash columns:** the `folder` and `tag` tables get a `trash` column (0 or 1), like `url`. The default folder (**Defaults**) and the default tag (**Tag1**) are never trashed.
+5. [x] **Trash columns:** the `folder` and `tag` tables get a `trash` column (0 or 1), like `url`. The default folder (**Defaults**) and the default tag (**Tag1**) are never trashed.
 6. [ ] **Deleting a folder:** in the folder selection sheet, deleting a folder moves its saved links to **Defaults**. Its trashed links aren't touched. The folder is marked as trashed (`folder.trash = 1`) if a trashed link uses it. Otherwise it is permanently deleted.
 7. [ ] **Deleting a tag:** in the tag selection sheet, deleting a tag deletes its `url_tag` rows for saved links. A saved link keeps its other tags, possibly none. The `url_tag` rows of trashed links aren't touched. The tag is marked as trashed (`tag.trash = 1`) if a trashed link uses it. Otherwise it is permanently deleted.
 8. [ ] **Hiding trashed folders and tags:** they aren't in any list or selection sheet, and the number of folders and the number of tags don't include them. Their names are shown only on the cards of trashed links that use them.

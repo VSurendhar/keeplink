@@ -68,17 +68,19 @@ Floor turns on SQLite's foreign-key checks (`PRAGMA foreign_keys = ON`) whenever
 
 ### folder
 
-| Column | Type | Null | Constraint |
-|---|---|---|---|
-| id | INTEGER | No | Primary Key (auto-increment) |
-| folder_name | TEXT | No | Unique |
+| Column | Type | Null | Constraint | Notes |
+|---|---|---|---|---|
+| id | INTEGER | No | Primary Key (auto-increment) | |
+| folder_name | TEXT | No | Unique | |
+| trash | INTEGER | No | | Boolean: 0 or 1; 1 means the user deleted the folder while a trashed link still uses it. Never 1 for the default folder (Defaults) |
 
 ### tag
 
-| Column | Type | Null | Constraint |
-|---|---|---|---|
-| id | INTEGER | No | Primary Key (auto-increment) |
-| tag_name | TEXT | No | Unique |
+| Column | Type | Null | Constraint | Notes |
+|---|---|---|---|---|
+| id | INTEGER | No | Primary Key (auto-increment) | |
+| tag_name | TEXT | No | Unique | |
+| trash | INTEGER | No | | Boolean: 0 or 1; 1 means the user deleted the tag while a trashed link still uses it. Never 1 for the default tag (Tag1) |
 
 ### url_tag
 

@@ -100,9 +100,9 @@ class _$UrlDatabase extends UrlDatabase {
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `url_tag` (`url_id` INTEGER NOT NULL, `tag_id` INTEGER NOT NULL, FOREIGN KEY (`url_id`) REFERENCES `url` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`url_id`, `tag_id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `folder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `folder_name` TEXT NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `folder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `folder_name` TEXT NOT NULL, `trash` INTEGER NOT NULL)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `tag` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `tag_name` TEXT NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `tag` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `tag_name` TEXT NOT NULL, `trash` INTEGER NOT NULL)');
         await database.execute(
             'CREATE INDEX `index_url_folder_id` ON `url` (`folder_id`)');
         await database.execute(
@@ -151,14 +151,18 @@ class _$UrlDao extends UrlDao {
             'folder',
             (Folder item) => <String, Object?>{
                   'id': item.id,
-                  'folder_name': item.folderName
+                  'folder_name': item.folderName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _tagInsertionAdapter = InsertionAdapter(
             database,
             'tag',
-            (Tag item) =>
-                <String, Object?>{'id': item.id, 'tag_name': item.tagName},
+            (Tag item) => <String, Object?>{
+                  'id': item.id,
+                  'tag_name': item.tagName,
+                  'trash': item.trash ? 1 : 0
+                },
             changeListener),
         _urlTagInsertionAdapter = InsertionAdapter(
             database,
@@ -190,7 +194,8 @@ class _$UrlDao extends UrlDao {
             ['id'],
             (Folder item) => <String, Object?>{
                   'id': item.id,
-                  'folder_name': item.folderName
+                  'folder_name': item.folderName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _urlTagDeletionAdapter = DeletionAdapter(
@@ -204,8 +209,11 @@ class _$UrlDao extends UrlDao {
             database,
             'tag',
             ['id'],
-            (Tag item) =>
-                <String, Object?>{'id': item.id, 'tag_name': item.tagName},
+            (Tag item) => <String, Object?>{
+                  'id': item.id,
+                  'tag_name': item.tagName,
+                  'trash': item.trash ? 1 : 0
+                },
             changeListener);
 
   final sqflite.DatabaseExecutor database;
@@ -253,7 +261,7 @@ class _$UrlDao extends UrlDao {
   Future<Folder?> findFolderForUrlId(int id) async {
     return _queryAdapter.query(
         'SELECT * FROM folder f where f.id = (SELECT folder_id FROM url u WHERE u.id = ?1)',
-        mapper: (Map<String, Object?> row) => Folder(id: row['id'] as int?, folderName: row['folder_name'] as String),
+        mapper: (Map<String, Object?> row) => Folder(id: row['id'] as int?, folderName: row['folder_name'] as String, trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
@@ -269,8 +277,10 @@ class _$UrlDao extends UrlDao {
   @override
   Stream<List<Tag>> findAllTags() {
     return _queryAdapter.queryListStream('SELECT * FROM tag',
-        mapper: (Map<String, Object?> row) =>
-            Tag(id: row['id'] as int?, tagName: row['tag_name'] as String),
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
         queryableName: 'tag',
         isView: false);
   }
@@ -279,7 +289,9 @@ class _$UrlDao extends UrlDao {
   Stream<List<Folder>> findAllFolders() {
     return _queryAdapter.queryListStream('SELECT * FROM folder',
         mapper: (Map<String, Object?> row) => Folder(
-            id: row['id'] as int?, folderName: row['folder_name'] as String),
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
         queryableName: 'folder',
         isView: false);
   }
@@ -347,7 +359,9 @@ class _$UrlDao extends UrlDao {
   Future<Folder?> findFolderById(int id) async {
     return _queryAdapter.query('SELECT * FROM folder WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Folder(
-            id: row['id'] as int?, folderName: row['folder_name'] as String),
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
@@ -355,7 +369,9 @@ class _$UrlDao extends UrlDao {
   Future<Folder?> findFolderByName(String folderName) async {
     return _queryAdapter.query('SELECT * FROM folder WHERE folder_name = ?1',
         mapper: (Map<String, Object?> row) => Folder(
-            id: row['id'] as int?, folderName: row['folder_name'] as String),
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [folderName]);
   }
 
@@ -417,16 +433,20 @@ class _$UrlDao extends UrlDao {
   @override
   Future<Tag?> findTagById(int id) async {
     return _queryAdapter.query('SELECT * FROM tag WHERE id = ?1',
-        mapper: (Map<String, Object?> row) =>
-            Tag(id: row['id'] as int?, tagName: row['tag_name'] as String),
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
   @override
   Future<Tag?> findTagByName(String tagName) async {
     return _queryAdapter.query('SELECT * FROM tag WHERE tag_name = ?1',
-        mapper: (Map<String, Object?> row) =>
-            Tag(id: row['id'] as int?, tagName: row['tag_name'] as String),
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [tagName]);
   }
 

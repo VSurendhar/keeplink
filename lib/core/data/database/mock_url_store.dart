@@ -78,7 +78,7 @@ class MockUrlStore implements UrlStore {
     final int id = existingId ?? _folderIdSeq;
     // Like SQLite's autoincrement, the next generated id is above any used id.
     if (id >= _folderIdSeq) _folderIdSeq = id + 1;
-    final newFolder = Folder(id: id, folderName: folder.folderName);
+    final newFolder = folder.copyWith(id: id);
     _folders.add(newFolder);
     _notifyFolders();
     return id;
@@ -98,7 +98,7 @@ class MockUrlStore implements UrlStore {
     final int id = existingId ?? _tagIdSeq;
     // Like SQLite's autoincrement, the next generated id is above any used id.
     if (id >= _tagIdSeq) _tagIdSeq = id + 1;
-    final newTag = Tag(id: id, tagName: tag.tagName);
+    final newTag = tag.copyWith(id: id);
     _tags.add(newTag);
     _notifyTags();
     return id;
