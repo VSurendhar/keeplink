@@ -109,7 +109,8 @@ The tasks are in the order to build them.
 18. [ ] **Entry point:** for now, the Trash page opens only from a button in Developer Options. Create no other entry point: the trash bin icon on the Folders page must not be wired to it, even once that icon is available.
 19. [ ] **Move All Links to Trash:** this replaces Erase All Data, which deletes everything (`clearAll`).
     - All saved links move to the trash, and their `updated_at` is set to the current time. Links already in the trash keep their `updated_at`.
-    - All folders and tags are deleted, except **Defaults** and **Tag1**. As in tasks 6 and 7, the ones a trashed link uses are marked as trashed, so restoring a link brings them back, and unused ones are permanently deleted.
+    - All folders and tags that a link uses move to the trash (`trash = 1`), except **Defaults** and **Tag1**. They aren't deleted, and restoring a link brings back its folder and tags.
+    - Folders and tags that no link uses are permanently deleted, as in tasks 6 and 7, so no stale data is left.
 20. [ ] **No automatic deletion:** no link is deleted automatically in version 1.
 21. [ ] **Restore toasts:** `TrashBloc` handles every failed restore: it catches the exception from `restoreUrl`, logs it and shows a toast. Done with task 17, when `TrashBloc` exists.
 
