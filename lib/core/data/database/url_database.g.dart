@@ -399,7 +399,19 @@ class _$UrlDao extends UrlDao {
 
   @override
   Future<Folder?> findFolderByName(String folderName) async {
-    return _queryAdapter.query('SELECT * FROM folder WHERE folder_name = ?1',
+    return _queryAdapter.query(
+        'SELECT * FROM folder WHERE folder_name = ?1 AND trash = 0',
+        mapper: (Map<String, Object?> row) => Folder(
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
+        arguments: [folderName]);
+  }
+
+  @override
+  Future<Folder?> findTrashedFolderByName(String folderName) async {
+    return _queryAdapter.query(
+        'SELECT * FROM folder WHERE folder_name = ?1 AND trash = 1',
         mapper: (Map<String, Object?> row) => Folder(
             id: row['id'] as int?,
             folderName: row['folder_name'] as String,
@@ -474,7 +486,19 @@ class _$UrlDao extends UrlDao {
 
   @override
   Future<Tag?> findTagByName(String tagName) async {
-    return _queryAdapter.query('SELECT * FROM tag WHERE tag_name = ?1',
+    return _queryAdapter.query(
+        'SELECT * FROM tag WHERE tag_name = ?1 AND trash = 0',
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
+        arguments: [tagName]);
+  }
+
+  @override
+  Future<Tag?> findTrashedTagByName(String tagName) async {
+    return _queryAdapter.query(
+        'SELECT * FROM tag WHERE tag_name = ?1 AND trash = 1',
         mapper: (Map<String, Object?> row) => Tag(
             id: row['id'] as int?,
             tagName: row['tag_name'] as String,
@@ -557,6 +581,34 @@ class _$UrlDao extends UrlDao {
         final transactionDatabase = _$UrlDatabase(changeListener)
           ..database = transaction;
         await transactionDatabase.urlDao.clearAll();
+      });
+    }
+  }
+
+  @override
+  Future<int> createFolder(Folder folder) async {
+    if (database is sqflite.Transaction) {
+      return super.createFolder(folder);
+    } else {
+      return (database as sqflite.Database)
+          .transaction<int>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        return transactionDatabase.urlDao.createFolder(folder);
+      });
+    }
+  }
+
+  @override
+  Future<int> createTag(Tag tag) async {
+    if (database is sqflite.Transaction) {
+      return super.createTag(tag);
+    } else {
+      return (database as sqflite.Database)
+          .transaction<int>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        return transactionDatabase.urlDao.createTag(tag);
       });
     }
   }

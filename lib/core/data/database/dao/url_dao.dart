@@ -43,9 +43,13 @@ abstract class UrlDao {
   @insert
   Future<int> insertUrl(Url url);
 
+  /// Internal to [createFolder], which reuses a trashed folder with the same name;
+  /// call [createFolder] instead of this.
   @insert
   Future<int> insertFolder(Folder folder);
 
+  /// Internal to [createTag], which reuses a trashed tag with the same name;
+  /// call [createTag] instead of this.
   @insert
   Future<int> insertTag(Tag tag);
 
@@ -97,8 +101,11 @@ abstract class UrlDao {
   @Query('SELECT * FROM folder WHERE id = :id')
   Future<Folder?> findFolderById(int id);
 
-  @Query('SELECT * FROM folder WHERE folder_name = :folderName')
+  @Query('SELECT * FROM folder WHERE folder_name = :folderName AND trash = 0')
   Future<Folder?> findFolderByName(String folderName);
+
+  @Query('SELECT * FROM folder WHERE folder_name = :folderName AND trash = 1')
+  Future<Folder?> findTrashedFolderByName(String folderName);
 
   @Query('SELECT * FROM url WHERE id = :id')
   Future<Url?> findUrlById(int id);
@@ -112,8 +119,11 @@ abstract class UrlDao {
   @Query('SELECT * FROM tag WHERE id = :id')
   Future<Tag?> findTagById(int id);
 
-  @Query('SELECT * FROM tag WHERE tag_name = :tagName')
+  @Query('SELECT * FROM tag WHERE tag_name = :tagName AND trash = 0')
   Future<Tag?> findTagByName(String tagName);
+
+  @Query('SELECT * FROM tag WHERE tag_name = :tagName AND trash = 1')
+  Future<Tag?> findTrashedTagByName(String tagName);
 
   @Query('SELECT * FROM url_tag WHERE url_id = :urlId AND tag_id = :tagId')
   Future<UrlTag?> findUrlTag(int urlId, int tagId);
@@ -124,6 +134,28 @@ abstract class UrlDao {
     await deleteAllUrls();
     await deleteAllTags();
     await deleteAllFolders();
+  }
+
+  @transaction
+  Future<int> createFolder(Folder folder) async {
+    final trashedFolder = await findTrashedFolderByName(folder.folderName);
+    final trashedId = trashedFolder?.id;
+    if (trashedFolder == null || trashedId == null) {
+      return insertFolder(folder);
+    }
+    await updateFolder(trashedFolder.copyWith(trash: false));
+    return trashedId;
+  }
+
+  @transaction
+  Future<int> createTag(Tag tag) async {
+    final trashedTag = await findTrashedTagByName(tag.tagName);
+    final trashedId = trashedTag?.id;
+    if (trashedTag == null || trashedId == null) {
+      return insertTag(tag);
+    }
+    await updateTag(trashedTag.copyWith(trash: false));
+    return trashedId;
   }
 
   @transaction

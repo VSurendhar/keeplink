@@ -18,6 +18,9 @@ abstract class UrlStore {
 
   /// Inserts [folder] as it is and returns its id.
   ///
+  /// If a trashed folder has the same name, it is made visible again
+  /// (`trash = false`) and its id returned; [folder] isn't inserted.
+  ///
   /// Folder names are unique: if the name or `id` is already taken, the
   /// database store throws (unique constraint) and the mock store throws a
   /// [StateError]. Callers should check first (e.g. with [findFolderByName])
@@ -25,6 +28,9 @@ abstract class UrlStore {
   Future<int> insertFolder(Folder folder);
 
   /// Inserts [tag] as it is and returns its id.
+  ///
+  /// If a trashed tag has the same name, it is made visible again
+  /// (`trash = false`) and its id returned; [tag] isn't inserted.
   ///
   /// Tag names are unique: if the name or `id` is already taken, the
   /// database store throws (unique constraint) and the mock store throws a
@@ -66,7 +72,7 @@ abstract class UrlStore {
   Future<Folder?> findFolderById(int id);
 
   /// Returns the folder named exactly [folderName], or `null` if there is
-  /// none.
+  /// none. Trashed folders are ignored.
   ///
   /// Case-sensitive: folder names can be in any language, where case folding
   /// doesn't apply or behaves inconsistently.
@@ -89,6 +95,7 @@ abstract class UrlStore {
   Future<Tag?> findTagById(int id);
 
   /// Returns the tag named exactly [tagName], or `null` if there is none.
+  /// Trashed tags are ignored.
   ///
   /// Case-sensitive, for the same reason as [findFolderByName].
   Future<Tag?> findTagByName(String tagName);

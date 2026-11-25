@@ -42,10 +42,10 @@ class DatabaseUrlStore implements UrlStore {
   // Insert Operations
   @override
   Future<int> insertFolder(Folder folder) async =>
-      (await _dao).insertFolder(folder);
+      (await _dao).createFolder(folder);
 
   @override
-  Future<int> insertTag(Tag tag) async => (await _dao).insertTag(tag);
+  Future<int> insertTag(Tag tag) async => (await _dao).createTag(tag);
 
   @override
   Future<void> insertUrlTag(UrlTag urlTag) async =>

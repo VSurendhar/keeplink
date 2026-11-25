@@ -71,6 +71,16 @@ class MockUrlStore implements UrlStore {
   // Insert Operations
   @override
   Future<int> insertFolder(Folder folder) async {
+    final trashedIndex = _folders.indexWhere(
+      (item) => item.trash && item.folderName == folder.folderName,
+    );
+    final trashedId = trashedIndex == -1 ? null : _folders[trashedIndex].id;
+    if (trashedId != null) {
+      _folders[trashedIndex] = _folders[trashedIndex].copyWith(trash: false);
+      _notifyFolders();
+      return trashedId;
+    }
+
     // Mirrors the database's unique constraint on `folder_name` and primary
     // key on `id`.
     if (await findFolderByName(folder.folderName) != null) {
@@ -91,6 +101,16 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<int> insertTag(Tag tag) async {
+    final trashedIndex = _tags.indexWhere(
+      (item) => item.trash && item.tagName == tag.tagName,
+    );
+    final trashedId = trashedIndex == -1 ? null : _tags[trashedIndex].id;
+    if (trashedId != null) {
+      _tags[trashedIndex] = _tags[trashedIndex].copyWith(trash: false);
+      _notifyTags();
+      return trashedId;
+    }
+
     // Mirrors the database's unique constraint on `tag_name` and primary key
     // on `id`.
     if (await findTagByName(tag.tagName) != null) {
@@ -178,7 +198,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Folder?> findFolderByName(String folderName) async {
     for (final folder in _folders) {
-      if (folder.folderName == folderName) return folder;
+      if (!folder.trash && folder.folderName == folderName) return folder;
     }
     return null;
   }
@@ -218,7 +238,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Tag?> findTagByName(String tagName) async {
     for (final tag in _tags) {
-      if (tag.tagName == tagName) return tag;
+      if (!tag.trash && tag.tagName == tagName) return tag;
     }
     return null;
   }
