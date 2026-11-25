@@ -144,8 +144,12 @@ abstract class UrlStore {
     List<int> tagIds = const [],
   });
 
-  /// Deletes the folder [sourceFolderId] and moves its URLs into the folder
-  /// [targetFolderId]. Returns nothing.
+  /// Deletes the folder [sourceFolderId] and moves its saved URLs into the
+  /// folder [targetFolderId]. Returns nothing.
+  ///
+  /// Trashed URLs aren't touched. If the folder has any, it is marked as
+  /// trashed (`Folder.trash`) instead of deleted, so they can be restored into
+  /// it.
   ///
   /// Checks run before anything changes, and the database store runs it in
   /// one transaction, so on failure nothing is moved or deleted. Folder and
@@ -155,6 +159,8 @@ abstract class UrlStore {
   /// - **Same folder**: throws `ArgumentError` if both ids are equal.
   /// - **Missing folder**: throws `FolderNotFoundException` if either folder
   ///   doesn't exist.
+  /// - **Default folder**: throws `ArgumentError` if [sourceFolderId] is a
+  ///   default folder (`AppDefaults.isDefaultFolder`).
   /// - **Empty folder**: no URLs to move; the folder is just deleted.
   Future<void> deleteFolderAndMoveUrls({
     required int sourceFolderId,

@@ -188,6 +188,16 @@ class _$UrlDao extends UrlDao {
                   'trash': item.trash ? 1 : 0
                 },
             changeListener),
+        _folderUpdateAdapter = UpdateAdapter(
+            database,
+            'folder',
+            ['id'],
+            (Folder item) => <String, Object?>{
+                  'id': item.id,
+                  'folder_name': item.folderName,
+                  'trash': item.trash ? 1 : 0
+                },
+            changeListener),
         _folderDeletionAdapter = DeletionAdapter(
             database,
             'folder',
@@ -231,6 +241,8 @@ class _$UrlDao extends UrlDao {
   final InsertionAdapter<UrlTag> _urlTagInsertionAdapter;
 
   final UpdateAdapter<Url> _urlUpdateAdapter;
+
+  final UpdateAdapter<Folder> _folderUpdateAdapter;
 
   final DeletionAdapter<Folder> _folderDeletionAdapter;
 
@@ -488,6 +500,11 @@ class _$UrlDao extends UrlDao {
   @override
   Future<void> updateUrls(List<Url> urls) async {
     await _urlUpdateAdapter.updateList(urls, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateFolder(Folder folder) async {
+    await _folderUpdateAdapter.update(folder, OnConflictStrategy.abort);
   }
 
   @override

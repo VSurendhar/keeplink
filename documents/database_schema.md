@@ -27,7 +27,7 @@ Inserting or updating a row that breaks one of these constraints throws an error
 
 | Column | References | On delete of the parent |
 |---|---|---|
-| `url.folder_id` | `folder.id` | **Restrict**: a folder that still has links can't be deleted. Move its links to another folder first (`deleteFolderAndMoveUrls`). |
+| `url.folder_id` | `folder.id` | **Restrict**: a folder that still has links can't be deleted. `deleteFolderAndMoveUrls` moves its saved links to another folder first. If trashed links use the folder, it is marked as trashed (`folder.trash = 1`) instead of deleted. |
 | `url_tag.url_id` | `url.id` | **Cascade**: deleting a link deletes its tag links. |
 | `url_tag.tag_id` | `tag.id` | **Cascade**: deleting a tag deletes its links to URLs. |
 

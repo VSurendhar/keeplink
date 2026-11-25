@@ -7,6 +7,7 @@ import 'package:keep_links/core/data/database/exception/duplicate_title_exceptio
 import 'package:keep_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
+import 'package:keep_links/core/utils/app_defaults.dart';
 
 @dao
 abstract class UrlDao {
@@ -56,6 +57,9 @@ abstract class UrlDao {
 
   @update
   Future<void> updateUrls(List<Url> urls);
+
+  @update
+  Future<void> updateFolder(Folder folder);
 
   @delete
   Future<void> deleteFolder(Folder folder);
@@ -141,12 +145,23 @@ abstract class UrlDao {
     if (folder == null) {
       throw FolderNotFoundException(sourceFolderId);
     }
+    if (AppDefaults.isDefaultFolder(folder)) {
+      throw ArgumentError('Cannot delete the default folder');
+    }
 
     final urls = await findUrlsByFolderId(sourceFolderId);
     await updateUrls(
-      urls.map((url) => url.copyWith(folderId: targetFolderId)).toList(),
+      urls
+          .where((url) => !url.trash)
+          .map((url) => url.copyWith(folderId: targetFolderId))
+          .toList(),
     );
-    await deleteFolder(folder);
+    // Trashed URLs stay in the folder, so it's kept for restoring them.
+    if (urls.any((url) => url.trash)) {
+      await updateFolder(folder.copyWith(trash: true));
+    } else {
+      await deleteFolder(folder);
+    }
   }
 
   @transaction

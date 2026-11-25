@@ -268,15 +268,26 @@ class MockUrlStore implements UrlStore {
       throw ArgumentError('Cannot move URLs into the folder being deleted');
     }
     await _checkIfFolderExists(targetFolderId);
-    await _checkIfFolderExists(sourceFolderId);
+    final folder = await findFolderById(sourceFolderId);
+    if (folder == null) {
+      throw FolderNotFoundException(sourceFolderId);
+    }
+    if (AppDefaults.isDefaultFolder(folder)) {
+      throw ArgumentError('Cannot delete the default folder');
+    }
 
     for (var i = 0; i < _urls.length; i++) {
       final url = _urls[i];
-      if (url.folderId == sourceFolderId) {
+      if (url.folderId == sourceFolderId && !url.trash) {
         _urls[i] = url.copyWith(folderId: targetFolderId);
       }
     }
-    _folders.removeWhere((folder) => folder.id == sourceFolderId);
+    // Trashed URLs stay in the folder, so it's kept for restoring them.
+    if (_urls.any((url) => url.folderId == sourceFolderId)) {
+      _folders[_folders.indexOf(folder)] = folder.copyWith(trash: true);
+    } else {
+      _folders.remove(folder);
+    }
     _notifyUrls();
     _notifyFolders();
   }
