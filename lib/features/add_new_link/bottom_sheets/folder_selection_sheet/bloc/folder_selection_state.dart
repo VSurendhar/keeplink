@@ -11,13 +11,19 @@ final class FolderSelectionState extends Equatable {
     this.folders = const [],
     required this.selectedFolder,
     this.isCreating = false,
+    this.isSaving = false,
     this.action,
   });
 
   final bool isLoading;
   final List<FolderItem> folders;
   final Folder selectedFolder;
+
+  /// Whether the create folder input is open.
   final bool isCreating;
+
+  /// Whether a new folder is being saved.
+  final bool isSaving;
   final FolderSelectionAction? action;
 
   factory FolderSelectionState.initial(Folder initialSelectedFolder) {
@@ -34,6 +40,7 @@ final class FolderSelectionState extends Equatable {
     List<FolderItem>? folders,
     Folder? selectedFolder,
     bool? isCreating,
+    bool? isSaving,
     FolderSelectionAction? action,
     bool clearAction = false,
   }) {
@@ -42,6 +49,7 @@ final class FolderSelectionState extends Equatable {
       folders: folders ?? this.folders,
       selectedFolder: selectedFolder ?? this.selectedFolder,
       isCreating: isCreating ?? this.isCreating,
+      isSaving: isSaving ?? this.isSaving,
       action: clearAction ? null : (action ?? this.action),
     );
   }
@@ -52,11 +60,12 @@ final class FolderSelectionState extends Equatable {
     folders,
     selectedFolder,
     isCreating,
+    isSaving,
     action,
   ];
 
   @override
   String toString() {
-    return 'FolderSelectionState{isLoading: $isLoading, folders: $folders, selectedFolder: $selectedFolder, isCreating: $isCreating, action: $action}';
+    return 'FolderSelectionState{isLoading: $isLoading, folders: $folders, selectedFolder: $selectedFolder, isCreating: $isCreating, isSaving: $isSaving, action: $action}';
   }
 }

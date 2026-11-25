@@ -3,7 +3,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:logger/logger.dart';
 import 'dart:developer' as developer;
 
-import 'package:keep_links/utils/Utils.dart';
+import 'package:keep_links/utils/utils.dart';
 
 late Logger _logger;
 const String logTag = "keep_links_tag";

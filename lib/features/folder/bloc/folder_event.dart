@@ -12,6 +12,11 @@ final class OnInitEvent extends FolderEvent {
   const OnInitEvent();
 }
 
+/// Triggered when the refresh icon is tapped, to load the folders again.
+final class OnRefreshClicked extends FolderEvent {
+  const OnRefreshClicked();
+}
+
 /// Triggered when the folder [folderId] is tapped in the list.
 final class OnFolderItemClicked extends FolderEvent {
   const OnFolderItemClicked({required this.folderId});
@@ -22,7 +27,7 @@ final class OnFolderItemClicked extends FolderEvent {
   List<Object?> get props => [folderId];
 }
 
-/// Triggered when the "Create Folder" button is clicked.
+/// Triggered when the floating button is tapped, to create a folder.
 final class OnCreateFolderClicked extends FolderEvent {
   const OnCreateFolderClicked();
 }
