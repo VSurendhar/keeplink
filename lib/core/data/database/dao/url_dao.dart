@@ -222,6 +222,21 @@ abstract class UrlDao {
   }
 
   @transaction
+  Future<void> moveUrlToTrash(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+
+    await updateUrls([
+      url.copyWith(
+        trash: true,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      ),
+    ]);
+  }
+
+  @transaction
   Future<void> restoreUrl(int urlId) async {
     // Validate everything before updating, so nothing changes on failure.
     final url = await findUrlById(urlId);

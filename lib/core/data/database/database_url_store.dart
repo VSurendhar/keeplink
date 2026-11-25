@@ -142,6 +142,10 @@ class DatabaseUrlStore implements UrlStore {
   }) async => (await _dao).createUrl(url, tagIds);
 
   @override
+  Future<void> moveUrlToTrash(int urlId) async =>
+      (await _dao).moveUrlToTrash(urlId);
+
+  @override
   Future<void> restoreUrl(int urlId) async => (await _dao).restoreUrl(urlId);
 
   @override

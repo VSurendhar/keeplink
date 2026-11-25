@@ -23,7 +23,7 @@ The tasks are in the order to build them.
     - A saved link never points to a trashed folder or tag: when saving a link, the stores treat a trashed folder or tag as missing.
 9. [x] **Reusing a trashed name:** creating a folder or tag with the name of a trashed one makes the trashed one visible again (`trash = 0`) instead of adding a second one, because names are unique.
 10. [x] **No stale data:** verify that the `url`, `folder`, `tag` and `url_tag` tables hold no stale or unlinked data. This is a check only, done after tasks 13, 15 and 19 (restoring, emptying the trash and Erase All Data). Folders and tags that aren't trashed are kept, even with no links, so they aren't stale.
-11. [ ] **Timestamps:** verify that trashing a link sets `updated_at` to that time, and restoring it sets `updated_at` to the time of the restore. This is a check only: restoring is checked after task 13, and trashing when moving a single link to the trash is built. `created_at` never changes. There is no `trashed_at` column.
+11. [x] **Timestamps:** verify that trashing a link sets `updated_at` to that time, and restoring it sets `updated_at` to the time of the restore. This is a check only: restoring is checked after task 13, and trashing after task 22. `created_at` never changes. There is no `trashed_at` column.
 12. [x] **Reading the trash:** both stores have a query for trashed links with their folder and tags, including trashed folders and tags. The most recently trashed link comes first, ordered by `updated_at`.
 13. [x] **Restoring:** both stores have one transactional `restoreUrl`. A restore either fully succeeds or changes nothing. Refer on how we are creating the url using `createUrl`
     - The link becomes saved again (`url.trash = 0`) with its original folder and tags. If its folder or any of its tags are trashed, they become visible again (`trash = 0`).
@@ -119,6 +119,11 @@ The tasks are in the order to build them.
     | `TagNotFoundException` | "Tag does not exist" |
     | Anything else, including `UrlNotFoundException` | "Error While Restoring Link" |
 
+22. [x] **Moving a single link to the trash:** both stores have one transactional `moveUrlToTrash`.
+    - The saved link becomes trashed (`url.trash = 1`), and its `updated_at` is set to the current time. `created_at` doesn't change.
+    - The link keeps its folder, tags and preview image. The folder and tags aren't touched, even if no other link uses them.
+    - If the link doesn't exist or is already in the trash, it throws `UrlNotFoundException` and changes nothing.
+
 ## UI changes
 
 These apply on top of the design from the external source.
@@ -133,6 +138,6 @@ These apply on top of the design from the external source.
 
 ## Out of scope
 
-- How a single link is moved to the trash. It is separate work.
+- The screen from which the user moves a single link to the trash. It is separate work, and calls `moveUrlToTrash` (task 22).
 - Permanently deleting a single link. It is separate work, right after restore. The link and its `url_tag` rows go first, then its trashed folder and tags if no other link, saved or trashed, uses them.
 - Automatic deletion (trash retention).

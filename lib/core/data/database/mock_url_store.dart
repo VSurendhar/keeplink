@@ -314,6 +314,20 @@ class MockUrlStore implements UrlStore {
   }
 
   @override
+  Future<void> moveUrlToTrash(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+
+    _urls[_urls.indexOf(url)] = url.copyWith(
+      trash: true,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    _notifyUrls();
+  }
+
+  @override
   Future<void> restoreUrl(int urlId) async {
     // Validate everything before updating, so nothing changes on failure.
     final url = await findUrlById(urlId);

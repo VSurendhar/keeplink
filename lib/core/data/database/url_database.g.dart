@@ -710,6 +710,20 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<void> moveUrlToTrash(int urlId) async {
+    if (database is sqflite.Transaction) {
+      await super.moveUrlToTrash(urlId);
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.moveUrlToTrash(urlId);
+      });
+    }
+  }
+
+  @override
   Future<void> restoreUrl(int urlId) async {
     if (database is sqflite.Transaction) {
       await super.restoreUrl(urlId);

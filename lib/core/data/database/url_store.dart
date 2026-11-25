@@ -157,6 +157,16 @@ abstract class UrlStore {
   /// - **Repeated tag id**: an id listed twice in [tagIds] is linked once.
   Future<int> createUrl({required Url url, List<int> tagIds = const []});
 
+  /// Moves the saved URL [urlId] to the trash. Returns nothing.
+  ///
+  /// Its `updatedAt` is set to the current time. It keeps its folder and tags,
+  /// which aren't touched, and its preview image. URL streams are notified.
+  ///
+  /// Special cases:
+  /// - **Missing URL**: throws `UrlNotFoundException` if no saved URL has
+  ///   [urlId].
+  Future<void> moveUrlToTrash(int urlId);
+
   /// Restores the trashed URL [urlId] with its original folder and tags.
   /// Returns nothing.
   ///
