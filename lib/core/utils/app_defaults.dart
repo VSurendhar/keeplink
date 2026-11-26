@@ -3,7 +3,7 @@ import 'package:keep_links/core/data/database/entity/tag.dart';
 import 'package:keep_links/core/data/hive/models/app_settings.dart';
 
 class AppDefaults {
-  static final defaultFolders = List.unmodifiable([
+  static final List<Folder> defaultFolders = List.unmodifiable([
     Folder(folderName: "Defaults"),
   ]);
   static final List<Tag> defaultTags = List.unmodifiable([
@@ -13,4 +13,14 @@ class AppDefaults {
   static const int trashRetention = 10;
   static const AppTheme appTheme = AppTheme.light;
   static const int linkNameMaxLength = 40;
+  static const int folderNameMaxLength = 40;
+
+  /// Whether [folder] is a default folder, which can't be deleted or trashed.
+  static bool isDefaultFolder(Folder folder) => defaultFolders.any(
+    (defaultFolder) => defaultFolder.folderName == folder.folderName,
+  );
+
+  /// Whether [tag] is a default tag, which can't be deleted or trashed.
+  static bool isDefaultTag(Tag tag) =>
+      defaultTags.any((defaultTag) => defaultTag.tagName == tag.tagName);
 }

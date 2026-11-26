@@ -36,6 +36,10 @@ class AppSettingsPage extends StatelessWidget {
 class AppSettingsView extends StatelessWidget {
   const AppSettingsView({super.key});
 
+  /// Nothing is deleted from the trash automatically in version 1, so the card
+  /// is hidden.
+  static const bool _showTrashRetentionCard = false;
+
   @override
   Widget build(BuildContext context) {
     return BlocConsumer<AppSettingsBloc, AppSettingsState>(
@@ -132,11 +136,13 @@ class AppSettingsView extends StatelessWidget {
                   const SizedBox(height: 16),
                   _buildDataBackupCard(context),
                   const SizedBox(height: 16),
-                  _buildTrashRetentionCard(
-                    context,
-                    retentionPeriod: state.newAppSettings.retentionPeriod,
-                  ),
-                  const SizedBox(height: 16),
+                  if (_showTrashRetentionCard) ...[
+                    _buildTrashRetentionCard(
+                      context,
+                      retentionPeriod: state.newAppSettings.retentionPeriod,
+                    ),
+                    const SizedBox(height: 16),
+                  ],
                   _buildEraseDataCard(context),
                   const SizedBox(height: paddingForBottomNavBar),
                 ],

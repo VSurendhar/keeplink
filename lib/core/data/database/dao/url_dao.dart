@@ -7,11 +7,34 @@ import 'package:keep_links/core/data/database/exception/duplicate_title_exceptio
 import 'package:keep_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
+import 'package:keep_links/core/data/database/exception/url_not_found_exception.dart';
+import 'package:keep_links/core/utils/app_defaults.dart';
 
 @dao
 abstract class UrlDao {
-  @Query('SELECT * FROM url')
+  @Query('SELECT * FROM url WHERE trash = 0')
   Stream<List<Url>> findAllUrl();
+
+  @Query('SELECT * FROM url WHERE trash = 1 ORDER BY updated_at DESC, id DESC')
+  Stream<List<Url>> findTrashedUrls();
+
+  /// The folders of trashed URLs, including trashed folders.
+  @Query(
+    'SELECT * FROM folder WHERE id IN (SELECT folder_id FROM url WHERE trash = 1)',
+  )
+  Future<List<Folder>> findFoldersOfTrashedUrls();
+
+  /// The tags of trashed URLs, including trashed tags.
+  @Query(
+    'SELECT * FROM tag WHERE id IN (SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1))',
+  )
+  Future<List<Tag>> findTagsOfTrashedUrls();
+
+  /// The tag links of trashed URLs.
+  @Query(
+    'SELECT * FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)',
+  )
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls();
 
   @Query(
     'SELECT * FROM folder f where f.id = (SELECT folder_id FROM url u WHERE u.id = :id)',
@@ -21,18 +44,20 @@ abstract class UrlDao {
   @Query('SELECT * FROM url_tag')
   Stream<List<UrlTag>> findAllUrlTags();
 
-  @Query('SELECT * FROM tag')
+  @Query('SELECT * FROM tag WHERE trash = 0')
   Stream<List<Tag>> findAllTags();
 
-  @Query('SELECT * FROM folder')
+  @Query('SELECT * FROM folder WHERE trash = 0')
   Stream<List<Folder>> findAllFolders();
 
-  /// One `folder_id` per URL, for counting URLs per folder.
-  @Query('SELECT folder_id FROM url')
+  /// One `folder_id` per saved URL, for counting URLs per folder.
+  @Query('SELECT folder_id FROM url WHERE trash = 0')
   Future<List<int>> findAllUrlFolderIds();
 
-  /// One `tag_id` per URL-tag link, for counting URLs per tag.
-  @Query('SELECT tag_id FROM url_tag')
+  /// One `tag_id` per tag link of a saved URL, for counting URLs per tag.
+  @Query(
+    'SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 0)',
+  )
   Future<List<int>> findAllUrlTagIds();
 
   /// Internal to [createUrl], which validates the URL first; call
@@ -40,12 +65,18 @@ abstract class UrlDao {
   @insert
   Future<int> insertUrl(Url url);
 
+  /// Internal to [createFolder], which reuses a trashed folder with the same name;
+  /// call [createFolder] instead of this.
   @insert
   Future<int> insertFolder(Folder folder);
 
+  /// Internal to [createTag], which reuses a trashed tag with the same name;
+  /// call [createTag] instead of this.
   @insert
   Future<int> insertTag(Tag tag);
 
+  /// Internal to [createUrl], which checks the tags first; call [createUrl]
+  /// instead of this.
   @insert
   Future<void> insertUrlTag(UrlTag urlTag);
 
@@ -55,14 +86,29 @@ abstract class UrlDao {
   @update
   Future<void> updateUrls(List<Url> urls);
 
+  @update
+  Future<void> updateFolder(Folder folder);
+
   @delete
   Future<void> deleteFolder(Folder folder);
 
   @Query('SELECT * FROM url_tag WHERE tag_id = :tagId')
   Future<List<UrlTag>> findUrlTagsByTagId(int tagId);
 
+  @Query('SELECT * FROM url_tag WHERE url_id = :urlId')
+  Future<List<UrlTag>> findUrlTagsByUrlId(int urlId);
+
+  /// The tag links of saved URLs with this tag.
+  @Query(
+    'SELECT * FROM url_tag WHERE tag_id = :tagId AND url_id IN (SELECT id FROM url WHERE trash = 0)',
+  )
+  Future<List<UrlTag>> findSavedUrlTagsByTagId(int tagId);
+
   @delete
   Future<void> deleteUrlTags(List<UrlTag> urlTags);
+
+  @update
+  Future<void> updateTag(Tag tag);
 
   @delete
   Future<void> deleteTag(Tag tag);
@@ -79,26 +125,59 @@ abstract class UrlDao {
   @Query('DELETE FROM folder')
   Future<void> deleteAllFolders();
 
+  @Query(
+    'DELETE FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)',
+  )
+  Future<void> deleteUrlTagsOfTrashedUrls();
+
+  @Query('DELETE FROM url_tag WHERE url_id = :urlId')
+  Future<void> deleteUrlTagsByUrlId(int urlId);
+
+  @Query('DELETE FROM url WHERE id = :urlId')
+  Future<void> deleteUrlById(int urlId);
+
+  @Query('DELETE FROM url WHERE trash = 1')
+  Future<void> deleteTrashedUrls();
+
+  /// Deletes the trashed folders that no URL, saved or trashed, uses.
+  @Query(
+    'DELETE FROM folder WHERE trash = 1 AND id NOT IN (SELECT folder_id FROM url)',
+  )
+  Future<void> deleteUnusedTrashedFolders();
+
+  /// Deletes the trashed tags that no URL, saved or trashed, uses.
+  /// Checking if not in url_tag coze url_tag is deleted first for trash removal.
+  @Query(
+    'DELETE FROM tag WHERE trash = 1 AND id NOT IN (SELECT tag_id FROM url_tag)',
+  )
+  Future<void> deleteUnusedTrashedTags();
+
   @Query('SELECT * FROM folder WHERE id = :id')
   Future<Folder?> findFolderById(int id);
 
-  @Query('SELECT * FROM folder WHERE folder_name = :folderName')
+  @Query('SELECT * FROM folder WHERE folder_name = :folderName AND trash = 0')
   Future<Folder?> findFolderByName(String folderName);
+
+  @Query('SELECT * FROM folder WHERE folder_name = :folderName AND trash = 1')
+  Future<Folder?> findTrashedFolderByName(String folderName);
 
   @Query('SELECT * FROM url WHERE id = :id')
   Future<Url?> findUrlById(int id);
 
-  @Query('SELECT * FROM url WHERE url = :url')
+  @Query('SELECT * FROM url WHERE url = :url AND trash = 0')
   Future<Url?> findUrlByUrlString(String url);
 
-  @Query('SELECT * FROM url WHERE title = :title')
+  @Query('SELECT * FROM url WHERE title = :title AND trash = 0')
   Future<Url?> findUrlByTitle(String title);
 
   @Query('SELECT * FROM tag WHERE id = :id')
   Future<Tag?> findTagById(int id);
 
-  @Query('SELECT * FROM tag WHERE tag_name = :tagName')
+  @Query('SELECT * FROM tag WHERE tag_name = :tagName AND trash = 0')
   Future<Tag?> findTagByName(String tagName);
+
+  @Query('SELECT * FROM tag WHERE tag_name = :tagName AND trash = 1')
+  Future<Tag?> findTrashedTagByName(String tagName);
 
   @Query('SELECT * FROM url_tag WHERE url_id = :urlId AND tag_id = :tagId')
   Future<UrlTag?> findUrlTag(int urlId, int tagId);
@@ -112,18 +191,107 @@ abstract class UrlDao {
   }
 
   @transaction
+  Future<int> createFolder(Folder folder) async {
+    final trashedFolder = await findTrashedFolderByName(folder.folderName);
+    final trashedId = trashedFolder?.id;
+    if (trashedFolder == null || trashedId == null) {
+      return insertFolder(folder);
+    }
+    await updateFolder(trashedFolder.copyWith(trash: false));
+    return trashedId;
+  }
+
+  @transaction
+  Future<int> createTag(Tag tag) async {
+    final trashedTag = await findTrashedTagByName(tag.tagName);
+    final trashedId = trashedTag?.id;
+    if (trashedTag == null || trashedId == null) {
+      return insertTag(tag);
+    }
+    await updateTag(trashedTag.copyWith(trash: false));
+    return trashedId;
+  }
+
+  @transaction
   Future<int> createUrl(Url url, List<int> tagIds) async {
     // Validate everything before inserting, so nothing is saved on failure.
     await checkIfUrlExists(url);
-    await checkIfFolderExists(url.folderId);
+    await checkIfFolderExists(url.folderId, allowTrashed: url.trash);
     final uniqueTagIds = tagIds.toSet();
-    await checkIfTagsExist(uniqueTagIds);
+    await checkIfTagsExist(uniqueTagIds, allowTrashed: url.trash);
 
     final urlId = await insertUrl(url);
     for (final tagId in uniqueTagIds) {
       await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
     }
     return urlId;
+  }
+
+  @transaction
+  Future<void> moveUrlToTrash(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+
+    await updateUrls([
+      url.copyWith(
+        trash: true,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      ),
+    ]);
+  }
+
+  @transaction
+  Future<void> restoreUrl(int urlId) async {
+    // Validate everything before updating, so nothing changes on failure.
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+    await checkIfSavedUrlExists(url);
+    await checkIfFolderExists(url.folderId, allowTrashed: true);
+    final urlTags = await findUrlTagsByUrlId(urlId);
+    final tagIds = urlTags.map((urlTag) => urlTag.tagId).toSet();
+    await checkIfTagsExist(tagIds, allowTrashed: true);
+
+    final folder = await findFolderById(url.folderId);
+    if (folder != null && folder.trash) {
+      await updateFolder(folder.copyWith(trash: false));
+    }
+    for (final tagId in tagIds) {
+      final tag = await findTagById(tagId);
+      if (tag != null && tag.trash) {
+        await updateTag(tag.copyWith(trash: false));
+      }
+    }
+    await updateUrls([
+      url.copyWith(
+        trash: false,
+        updatedAt: DateTime.now().millisecondsSinceEpoch,
+      ),
+    ]);
+  }
+
+  @transaction
+  Future<void> deleteTrashedUrl(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+
+    await deleteUrlTagsByUrlId(urlId);
+    await deleteUrlById(urlId);
+    await deleteUnusedTrashedFolders();
+    await deleteUnusedTrashedTags();
+  }
+
+  @transaction
+  Future<void> emptyTrash() async {
+    await deleteUrlTagsOfTrashedUrls();
+    await deleteTrashedUrls();
+    await deleteUnusedTrashedFolders();
+    await deleteUnusedTrashedTags();
   }
 
   @transaction
@@ -139,12 +307,23 @@ abstract class UrlDao {
     if (folder == null) {
       throw FolderNotFoundException(sourceFolderId);
     }
+    if (AppDefaults.isDefaultFolder(folder)) {
+      throw ArgumentError('Cannot delete the default folder');
+    }
 
     final urls = await findUrlsByFolderId(sourceFolderId);
     await updateUrls(
-      urls.map((url) => url.copyWith(folderId: targetFolderId)).toList(),
+      urls
+          .where((url) => !url.trash)
+          .map((url) => url.copyWith(folderId: targetFolderId))
+          .toList(),
     );
-    await deleteFolder(folder);
+    // Trashed URLs stay in the folder, so it's kept for restoring them.
+    if (urls.any((url) => url.trash)) {
+      await updateFolder(folder.copyWith(trash: true));
+    } else {
+      await deleteFolder(folder);
+    }
   }
 
   @transaction
@@ -153,17 +332,41 @@ abstract class UrlDao {
     if (tag == null) {
       throw TagNotFoundException(tagId);
     }
+    if (AppDefaults.isDefaultTag(tag)) {
+      throw ArgumentError('Cannot delete the default tag');
+    }
 
-    await deleteUrlTags(await findUrlTagsByTagId(tagId));
-    await deleteTag(tag);
+    await deleteUrlTags(await findSavedUrlTagsByTagId(tagId));
+    // Trashed URLs keep their tag links, so the tag is kept for restoring them.
+    final trashedUrlTags = await findUrlTagsByTagId(tagId);
+    if (trashedUrlTags.isNotEmpty) {
+      await updateTag(tag.copyWith(trash: true));
+    } else {
+      await deleteTag(tag);
+    }
   }
 
-  /// Throws [DuplicateUrlException] if a URL with the same id or address
-  /// exists, or [DuplicateTitleException] if one with the same title exists.
+  /// Throws [DuplicateUrlException] if any URL has the same id or a saved URL
+  /// has the same address, or [DuplicateTitleException] if a saved URL has the
+  /// same title.
+  ///
+  /// A trashed [url] may share its address and title with any other URL, so
+  /// only its id is checked.
   Future<void> checkIfUrlExists(Url url) async {
     final id = url.id;
     final idTaken = id != null && await findUrlById(id) != null;
-    if (idTaken || await findUrlByUrlString(url.url) != null) {
+    if (idTaken) {
+      throw DuplicateUrlException(url.url);
+    }
+    if (url.trash) return;
+
+    await checkIfSavedUrlExists(url);
+  }
+
+  /// Throws [DuplicateUrlException] if a saved URL has the same address as
+  /// [url], or [DuplicateTitleException] if a saved URL has the same title.
+  Future<void> checkIfSavedUrlExists(Url url) async {
+    if (await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
     }
     if (await findUrlByTitle(url.title) != null) {
@@ -171,17 +374,27 @@ abstract class UrlDao {
     }
   }
 
-  /// Throws [FolderNotFoundException] if no folder has [folderId].
-  Future<void> checkIfFolderExists(int folderId) async {
-    if (await findFolderById(folderId) == null) {
+  /// Throws [FolderNotFoundException] if no folder has [folderId], or if it is
+  /// trashed and not [allowTrashed].
+  Future<void> checkIfFolderExists(
+    int folderId, {
+    bool allowTrashed = false,
+  }) async {
+    final folder = await findFolderById(folderId);
+    if (folder == null || (folder.trash && !allowTrashed)) {
       throw FolderNotFoundException(folderId);
     }
   }
 
-  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag.
-  Future<void> checkIfTagsExist(Iterable<int> tagIds) async {
+  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag, or
+  /// whose tag is trashed and not [allowTrashed].
+  Future<void> checkIfTagsExist(
+    Iterable<int> tagIds, {
+    bool allowTrashed = false,
+  }) async {
     for (final tagId in tagIds) {
-      if (await findTagById(tagId) == null) {
+      final tag = await findTagById(tagId);
+      if (tag == null || (tag.trash && !allowTrashed)) {
         throw TagNotFoundException(tagId);
       }
     }

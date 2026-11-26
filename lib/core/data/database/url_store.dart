@@ -18,6 +18,9 @@ abstract class UrlStore {
 
   /// Inserts [folder] as it is and returns its id.
   ///
+  /// If a trashed folder has the same name, it is made visible again
+  /// (`trash = false`) and its id returned; [folder] isn't inserted.
+  ///
   /// Folder names are unique: if the name or `id` is already taken, the
   /// database store throws (unique constraint) and the mock store throws a
   /// [StateError]. Callers should check first (e.g. with [findFolderByName])
@@ -26,19 +29,14 @@ abstract class UrlStore {
 
   /// Inserts [tag] as it is and returns its id.
   ///
+  /// If a trashed tag has the same name, it is made visible again
+  /// (`trash = false`) and its id returned; [tag] isn't inserted.
+  ///
   /// Tag names are unique: if the name or `id` is already taken, the
   /// database store throws (unique constraint) and the mock store throws a
   /// [StateError]. Callers should check first (e.g. with [findTagByName]) to
   /// show a friendly message.
   Future<int> insertTag(Tag tag);
-
-  /// Links a URL to a tag. Returns nothing.
-  ///
-  /// The database store throws if the same URL-tag link already exists, or if
-  /// the URL or the tag doesn't exist (foreign keys). The mock store checks
-  /// none of these: it adds the link as it is. Check with [findUrlTag],
-  /// [findUrlById] and [findTagById] first.
-  Future<void> insertUrlTag(UrlTag urlTag);
 
   // Query Operations
 
@@ -47,45 +45,70 @@ abstract class UrlStore {
   /// Returns `null` if the URL doesn't exist or its folder no longer exists.
   Future<Folder?> findFolderForUrlId(int id);
 
-  /// Emits all folders now and again whenever the folder table changes.
+  /// Emits all folders that are not trashed, now and again whenever the folder
+  /// table changes.
   Stream<List<Folder>> findAllFolders();
 
-  /// Emits all URLs now and again whenever the URL table changes.
+  /// Emits all URLs that are not in the trash, now and again whenever the URL
+  /// table changes.
   Stream<List<Url>> findAllUrl();
 
-  /// Emits all tags now and again whenever the tag table changes.
+  /// Emits all trashed URLs, now and again whenever the URL table changes.
+  ///
+  /// The most recently trashed URL comes first (`updatedAt`, newest first).
+  Stream<List<Url>> findTrashedUrls();
+
+  /// Returns the folders of trashed URLs, including trashed folders.
+  Future<List<Folder>> findFoldersOfTrashedUrls();
+
+  /// Returns the tags of trashed URLs, including trashed tags.
+  Future<List<Tag>> findTagsOfTrashedUrls();
+
+  /// Returns the URL-tag links of trashed URLs.
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls();
+
+  /// Emits all tags that are not trashed, now and again whenever the tag table
+  /// changes.
   Stream<List<Tag>> findAllTags();
 
   /// Emits all URL-tag links now and again whenever they change.
   Stream<List<UrlTag>> findAllUrlTags();
 
   /// Returns the folder with this [id], or `null` if there is none.
+  ///
+  /// Also returns trashed folders.
   Future<Folder?> findFolderById(int id);
 
   /// Returns the folder named exactly [folderName], or `null` if there is
-  /// none.
+  /// none. Trashed folders are ignored.
   ///
   /// Case-sensitive: folder names can be in any language, where case folding
   /// doesn't apply or behaves inconsistently.
   Future<Folder?> findFolderByName(String folderName);
 
   /// Returns the URL with this [id], or `null` if there is none.
+  ///
+  /// Also returns trashed URLs: a screen that opens or edits a URL must check
+  /// [Url.trash].
   Future<Url?> findUrlById(int id);
 
   /// Returns the saved URL whose address is exactly [url], or `null` if there
-  /// is none. Used for the duplicate check.
+  /// is none. Trashed URLs are ignored. Used for the duplicate check.
   Future<Url?> findUrlByUrlString(String url);
 
   /// Returns the saved URL whose title is exactly [title], or `null` if there
-  /// is none. Used for the duplicate check.
+  /// is none. Trashed URLs are ignored. Used for the duplicate check.
   ///
   /// Case-sensitive, for the same reason as [findFolderByName].
   Future<Url?> findUrlByTitle(String title);
 
   /// Returns the tag with this [id], or `null` if there is none.
+  ///
+  /// Also returns trashed tags.
   Future<Tag?> findTagById(int id);
 
   /// Returns the tag named exactly [tagName], or `null` if there is none.
+  /// Trashed tags are ignored.
   ///
   /// Case-sensitive, for the same reason as [findFolderByName].
   Future<Tag?> findTagByName(String tagName);
@@ -94,14 +117,16 @@ abstract class UrlStore {
   /// linked.
   Future<UrlTag?> findUrlTag(int urlId, int tagId);
 
-  /// Number of URLs in each folder, keyed by folder id.
+  /// Number of saved URLs in each folder, keyed by folder id. Trashed URLs
+  /// aren't counted.
   ///
-  /// Folders with no URLs are not in the map; read them as `counts[id] ?? 0`.
+  /// Folders with no saved URLs are not in the map; read them as `counts[id] ?? 0`.
   Future<Map<int, int>> findUrlCountPerFolder();
 
-  /// Number of URLs with each tag, keyed by tag id.
+  /// Number of saved URLs with each tag, keyed by tag id. Trashed URLs aren't
+  /// counted.
   ///
-  /// Tags with no URLs are not in the map; read them as `counts[id] ?? 0`.
+  /// Tags with no saved URLs are not in the map; read them as `counts[id] ?? 0`.
   Future<Map<int, int>> findUrlCountPerTag();
 
   /// Deletes all URL-tag links, URLs, tags and folders. Returns nothing.
@@ -125,19 +150,80 @@ abstract class UrlStore {
   /// keys reject a missing folder or tag.
   ///
   /// Special cases:
-  /// - **Duplicate URL**: throws `DuplicateUrlException` if a URL with the
-  ///   same address (or the same `id`, when [url] has one) already exists.
-  /// - **Duplicate title**: throws `DuplicateTitleException` if a URL with
-  ///   the same title already exists.
+  /// - **Duplicate URL**: throws `DuplicateUrlException` if a saved URL
+  ///   has the same address, or any URL has the same `id` (when [url] has one).
+  /// - **Duplicate title**: throws `DuplicateTitleException` if a saved
+  ///   URL has the same title.
+  /// - **Trashed URL**: if [url] is trashed, its address and title aren't
+  ///   checked, since they can repeat in the trash. Its folder and tags may be
+  ///   trashed too.
   /// - **Missing folder**: throws `FolderNotFoundException` if no folder has
-  ///   `url.folderId`.
+  ///   `url.folderId`, or if that folder is trashed.
   /// - **Missing tag**: throws `TagNotFoundException` for the first id in
-  ///   [tagIds] that has no tag.
+  ///   [tagIds] that has no tag, or whose tag is trashed.
   /// - **Repeated tag id**: an id listed twice in [tagIds] is linked once.
   Future<int> createUrl({required Url url, List<int> tagIds = const []});
 
-  /// Deletes the folder [sourceFolderId] and moves its URLs into the folder
-  /// [targetFolderId]. Returns nothing.
+  /// Moves the saved URL [urlId] to the trash. Returns nothing.
+  ///
+  /// Its `updatedAt` is set to the current time. It keeps its folder and tags,
+  /// which aren't touched, and its preview image. URL streams are notified.
+  ///
+  /// Special cases:
+  /// - **Missing URL**: throws `UrlNotFoundException` if no saved URL has
+  ///   [urlId].
+  Future<void> moveUrlToTrash(int urlId);
+
+  /// Restores the trashed URL [urlId] with its original folder and tags.
+  /// Returns nothing.
+  ///
+  /// The URL becomes saved again, and `updatedAt` is set to the current time.
+  /// If its folder or any of its tags are trashed, they become visible again.
+  /// Everything is checked before anything changes, and the database store runs
+  /// it in one transaction, so on failure nothing is restored.
+  ///
+  /// Special cases:
+  /// - **Missing URL**: throws `UrlNotFoundException` if no trashed URL has
+  ///   [urlId].
+  /// - **Duplicate URL**: throws `DuplicateUrlException` if a saved URL has the
+  ///   same address. Checked before the title.
+  /// - **Duplicate title**: throws `DuplicateTitleException` if a saved URL has
+  ///   the same title.
+  /// - **Missing folder or tag**: throws `FolderNotFoundException` or
+  ///   `TagNotFoundException` if its folder or one of its tags no longer
+  ///   exists.
+  Future<void> restoreUrl(int urlId);
+
+  /// Permanently deletes the trashed URL [urlId] and its URL-tag links, then its
+  /// folder and tags if they are trashed and no other URL uses them. Returns
+  /// nothing.
+  ///
+  /// Its preview image isn't deleted; the startup sweep removes it. The database
+  /// store runs it in one transaction, so on failure nothing is deleted.
+  ///
+  /// Special cases:
+  /// - **Missing URL**: throws `UrlNotFoundException` if no trashed URL has
+  ///   [urlId]. A saved URL is never deleted.
+  Future<void> deleteTrashedUrl(int urlId);
+
+  /// Permanently deletes all trashed URLs and their URL-tag links, then the
+  /// trashed folders and tags that no URL uses. Returns nothing.
+  ///
+  /// Saved URLs, and folders and tags that aren't trashed, aren't touched.
+  /// Preview images aren't deleted either; the startup sweep removes them. The
+  /// database store runs it in one transaction, so on failure nothing is
+  /// deleted.
+  ///
+  /// Special cases:
+  /// - **Empty trash**: nothing to delete; it does nothing.
+  Future<void> emptyTrash();
+
+  /// Deletes the folder [sourceFolderId] and moves its saved URLs into the
+  /// folder [targetFolderId]. Returns nothing.
+  ///
+  /// Trashed URLs aren't touched. If the folder has any, it is marked as
+  /// trashed (`Folder.trash`) instead of deleted, so they can be restored into
+  /// it.
   ///
   /// Checks run before anything changes, and the database store runs it in
   /// one transaction, so on failure nothing is moved or deleted. Folder and
@@ -146,14 +232,21 @@ abstract class UrlStore {
   /// Special cases:
   /// - **Same folder**: throws `ArgumentError` if both ids are equal.
   /// - **Missing folder**: throws `FolderNotFoundException` if either folder
-  ///   doesn't exist.
+  ///   doesn't exist, or if the target folder is trashed.
+  /// - **Default folder**: throws `ArgumentError` if [sourceFolderId] is a
+  ///   default folder (`AppDefaults.isDefaultFolder`).
   /// - **Empty folder**: no URLs to move; the folder is just deleted.
   Future<void> deleteFolderAndMoveUrls({
     required int sourceFolderId,
     required int targetFolderId,
   });
 
-  /// Deletes the tag [tagId] and all its URL-tag links. Returns nothing.
+  /// Deletes the tag [tagId] and its URL-tag links to saved URLs. Returns
+  /// nothing.
+  ///
+  /// The tag links of trashed URLs aren't touched. If there are any, the tag is
+  /// marked as trashed (`Tag.trash`) instead of deleted, so the URLs can be
+  /// restored with it.
   ///
   /// URLs are never changed or deleted: each linked URL keeps its other
   /// tags, and a URL whose only tag was [tagId] is left with no tags. No
@@ -163,6 +256,8 @@ abstract class UrlStore {
   ///
   /// Special cases:
   /// - **Missing tag**: throws `TagNotFoundException` if no tag has [tagId].
+  /// - **Default tag**: throws `ArgumentError` if [tagId] is a default tag
+  ///   (`AppDefaults.isDefaultTag`).
   /// - **Unused tag**: no links to delete; the tag is just deleted.
   Future<void> deleteTagAndUrlTags(int tagId);
 

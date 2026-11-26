@@ -37,10 +37,9 @@ class TagSelectionBloc extends Bloc<TagSelectionEvent, TagSelectionState> {
     return super.close();
   }
 
-  bool isDefaultTag(Tag tag) =>
-      tag.tagName == AppDefaults.defaultTags.first.tagName;
+  bool isDefaultTag(Tag tag) => AppDefaults.isDefaultTag(tag);
 
-  /// Deletes the tag and unlinks it from all its links.
+  /// Deletes the tag and unlinks it from all its saved links.
   ///
   /// The tag is only removed: links keep their other tags (possibly none).
   /// If the deleted tag was selected, only it leaves the selection; the other

@@ -1,8 +1,16 @@
+import 'dart:async';
 import 'package:get_it/get_it.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
 
 class UrlStoreSwitcher {
   static bool _isMock = false;
+
+  static final StreamController<void> _storeChangesController =
+      StreamController<void>.broadcast();
+
+  /// Emits after the registered [UrlStore] is replaced, so long-lived listeners
+  /// can move to the new store.
+  static Stream<void> get storeChanges => _storeChangesController.stream;
 
   static bool get isMock {
     if (!GetIt.instance.isRegistered<UrlStore>()) {
@@ -34,5 +42,6 @@ class UrlStoreSwitcher {
       GetIt.instance.unregister<UrlStore>();
     }
     GetIt.instance.registerLazySingleton<UrlStore>(storeFactory);
+    _storeChangesController.add(null);
   }
 }

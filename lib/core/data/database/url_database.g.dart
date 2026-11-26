@@ -96,17 +96,13 @@ class _$UrlDatabase extends UrlDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `preview_image_name` TEXT, FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON UPDATE NO ACTION ON DELETE RESTRICT)');
+            'CREATE TABLE IF NOT EXISTS `url` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `url` TEXT NOT NULL, `title` TEXT NOT NULL, `meta_image_url` TEXT NOT NULL, `meta_description` TEXT NOT NULL, `folder_id` INTEGER NOT NULL, `created_at` INTEGER NOT NULL, `updated_at` INTEGER NOT NULL, `is_favorite` INTEGER NOT NULL, `preview_image_name` TEXT, `trash` INTEGER NOT NULL, FOREIGN KEY (`folder_id`) REFERENCES `folder` (`id`) ON UPDATE NO ACTION ON DELETE RESTRICT)');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `url_tag` (`url_id` INTEGER NOT NULL, `tag_id` INTEGER NOT NULL, FOREIGN KEY (`url_id`) REFERENCES `url` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, FOREIGN KEY (`tag_id`) REFERENCES `tag` (`id`) ON UPDATE NO ACTION ON DELETE CASCADE, PRIMARY KEY (`url_id`, `tag_id`))');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `folder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `folder_name` TEXT NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `folder` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `folder_name` TEXT NOT NULL, `trash` INTEGER NOT NULL)');
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `tag` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `tag_name` TEXT NOT NULL)');
-        await database
-            .execute('CREATE UNIQUE INDEX `index_url_url` ON `url` (`url`)');
-        await database.execute(
-            'CREATE UNIQUE INDEX `index_url_title` ON `url` (`title`)');
+            'CREATE TABLE IF NOT EXISTS `tag` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `tag_name` TEXT NOT NULL, `trash` INTEGER NOT NULL)');
         await database.execute(
             'CREATE INDEX `index_url_folder_id` ON `url` (`folder_id`)');
         await database.execute(
@@ -146,7 +142,8 @@ class _$UrlDao extends UrlDao {
                   'created_at': item.createdAt,
                   'updated_at': item.updatedAt,
                   'is_favorite': item.isFavorite ? 1 : 0,
-                  'preview_image_name': item.previewImageName
+                  'preview_image_name': item.previewImageName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _folderInsertionAdapter = InsertionAdapter(
@@ -154,14 +151,18 @@ class _$UrlDao extends UrlDao {
             'folder',
             (Folder item) => <String, Object?>{
                   'id': item.id,
-                  'folder_name': item.folderName
+                  'folder_name': item.folderName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _tagInsertionAdapter = InsertionAdapter(
             database,
             'tag',
-            (Tag item) =>
-                <String, Object?>{'id': item.id, 'tag_name': item.tagName},
+            (Tag item) => <String, Object?>{
+                  'id': item.id,
+                  'tag_name': item.tagName,
+                  'trash': item.trash ? 1 : 0
+                },
             changeListener),
         _urlTagInsertionAdapter = InsertionAdapter(
             database,
@@ -183,7 +184,28 @@ class _$UrlDao extends UrlDao {
                   'created_at': item.createdAt,
                   'updated_at': item.updatedAt,
                   'is_favorite': item.isFavorite ? 1 : 0,
-                  'preview_image_name': item.previewImageName
+                  'preview_image_name': item.previewImageName,
+                  'trash': item.trash ? 1 : 0
+                },
+            changeListener),
+        _folderUpdateAdapter = UpdateAdapter(
+            database,
+            'folder',
+            ['id'],
+            (Folder item) => <String, Object?>{
+                  'id': item.id,
+                  'folder_name': item.folderName,
+                  'trash': item.trash ? 1 : 0
+                },
+            changeListener),
+        _tagUpdateAdapter = UpdateAdapter(
+            database,
+            'tag',
+            ['id'],
+            (Tag item) => <String, Object?>{
+                  'id': item.id,
+                  'tag_name': item.tagName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _folderDeletionAdapter = DeletionAdapter(
@@ -192,7 +214,8 @@ class _$UrlDao extends UrlDao {
             ['id'],
             (Folder item) => <String, Object?>{
                   'id': item.id,
-                  'folder_name': item.folderName
+                  'folder_name': item.folderName,
+                  'trash': item.trash ? 1 : 0
                 },
             changeListener),
         _urlTagDeletionAdapter = DeletionAdapter(
@@ -206,8 +229,11 @@ class _$UrlDao extends UrlDao {
             database,
             'tag',
             ['id'],
-            (Tag item) =>
-                <String, Object?>{'id': item.id, 'tag_name': item.tagName},
+            (Tag item) => <String, Object?>{
+                  'id': item.id,
+                  'tag_name': item.tagName,
+                  'trash': item.trash ? 1 : 0
+                },
             changeListener);
 
   final sqflite.DatabaseExecutor database;
@@ -226,6 +252,10 @@ class _$UrlDao extends UrlDao {
 
   final UpdateAdapter<Url> _urlUpdateAdapter;
 
+  final UpdateAdapter<Folder> _folderUpdateAdapter;
+
+  final UpdateAdapter<Tag> _tagUpdateAdapter;
+
   final DeletionAdapter<Folder> _folderDeletionAdapter;
 
   final DeletionAdapter<UrlTag> _urlTagDeletionAdapter;
@@ -234,7 +264,7 @@ class _$UrlDao extends UrlDao {
 
   @override
   Stream<List<Url>> findAllUrl() {
-    return _queryAdapter.queryListStream('SELECT * FROM url',
+    return _queryAdapter.queryListStream('SELECT * FROM url WHERE trash = 0',
         mapper: (Map<String, Object?> row) => Url(
             id: row['id'] as int?,
             url: row['url'] as String,
@@ -245,16 +275,65 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         queryableName: 'url',
         isView: false);
+  }
+
+  @override
+  Stream<List<Url>> findTrashedUrls() {
+    return _queryAdapter.queryListStream(
+        'SELECT * FROM url WHERE trash = 1 ORDER BY updated_at DESC, id DESC',
+        mapper: (Map<String, Object?> row) => Url(
+            id: row['id'] as int?,
+            url: row['url'] as String,
+            title: row['title'] as String,
+            metaImageUrl: row['meta_image_url'] as String,
+            metaDescription: row['meta_description'] as String,
+            folderId: row['folder_id'] as int,
+            createdAt: row['created_at'] as int,
+            updatedAt: row['updated_at'] as int,
+            isFavorite: (row['is_favorite'] as int) != 0,
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
+        queryableName: 'url',
+        isView: false);
+  }
+
+  @override
+  Future<List<Folder>> findFoldersOfTrashedUrls() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM folder WHERE id IN (SELECT folder_id FROM url WHERE trash = 1)',
+        mapper: (Map<String, Object?> row) => Folder(
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0));
+  }
+
+  @override
+  Future<List<Tag>> findTagsOfTrashedUrls() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM tag WHERE id IN (SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1))',
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0));
+  }
+
+  @override
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)',
+        mapper: (Map<String, Object?> row) =>
+            UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int));
   }
 
   @override
   Future<Folder?> findFolderForUrlId(int id) async {
     return _queryAdapter.query(
         'SELECT * FROM folder f where f.id = (SELECT folder_id FROM url u WHERE u.id = ?1)',
-        mapper: (Map<String, Object?> row) => Folder(id: row['id'] as int?, folderName: row['folder_name'] as String),
+        mapper: (Map<String, Object?> row) => Folder(id: row['id'] as int?, folderName: row['folder_name'] as String, trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
@@ -269,31 +348,36 @@ class _$UrlDao extends UrlDao {
 
   @override
   Stream<List<Tag>> findAllTags() {
-    return _queryAdapter.queryListStream('SELECT * FROM tag',
-        mapper: (Map<String, Object?> row) =>
-            Tag(id: row['id'] as int?, tagName: row['tag_name'] as String),
+    return _queryAdapter.queryListStream('SELECT * FROM tag WHERE trash = 0',
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
         queryableName: 'tag',
         isView: false);
   }
 
   @override
   Stream<List<Folder>> findAllFolders() {
-    return _queryAdapter.queryListStream('SELECT * FROM folder',
+    return _queryAdapter.queryListStream('SELECT * FROM folder WHERE trash = 0',
         mapper: (Map<String, Object?> row) => Folder(
-            id: row['id'] as int?, folderName: row['folder_name'] as String),
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
         queryableName: 'folder',
         isView: false);
   }
 
   @override
   Future<List<int>> findAllUrlFolderIds() async {
-    return _queryAdapter.queryList('SELECT folder_id FROM url',
+    return _queryAdapter.queryList('SELECT folder_id FROM url WHERE trash = 0',
         mapper: (Map<String, Object?> row) => row.values.first as int);
   }
 
   @override
   Future<List<int>> findAllUrlTagIds() async {
-    return _queryAdapter.queryList('SELECT tag_id FROM url_tag',
+    return _queryAdapter.queryList(
+        'SELECT tag_id FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 0)',
         mapper: (Map<String, Object?> row) => row.values.first as int);
   }
 
@@ -310,7 +394,8 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [folderId]);
   }
 
@@ -319,6 +404,22 @@ class _$UrlDao extends UrlDao {
     return _queryAdapter.queryList('SELECT * FROM url_tag WHERE tag_id = ?1',
         mapper: (Map<String, Object?> row) =>
             UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int),
+        arguments: [tagId]);
+  }
+
+  @override
+  Future<List<UrlTag>> findUrlTagsByUrlId(int urlId) async {
+    return _queryAdapter.queryList('SELECT * FROM url_tag WHERE url_id = ?1',
+        mapper: (Map<String, Object?> row) =>
+            UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int),
+        arguments: [urlId]);
+  }
+
+  @override
+  Future<List<UrlTag>> findSavedUrlTagsByTagId(int tagId) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM url_tag WHERE tag_id = ?1 AND url_id IN (SELECT id FROM url WHERE trash = 0)',
+        mapper: (Map<String, Object?> row) => UrlTag(urlId: row['url_id'] as int, tagId: row['tag_id'] as int),
         arguments: [tagId]);
   }
 
@@ -343,18 +444,69 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<void> deleteUrlTagsOfTrashedUrls() async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM url_tag WHERE url_id IN (SELECT id FROM url WHERE trash = 1)');
+  }
+
+  @override
+  Future<void> deleteUrlTagsByUrlId(int urlId) async {
+    await _queryAdapter.queryNoReturn('DELETE FROM url_tag WHERE url_id = ?1',
+        arguments: [urlId]);
+  }
+
+  @override
+  Future<void> deleteUrlById(int urlId) async {
+    await _queryAdapter
+        .queryNoReturn('DELETE FROM url WHERE id = ?1', arguments: [urlId]);
+  }
+
+  @override
+  Future<void> deleteTrashedUrls() async {
+    await _queryAdapter.queryNoReturn('DELETE FROM url WHERE trash = 1');
+  }
+
+  @override
+  Future<void> deleteUnusedTrashedFolders() async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM folder WHERE trash = 1 AND id NOT IN (SELECT folder_id FROM url)');
+  }
+
+  @override
+  Future<void> deleteUnusedTrashedTags() async {
+    await _queryAdapter.queryNoReturn(
+        'DELETE FROM tag WHERE trash = 1 AND id NOT IN (SELECT tag_id FROM url_tag)');
+  }
+
+  @override
   Future<Folder?> findFolderById(int id) async {
     return _queryAdapter.query('SELECT * FROM folder WHERE id = ?1',
         mapper: (Map<String, Object?> row) => Folder(
-            id: row['id'] as int?, folderName: row['folder_name'] as String),
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
   @override
   Future<Folder?> findFolderByName(String folderName) async {
-    return _queryAdapter.query('SELECT * FROM folder WHERE folder_name = ?1',
+    return _queryAdapter.query(
+        'SELECT * FROM folder WHERE folder_name = ?1 AND trash = 0',
         mapper: (Map<String, Object?> row) => Folder(
-            id: row['id'] as int?, folderName: row['folder_name'] as String),
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
+        arguments: [folderName]);
+  }
+
+  @override
+  Future<Folder?> findTrashedFolderByName(String folderName) async {
+    return _queryAdapter.query(
+        'SELECT * FROM folder WHERE folder_name = ?1 AND trash = 1',
+        mapper: (Map<String, Object?> row) => Folder(
+            id: row['id'] as int?,
+            folderName: row['folder_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [folderName]);
   }
 
@@ -371,13 +523,14 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
   @override
   Future<Url?> findUrlByUrlString(String url) async {
-    return _queryAdapter.query('SELECT * FROM url WHERE url = ?1',
+    return _queryAdapter.query('SELECT * FROM url WHERE url = ?1 AND trash = 0',
         mapper: (Map<String, Object?> row) => Url(
             id: row['id'] as int?,
             url: row['url'] as String,
@@ -388,13 +541,15 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [url]);
   }
 
   @override
   Future<Url?> findUrlByTitle(String title) async {
-    return _queryAdapter.query('SELECT * FROM url WHERE title = ?1',
+    return _queryAdapter.query(
+        'SELECT * FROM url WHERE title = ?1 AND trash = 0',
         mapper: (Map<String, Object?> row) => Url(
             id: row['id'] as int?,
             url: row['url'] as String,
@@ -405,23 +560,40 @@ class _$UrlDao extends UrlDao {
             createdAt: row['created_at'] as int,
             updatedAt: row['updated_at'] as int,
             isFavorite: (row['is_favorite'] as int) != 0,
-            previewImageName: row['preview_image_name'] as String?),
+            previewImageName: row['preview_image_name'] as String?,
+            trash: (row['trash'] as int) != 0),
         arguments: [title]);
   }
 
   @override
   Future<Tag?> findTagById(int id) async {
     return _queryAdapter.query('SELECT * FROM tag WHERE id = ?1',
-        mapper: (Map<String, Object?> row) =>
-            Tag(id: row['id'] as int?, tagName: row['tag_name'] as String),
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [id]);
   }
 
   @override
   Future<Tag?> findTagByName(String tagName) async {
-    return _queryAdapter.query('SELECT * FROM tag WHERE tag_name = ?1',
-        mapper: (Map<String, Object?> row) =>
-            Tag(id: row['id'] as int?, tagName: row['tag_name'] as String),
+    return _queryAdapter.query(
+        'SELECT * FROM tag WHERE tag_name = ?1 AND trash = 0',
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
+        arguments: [tagName]);
+  }
+
+  @override
+  Future<Tag?> findTrashedTagByName(String tagName) async {
+    return _queryAdapter.query(
+        'SELECT * FROM tag WHERE tag_name = ?1 AND trash = 1',
+        mapper: (Map<String, Object?> row) => Tag(
+            id: row['id'] as int?,
+            tagName: row['tag_name'] as String,
+            trash: (row['trash'] as int) != 0),
         arguments: [tagName]);
   }
 
@@ -466,6 +638,16 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<void> updateFolder(Folder folder) async {
+    await _folderUpdateAdapter.update(folder, OnConflictStrategy.abort);
+  }
+
+  @override
+  Future<void> updateTag(Tag tag) async {
+    await _tagUpdateAdapter.update(tag, OnConflictStrategy.abort);
+  }
+
+  @override
   Future<void> deleteFolder(Folder folder) async {
     await _folderDeletionAdapter.delete(folder);
   }
@@ -495,6 +677,34 @@ class _$UrlDao extends UrlDao {
   }
 
   @override
+  Future<int> createFolder(Folder folder) async {
+    if (database is sqflite.Transaction) {
+      return super.createFolder(folder);
+    } else {
+      return (database as sqflite.Database)
+          .transaction<int>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        return transactionDatabase.urlDao.createFolder(folder);
+      });
+    }
+  }
+
+  @override
+  Future<int> createTag(Tag tag) async {
+    if (database is sqflite.Transaction) {
+      return super.createTag(tag);
+    } else {
+      return (database as sqflite.Database)
+          .transaction<int>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        return transactionDatabase.urlDao.createTag(tag);
+      });
+    }
+  }
+
+  @override
   Future<int> createUrl(
     Url url,
     List<int> tagIds,
@@ -507,6 +717,62 @@ class _$UrlDao extends UrlDao {
         final transactionDatabase = _$UrlDatabase(changeListener)
           ..database = transaction;
         return transactionDatabase.urlDao.createUrl(url, tagIds);
+      });
+    }
+  }
+
+  @override
+  Future<void> moveUrlToTrash(int urlId) async {
+    if (database is sqflite.Transaction) {
+      await super.moveUrlToTrash(urlId);
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.moveUrlToTrash(urlId);
+      });
+    }
+  }
+
+  @override
+  Future<void> restoreUrl(int urlId) async {
+    if (database is sqflite.Transaction) {
+      await super.restoreUrl(urlId);
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.restoreUrl(urlId);
+      });
+    }
+  }
+
+  @override
+  Future<void> deleteTrashedUrl(int urlId) async {
+    if (database is sqflite.Transaction) {
+      await super.deleteTrashedUrl(urlId);
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.deleteTrashedUrl(urlId);
+      });
+    }
+  }
+
+  @override
+  Future<void> emptyTrash() async {
+    if (database is sqflite.Transaction) {
+      await super.emptyTrash();
+    } else {
+      await (database as sqflite.Database)
+          .transaction<void>((transaction) async {
+        final transactionDatabase = _$UrlDatabase(changeListener)
+          ..database = transaction;
+        await transactionDatabase.urlDao.emptyTrash();
       });
     }
   }

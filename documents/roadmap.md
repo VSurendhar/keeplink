@@ -17,7 +17,7 @@ Version 1 covers only the basic CRUD operations on links.
   - The folder screen shows all folders. Tapping a folder opens a screen with the links saved in it.
 - **Update a link**: edit a saved link.
 - **Delete a link**: a deleted link moves to the trash folder.
-- **Trash folder**: the user opens it to restore links or delete them permanently. Nothing is deleted automatically.
+- **Trash folder**: the user opens it to restore links, delete a link permanently, or empty the trash. Nothing is deleted automatically.
 - **Duplicate checks**:
   - A URL that is already saved can't be saved again.
   - A title that is already used can't be used again.

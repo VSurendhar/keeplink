@@ -2,6 +2,7 @@ import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
 import 'package:flutter/material.dart';
 import 'package:keep_links/core/utils/app_defaults.dart';
+import 'package:keep_links/core/utils/folder_name_validator.dart';
 import 'package:keep_links/core/data/database/entity/folder.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
 import 'package:keep_links/features/add_new_link/bottom_sheets/folder_selection_sheet/bloc/folder_selection_event.dart';
@@ -40,8 +41,7 @@ class FolderSelectionBloc
   }
 
   /// Whether [folder] is the default folder, which can't be deleted.
-  bool isDefaultFolder(Folder folder) =>
-      folder.folderName == AppDefaults.defaultFolders.first.folderName;
+  bool isDefaultFolder(Folder folder) => AppDefaults.isDefaultFolder(folder);
 
   void _onToggleCreateMode(
     OnToggleCreateMode event,
@@ -60,28 +60,21 @@ class FolderSelectionBloc
     OnSaveFolderClicked event,
     Emitter<FolderSelectionState> emit,
   ) async {
+    if (state.isSaving) return;
     createFolderFocusNode.unfocus();
     final name = createFolderController.text.trim();
-    if (name.isEmpty || name.length > 40) {
-      emit(
-        state.copyWith(
-          action: const ShowToast(
-            'Folder name must be between 1 and 40 characters',
-          ),
-        ),
-      );
+    final nameError = FolderNameValidator.validate(name);
+    if (nameError != null) {
+      emit(state.copyWith(action: ShowToast(nameError)));
       return;
     }
 
-    final alreadyExists = state.folders.any(
-      (item) => item.folder.folderName.trim() == name,
-    );
-    if (alreadyExists) {
-      emit(state.copyWith(action: ShowToast('Folder already exists')));
-      return;
-    }
-
+    emit(state.copyWith(isSaving: true));
     try {
+      if (await urlStore.findFolderByName(name) != null) {
+        emit(state.copyWith(action: const ShowToast('Folder already exists')));
+        return;
+      }
       final id = await urlStore.insertFolder(Folder(folderName: name));
       createFolderController.clear();
       emit(
@@ -95,10 +88,12 @@ class FolderSelectionBloc
       emit(
         state.copyWith(action: const ShowToast('Error While Creating Folder')),
       );
+    } finally {
+      emit(state.copyWith(isSaving: false));
     }
   }
 
-  /// Deletes the folder and moves its links into the default folder.
+  /// Deletes the folder and moves its saved links into the default folder.
   ///
   /// If the deleted folder was the selected one, the sheet closes with the
   /// default folder selected, so the Add Link page never keeps a deleted
