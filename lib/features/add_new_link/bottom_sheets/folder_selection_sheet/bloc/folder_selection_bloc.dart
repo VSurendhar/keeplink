@@ -41,8 +41,7 @@ class FolderSelectionBloc
   }
 
   /// Whether [folder] is the default folder, which can't be deleted.
-  bool isDefaultFolder(Folder folder) =>
-      folder.folderName == AppDefaults.defaultFolders.first.folderName;
+  bool isDefaultFolder(Folder folder) => AppDefaults.isDefaultFolder(folder);
 
   void _onToggleCreateMode(
     OnToggleCreateMode event,
@@ -94,7 +93,7 @@ class FolderSelectionBloc
     }
   }
 
-  /// Deletes the folder and moves its links into the default folder.
+  /// Deletes the folder and moves its saved links into the default folder.
   ///
   /// If the deleted folder was the selected one, the sheet closes with the
   /// default folder selected, so the Add Link page never keeps a deleted

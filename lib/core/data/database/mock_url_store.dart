@@ -8,6 +8,7 @@ import 'package:keep_links/core/data/database/exception/duplicate_title_exceptio
 import 'package:keep_links/core/data/database/exception/duplicate_url_exception.dart';
 import 'package:keep_links/core/data/database/exception/folder_not_found_exception.dart';
 import 'package:keep_links/core/data/database/exception/tag_not_found_exception.dart';
+import 'package:keep_links/core/data/database/exception/url_not_found_exception.dart';
 import 'package:keep_links/core/data/database/url_store.dart';
 
 class MockUrlStore implements UrlStore {
@@ -50,12 +51,30 @@ class MockUrlStore implements UrlStore {
     }
   }
 
-  void _notifyFolders() =>
-      _folderStreamController.add(List.unmodifiable(_folders));
+  List<Folder> get _untrashedFolders =>
+      List.unmodifiable(_folders.where((folder) => !folder.trash));
 
-  void _notifyUrls() => _urlStreamController.add(List.unmodifiable(_urls));
+  void _notifyFolders() => _folderStreamController.add(_untrashedFolders);
 
-  void _notifyTags() => _tagStreamController.add(List.unmodifiable(_tags));
+  List<Url> get _untrashedUrls =>
+      List.unmodifiable(_urls.where((url) => !url.trash));
+
+  List<Url> get _trashedUrls {
+    final urls = _urls.where((url) => url.trash).toList()
+      ..sort((a, b) {
+        final byUpdatedAt = b.updatedAt.compareTo(a.updatedAt);
+        if (byUpdatedAt != 0) return byUpdatedAt;
+        return (b.id ?? 0).compareTo(a.id ?? 0);
+      });
+    return List.unmodifiable(urls);
+  }
+
+  void _notifyUrls() => _urlStreamController.add(_untrashedUrls);
+
+  List<Tag> get _untrashedTags =>
+      List.unmodifiable(_tags.where((tag) => !tag.trash));
+
+  void _notifyTags() => _tagStreamController.add(_untrashedTags);
 
   void _notifyUrlTags() =>
       _urlTagStreamController.add(List.unmodifiable(_urlTags));
@@ -63,6 +82,16 @@ class MockUrlStore implements UrlStore {
   // Insert Operations
   @override
   Future<int> insertFolder(Folder folder) async {
+    final trashedIndex = _folders.indexWhere(
+      (item) => item.trash && item.folderName == folder.folderName,
+    );
+    final trashedId = trashedIndex == -1 ? null : _folders[trashedIndex].id;
+    if (trashedId != null) {
+      _folders[trashedIndex] = _folders[trashedIndex].copyWith(trash: false);
+      _notifyFolders();
+      return trashedId;
+    }
+
     // Mirrors the database's unique constraint on `folder_name` and primary
     // key on `id`.
     if (await findFolderByName(folder.folderName) != null) {
@@ -75,7 +104,7 @@ class MockUrlStore implements UrlStore {
     final int id = existingId ?? _folderIdSeq;
     // Like SQLite's autoincrement, the next generated id is above any used id.
     if (id >= _folderIdSeq) _folderIdSeq = id + 1;
-    final newFolder = Folder(id: id, folderName: folder.folderName);
+    final newFolder = folder.copyWith(id: id);
     _folders.add(newFolder);
     _notifyFolders();
     return id;
@@ -83,6 +112,16 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<int> insertTag(Tag tag) async {
+    final trashedIndex = _tags.indexWhere(
+      (item) => item.trash && item.tagName == tag.tagName,
+    );
+    final trashedId = trashedIndex == -1 ? null : _tags[trashedIndex].id;
+    if (trashedId != null) {
+      _tags[trashedIndex] = _tags[trashedIndex].copyWith(trash: false);
+      _notifyTags();
+      return trashedId;
+    }
+
     // Mirrors the database's unique constraint on `tag_name` and primary key
     // on `id`.
     if (await findTagByName(tag.tagName) != null) {
@@ -95,16 +134,10 @@ class MockUrlStore implements UrlStore {
     final int id = existingId ?? _tagIdSeq;
     // Like SQLite's autoincrement, the next generated id is above any used id.
     if (id >= _tagIdSeq) _tagIdSeq = id + 1;
-    final newTag = Tag(id: id, tagName: tag.tagName);
+    final newTag = tag.copyWith(id: id);
     _tags.add(newTag);
     _notifyTags();
     return id;
-  }
-
-  @override
-  Future<void> insertUrlTag(UrlTag urlTag) async {
-    _urlTags.add(urlTag);
-    _notifyUrlTags();
   }
 
   // Query Operations
@@ -123,19 +156,44 @@ class MockUrlStore implements UrlStore {
 
   @override
   Stream<List<Folder>> findAllFolders() async* {
-    yield List.unmodifiable(_folders);
+    yield _untrashedFolders;
     yield* _folderStreamController.stream;
   }
 
   @override
   Stream<List<Url>> findAllUrl() async* {
-    yield List.unmodifiable(_urls);
+    yield _untrashedUrls;
     yield* _urlStreamController.stream;
   }
 
   @override
+  Stream<List<Url>> findTrashedUrls() async* {
+    yield _trashedUrls;
+    yield* _urlStreamController.stream.map((_) => _trashedUrls);
+  }
+
+  @override
+  Future<List<Folder>> findFoldersOfTrashedUrls() async {
+    final folderIds = _trashedUrls.map((url) => url.folderId).toSet();
+    return _folders.where((folder) => folderIds.contains(folder.id)).toList();
+  }
+
+  @override
+  Future<List<Tag>> findTagsOfTrashedUrls() async {
+    final urlTags = await findUrlTagsOfTrashedUrls();
+    final tagIds = urlTags.map((urlTag) => urlTag.tagId).toSet();
+    return _tags.where((tag) => tagIds.contains(tag.id)).toList();
+  }
+
+  @override
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls() async {
+    final urlIds = _trashedUrls.map((url) => url.id).toSet();
+    return _urlTags.where((urlTag) => urlIds.contains(urlTag.urlId)).toList();
+  }
+
+  @override
   Stream<List<Tag>> findAllTags() async* {
-    yield List.unmodifiable(_tags);
+    yield _untrashedTags;
     yield* _tagStreamController.stream;
   }
 
@@ -147,11 +205,17 @@ class MockUrlStore implements UrlStore {
 
   @override
   Future<Map<int, int>> findUrlCountPerFolder() async =>
-      UrlStore.countById(_urls.map((url) => url.folderId));
+      UrlStore.countById(_untrashedUrls.map((url) => url.folderId));
 
   @override
-  Future<Map<int, int>> findUrlCountPerTag() async =>
-      UrlStore.countById(_urlTags.map((urlTag) => urlTag.tagId));
+  Future<Map<int, int>> findUrlCountPerTag() async {
+    final untrashedUrlIds = _untrashedUrls.map((url) => url.id).toSet();
+    return UrlStore.countById(
+      _urlTags
+          .where((urlTag) => untrashedUrlIds.contains(urlTag.urlId))
+          .map((urlTag) => urlTag.tagId),
+    );
+  }
 
   @override
   Future<Folder?> findFolderById(int id) async {
@@ -164,7 +228,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Folder?> findFolderByName(String folderName) async {
     for (final folder in _folders) {
-      if (folder.folderName == folderName) return folder;
+      if (!folder.trash && folder.folderName == folderName) return folder;
     }
     return null;
   }
@@ -180,7 +244,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Url?> findUrlByUrlString(String url) async {
     for (final item in _urls) {
-      if (item.url == url) return item;
+      if (!item.trash && item.url == url) return item;
     }
     return null;
   }
@@ -188,7 +252,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Url?> findUrlByTitle(String title) async {
     for (final item in _urls) {
-      if (item.title == title) return item;
+      if (!item.trash && item.title == title) return item;
     }
     return null;
   }
@@ -204,7 +268,7 @@ class MockUrlStore implements UrlStore {
   @override
   Future<Tag?> findTagByName(String tagName) async {
     for (final tag in _tags) {
-      if (tag.tagName == tagName) return tag;
+      if (!tag.trash && tag.tagName == tagName) return tag;
     }
     return null;
   }
@@ -233,18 +297,102 @@ class MockUrlStore implements UrlStore {
   Future<int> createUrl({required Url url, List<int> tagIds = const []}) async {
     // Validate everything before inserting, so nothing is saved on failure.
     await _checkIfUrlExists(url);
-    await _checkIfFolderExists(url.folderId);
+    await _checkIfFolderExists(url.folderId, allowTrashed: url.trash);
     // A Set links a tag listed twice only once.
     final uniqueTagIds = tagIds.toSet();
-    await _checkIfTagsExist(uniqueTagIds);
+    await _checkIfTagsExist(uniqueTagIds, allowTrashed: url.trash);
 
     final urlId = url.id ?? _urlIdSeq++;
     _urls.add(url.copyWith(id: urlId));
-    _notifyUrls();
     for (final tagId in uniqueTagIds) {
-      await insertUrlTag(UrlTag(urlId: urlId, tagId: tagId));
+      _urlTags.add(UrlTag(urlId: urlId, tagId: tagId));
     }
+    _notifyUrlTags();
+    // After the tags are linked, so listeners see the URL with its tags.
+    _notifyUrls();
     return urlId;
+  }
+
+  @override
+  Future<void> moveUrlToTrash(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+
+    _urls[_urls.indexOf(url)] = url.copyWith(
+      trash: true,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    _notifyUrls();
+  }
+
+  @override
+  Future<void> restoreUrl(int urlId) async {
+    // Validate everything before updating, so nothing changes on failure.
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+    await _checkIfSavedUrlExists(url);
+    await _checkIfFolderExists(url.folderId, allowTrashed: true);
+    final tagIds = _urlTags
+        .where((urlTag) => urlTag.urlId == urlId)
+        .map((urlTag) => urlTag.tagId)
+        .toSet();
+    await _checkIfTagsExist(tagIds, allowTrashed: true);
+
+    for (var i = 0; i < _folders.length; i++) {
+      final folder = _folders[i];
+      if (folder.id == url.folderId && folder.trash) {
+        _folders[i] = folder.copyWith(trash: false);
+      }
+    }
+    for (var i = 0; i < _tags.length; i++) {
+      final tag = _tags[i];
+      if (tagIds.contains(tag.id) && tag.trash) {
+        _tags[i] = tag.copyWith(trash: false);
+      }
+    }
+    _urls[_urls.indexOf(url)] = url.copyWith(
+      trash: false,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+    _notifyFolders();
+    _notifyTags();
+    _notifyUrls();
+  }
+
+  @override
+  Future<void> emptyTrash() async {
+    _deleteUrlsById(_trashedUrls.map((url) => url.id).toSet());
+  }
+
+  @override
+  Future<void> deleteTrashedUrl(int urlId) async {
+    final url = await findUrlById(urlId);
+    if (url == null || !url.trash) {
+      throw UrlNotFoundException(urlId);
+    }
+    _deleteUrlsById({urlId});
+  }
+
+  /// Deletes the URLs in [urlIds] and their tag links, then the trashed folders
+  /// and tags that no URL uses.
+  void _deleteUrlsById(Set<int?> urlIds) {
+    _urlTags.removeWhere((urlTag) => urlIds.contains(urlTag.urlId));
+    _urls.removeWhere((url) => urlIds.contains(url.id));
+
+    final usedFolderIds = _urls.map((url) => url.folderId).toSet();
+    _folders.removeWhere(
+      (folder) => folder.trash && !usedFolderIds.contains(folder.id),
+    );
+    final usedTagIds = _urlTags.map((urlTag) => urlTag.tagId).toSet();
+    _tags.removeWhere((tag) => tag.trash && !usedTagIds.contains(tag.id));
+    _notifyUrlTags();
+    _notifyUrls();
+    _notifyFolders();
+    _notifyTags();
   }
 
   @override
@@ -256,35 +404,79 @@ class MockUrlStore implements UrlStore {
       throw ArgumentError('Cannot move URLs into the folder being deleted');
     }
     await _checkIfFolderExists(targetFolderId);
-    await _checkIfFolderExists(sourceFolderId);
+    final folder = await findFolderById(sourceFolderId);
+    if (folder == null) {
+      throw FolderNotFoundException(sourceFolderId);
+    }
+    if (AppDefaults.isDefaultFolder(folder)) {
+      throw ArgumentError('Cannot delete the default folder');
+    }
 
     for (var i = 0; i < _urls.length; i++) {
       final url = _urls[i];
-      if (url.folderId == sourceFolderId) {
+      if (url.folderId == sourceFolderId && !url.trash) {
         _urls[i] = url.copyWith(folderId: targetFolderId);
       }
     }
-    _folders.removeWhere((folder) => folder.id == sourceFolderId);
+    // Trashed URLs stay in the folder, so it's kept for restoring them.
+    if (_urls.any((url) => url.folderId == sourceFolderId)) {
+      _folders[_folders.indexOf(folder)] = folder.copyWith(trash: true);
+    } else {
+      _folders.remove(folder);
+    }
     _notifyUrls();
     _notifyFolders();
   }
 
   @override
   Future<void> deleteTagAndUrlTags(int tagId) async {
-    await _checkIfTagsExist([tagId]);
+    final tag = await findTagById(tagId);
+    if (tag == null) {
+      throw TagNotFoundException(tagId);
+    }
+    if (AppDefaults.isDefaultTag(tag)) {
+      throw ArgumentError('Cannot delete the default tag');
+    }
 
-    _urlTags.removeWhere((urlTag) => urlTag.tagId == tagId);
-    _tags.removeWhere((tag) => tag.id == tagId);
+    final trashedUrlIds = _urls
+        .where((url) => url.trash)
+        .map((url) => url.id)
+        .toSet();
+    _urlTags.removeWhere(
+      (urlTag) =>
+          urlTag.tagId == tagId && !trashedUrlIds.contains(urlTag.urlId),
+    );
+    // Trashed URLs keep their tag links, so the tag is kept for restoring them.
+    if (_urlTags.any((urlTag) => urlTag.tagId == tagId)) {
+      _tags[_tags.indexOf(tag)] = tag.copyWith(trash: true);
+    } else {
+      _tags.remove(tag);
+    }
     _notifyUrlTags();
     _notifyTags();
   }
 
-  /// Throws [DuplicateUrlException] if a URL with the same id or address
-  /// exists, or [DuplicateTitleException] if one with the same title exists.
+  /// Throws [DuplicateUrlException] if any URL has the same id or a saved URL
+  /// has the same address, or [DuplicateTitleException] if a saved URL has the
+  /// same title.
+  ///
+  /// A trashed [url] may share its address and title with any other URL, so
+  /// only its id is checked.
   Future<void> _checkIfUrlExists(Url url) async {
     final id = url.id;
     final idTaken = id != null && await findUrlById(id) != null;
-    if (idTaken || await findUrlByUrlString(url.url) != null) {
+    if (idTaken) {
+      throw DuplicateUrlException(url.url);
+    }
+    if (url.trash) return;
+
+    await _checkIfSavedUrlExists(url);
+  }
+
+  /// Throws [DuplicateUrlException] if a saved URL has the same address as
+  /// [url], or [DuplicateTitleException] if a saved URL has the same title.
+  Future<void> _checkIfSavedUrlExists(Url url) async {
+    if (await findUrlByUrlString(url.url) != null) {
       throw DuplicateUrlException(url.url);
     }
     if (await findUrlByTitle(url.title) != null) {
@@ -292,17 +484,27 @@ class MockUrlStore implements UrlStore {
     }
   }
 
-  /// Throws [FolderNotFoundException] if no folder has [folderId].
-  Future<void> _checkIfFolderExists(int folderId) async {
-    if (await findFolderById(folderId) == null) {
+  /// Throws [FolderNotFoundException] if no folder has [folderId], or if it is
+  /// trashed and not [allowTrashed].
+  Future<void> _checkIfFolderExists(
+    int folderId, {
+    bool allowTrashed = false,
+  }) async {
+    final folder = await findFolderById(folderId);
+    if (folder == null || (folder.trash && !allowTrashed)) {
       throw FolderNotFoundException(folderId);
     }
   }
 
-  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag.
-  Future<void> _checkIfTagsExist(Iterable<int> tagIds) async {
+  /// Throws [TagNotFoundException] for the first id in [tagIds] with no tag, or
+  /// whose tag is trashed and not [allowTrashed].
+  Future<void> _checkIfTagsExist(
+    Iterable<int> tagIds, {
+    bool allowTrashed = false,
+  }) async {
     for (final tagId in tagIds) {
-      if (await findTagById(tagId) == null) {
+      final tag = await findTagById(tagId);
+      if (tag == null || (tag.trash && !allowTrashed)) {
         throw TagNotFoundException(tagId);
       }
     }

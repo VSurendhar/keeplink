@@ -28,7 +28,7 @@ class EraseAllConfirmationWidget extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             const Text(
-              'Are you sure you want to erase all your saved URLs, folders, and tags?\nThis action cannot be undone.',
+              'This permanently deletes all your links, including those in the trash, and all your folders and tags. This action cannot be undone.',
               style: TextStyle(fontSize: 14, color: Color(0xFF7A4326)),
             ),
             const SizedBox(height: 8),

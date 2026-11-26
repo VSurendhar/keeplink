@@ -26,6 +26,7 @@ class DatabaseUrlStore implements UrlStore {
     try {
       return await $FloorUrlDatabase
           .databaseBuilder('keep_links_db.db')
+          .addCallback(urlDatabaseCallback)
           .build();
     } catch (_) {
       _dbFuture = null;
@@ -41,14 +42,10 @@ class DatabaseUrlStore implements UrlStore {
   // Insert Operations
   @override
   Future<int> insertFolder(Folder folder) async =>
-      (await _dao).insertFolder(folder);
+      (await _dao).createFolder(folder);
 
   @override
-  Future<int> insertTag(Tag tag) async => (await _dao).insertTag(tag);
-
-  @override
-  Future<void> insertUrlTag(UrlTag urlTag) async =>
-      (await _dao).insertUrlTag(urlTag);
+  Future<int> insertTag(Tag tag) async => (await _dao).createTag(tag);
 
   // Query Operations
   @override
@@ -66,6 +63,24 @@ class DatabaseUrlStore implements UrlStore {
     final dao = await _dao;
     yield* dao.findAllUrl();
   }
+
+  @override
+  Stream<List<Url>> findTrashedUrls() async* {
+    final dao = await _dao;
+    yield* dao.findTrashedUrls();
+  }
+
+  @override
+  Future<List<Folder>> findFoldersOfTrashedUrls() async =>
+      (await _dao).findFoldersOfTrashedUrls();
+
+  @override
+  Future<List<Tag>> findTagsOfTrashedUrls() async =>
+      (await _dao).findTagsOfTrashedUrls();
+
+  @override
+  Future<List<UrlTag>> findUrlTagsOfTrashedUrls() async =>
+      (await _dao).findUrlTagsOfTrashedUrls();
 
   @override
   Stream<List<Tag>> findAllTags() async* {
@@ -125,6 +140,20 @@ class DatabaseUrlStore implements UrlStore {
     required Url url,
     List<int> tagIds = const [],
   }) async => (await _dao).createUrl(url, tagIds);
+
+  @override
+  Future<void> moveUrlToTrash(int urlId) async =>
+      (await _dao).moveUrlToTrash(urlId);
+
+  @override
+  Future<void> restoreUrl(int urlId) async => (await _dao).restoreUrl(urlId);
+
+  @override
+  Future<void> deleteTrashedUrl(int urlId) async =>
+      (await _dao).deleteTrashedUrl(urlId);
+
+  @override
+  Future<void> emptyTrash() async => (await _dao).emptyTrash();
 
   @override
   Future<void> deleteFolderAndMoveUrls({

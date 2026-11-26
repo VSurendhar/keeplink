@@ -13,8 +13,8 @@ import 'package:keep_links/core/data/database/entity/folder.dart';
     ),
   ],
   indices: [
-    Index(value: ['url'], unique: true),
-    Index(value: ['title'], unique: true),
+    // `url` and `title` are unique among saved URLs only. Floor can't declare
+    // partial indexes, so `urlDatabaseCallback` creates them.
     // Speeds up finding a folder's URLs and the foreign-key check when a
     // folder is deleted.
     Index(value: ['folder_id']),
@@ -32,6 +32,7 @@ class Url {
     required this.updatedAt,
     required this.isFavorite,
     this.previewImageName,
+    this.trash = false,
   });
 
   @PrimaryKey(autoGenerate: true)
@@ -62,6 +63,10 @@ class Url {
   @ColumnInfo(name: 'preview_image_name')
   final String? previewImageName;
 
+  /// Whether this URL is marked to be deleted.
+  @ColumnInfo(name: 'trash')
+  final bool trash;
+
   Url copyWith({
     int? id,
     String? url,
@@ -73,6 +78,7 @@ class Url {
     int? updatedAt,
     bool? isFavorite,
     String? previewImageName,
+    bool? trash,
   }) {
     return Url(
       id: id ?? this.id,
@@ -85,11 +91,12 @@ class Url {
       updatedAt: updatedAt ?? this.updatedAt,
       isFavorite: isFavorite ?? this.isFavorite,
       previewImageName: previewImageName ?? this.previewImageName,
+      trash: trash ?? this.trash,
     );
   }
 
   @override
   String toString() {
-    return 'Url{id: $id, url: $url, title: $title, metaImageUrl: $metaImageUrl, metaDescription: $metaDescription, folderId: $folderId, createdAt: $createdAt, updatedAt: $updatedAt, isFavorite: $isFavorite, previewImageName: $previewImageName}';
+    return 'Url{id: $id, url: $url, title: $title, metaImageUrl: $metaImageUrl, metaDescription: $metaDescription, folderId: $folderId, createdAt: $createdAt, updatedAt: $updatedAt, isFavorite: $isFavorite, previewImageName: $previewImageName, trash: $trash}';
   }
 }
