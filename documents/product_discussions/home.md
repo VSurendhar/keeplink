@@ -47,13 +47,13 @@ Status: confirmed, not implemented.
   - **4.5.3** Image: cropped to fill a fixed shape: 1.91:1 in the thumbnail view, which shows the whole image, and square in the list view, which cuts off its sides. Thumbnail cards are therefore shorter than in the screenshot. With no image, or one that can't be read, a placeholder icon is shown.
 - **4.6** **FAB:** opens Add New Link. After saving, the user is back on Home and the new link is shown.
   - **4.6.1** Saving a link selects "All Items" and clears the search, so the new link is never hidden. Leaving Add New Link without saving keeps the selected tag and the search.
-- **4.7** **Order:** most recently changed first, by `updated_at`. Filtering and searching keep this order.
+- **4.7** **Order:** most recently changed first, by `updated_at`. Filtering and searching keep this order. A link restored from the trash gets a new `updated_at`, so it appears at the top.
 - **4.8** **Empty messages:** "No links saved yet" when there are no saved links, and "No links found" when the search and the selected tag match nothing.
 
 ## 5. How
 
-- **5.1** **Data:** listen to `findAllUrl()`, so a newly saved link appears by itself. Resolve `UrlStore` from GetIt. The tag chips come from listening to `findAllTags()` and `findAllUrlTags()` together with `findAllUrl()`. Whenever any of them changes, the chips, the selected tag (4.3.5) and the list are worked out again.
-- **5.2** **`trash = 0`:** build on `findAllUrl()` as it is now. It leaves out trashed links by itself once `feat/trash_page`, which adds the `url.trash` column and the filter, is merged. Until then, nothing can be in the trash on this branch.
+- **5.1** **Data:** listen to `findAllUrl()`, so a newly saved link appears by itself. Resolve `UrlStore` from GetIt. The tag chips come from listening to `findAllTags()` and `findAllUrlTags()` together with `findAllUrl()`. Whenever any of them changes, the chips, the selected tag (4.3.5) and the list are worked out again. A tag used only by trashed links gets no chip.
+- **5.2** **`trash = 0`:** `findAllUrl()` returns only saved links, and `findAllTags()` only tags that aren't trashed, so Home adds no trash filtering of its own. `findAllUrlTags()` also returns the rows of trashed links, which drop out when they are joined with the links from `findAllUrl()`. See [trash.md](trash.md).
 - **5.3** **State:** a BLoC with the Action pattern, as in `lib/features/add_new_link/`, with separate event, action and state files.
 - **5.4** **Icons:** `Symbols.tile_small` (thumbnail view), `Icons.view_list` (list view), `Icons.photo` (placeholder).
 - **5.5** **Preview images:** `Image.file` with `BoxFit.cover`, shaped to `kPreviewImageAspectRatio` in the thumbnail view and to a square in the list view, using the path from `PreviewImageStorage.filePathFor`. It returns `null` until the folder has been resolved, which today happens only when an image is stored or deleted, so the folder must be resolved before Home shows images, or they would be missing after a restart.
@@ -61,11 +61,11 @@ Status: confirmed, not implemented.
 - **5.7** **Dimensions:** match Settings and Add New Link: 16 horizontal and 8 vertical page padding, 16 between sections, white cards with radius 16 and the same soft shadow. Follow the dimension rules for anything new.
 - **5.8** **Bottom space:** the list's bottom padding is `paddingForBottomNavBar` plus the FAB's size and margin. The FAB sits above the bottom navigation bar.
 - **5.9** **Errors:** handled in the BLoC, following the project's error handling rule.
-- **5.10** **Knowing a link was saved:** Add New Link returns nothing to Home and isn't changed. Home learns about a new link from `findAllUrl()`: when an update has a link whose id wasn't in the previous one, Home resets the tag and search (4.6.1). The first load doesn't count.
+- **5.10** **Knowing a link was saved:** Add New Link returns nothing to Home and isn't changed. Home learns about a new link from `findAllUrl()`: when an update has a link whose id wasn't in the previous one, Home resets the tag and search (4.6.1). The first load doesn't count. A link restored from the trash, or added by seeding in Developer Options, also comes in as a new id, so it resets the tag and search too.
 
 ## 6. Tasks
 
-- [ ] **6.1** Load the links only through `findAllUrl()`, and check that trashed links are hidden once `feat/trash_page` is merged.
+- [ ] **6.1** Load the links only through `findAllUrl()`, and check that a link moved to the trash disappears from Home and a restored one comes back.
 - [ ] **6.2** Make preview image paths available after an app restart.
 - [ ] **6.3** Create the Home BLoC: listen to the links, tags and URL-tag streams, keep the links and chips up to date, and order the links by `updated_at`.
 - [ ] **6.4** Build the app bar and the "Your Archive" heading. The trash icon does nothing: `// TODO: Wire it to the trash page once it is done.`
